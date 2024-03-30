@@ -1,0 +1,254 @@
+/*
+ * Programmed by Martin Rickey
+ *
+ * Created November 26th 2017
+ *
+ * This module implements a hardware watchdog. An RTOS task is used
+ * to kick a hardware watchdog every so many milleseconds. If the RTOS
+ * scheduler gets messed due to infinite loops or whatever the watchdog
+ * will not be kicked and the system will reset.
+ */
+
+//includes
+
+#include "stdlib.h"
+#include "stm32f4xx.h"
+#include "stm32f4xx_rcc.h"
+#include "assert.h"
+#include  "FreeRTOS.h"
+#include "event_groups.h"
+
+#include "watchdog.h"
+#include "error_handler.h"
+#include "logger.h"
+
+#include "global_board_config.h"
+#ifdef ACB
+#include "ACU_Task_Manager.h"
+#else
+#include "VCU_Task_Manager.h"
+#endif
+
+//period for kicking watchdog [ms]
+#define WDPERIOD 50
+#define IWDGPERIOD 500
+
+typedef struct IWDG_HandleTypeDef IWDG_HandleTypeDef;
+//local global varaibales
+static EventGroupHandle_t wdEvGroup = NULL;	//watchdog event group
+
+//private function prototypes
+void iwdgTask(void * pvParameters);
+static void initWdEventGroup();
+void kickIWDG();
+static uint8_t initIWDGHardware();
+void wdErrorHandler();
+//functions
+
+
+/*
+ * initWdEventGroup
+ *
+ * @brief this function sets up the watchdog event group. This event group is used for monitoring critical tasks
+ */
+static void initWdEventGroup(){
+	configASSERT(wdEvGroup == NULL);
+	wdEvGroup = xEventGroupCreate();
+
+	/* Was the event group created successfully? */
+	if( wdEvGroup == NULL )
+	{
+		/* The event group was not created because there was insufficient FreeRTOS heap available. */
+		log_and_handle_error(IWDG_ERROR, *wdErrorHandler);
+	}
+}
+
+/*
+ * wd_criticalTaskKick
+ *
+ * @brief this function is used for allowing critical tasks to notify the watchdog that they have not hanged yet
+ *
+ * @WD_CRITICALTASK the critical task notifying the watchdog that it has not hung yet
+ *
+ */
+void wd_criticalTaskKick(enum WD_CRITICALTASK task){
+	configASSERT(wdEvGroup != NULL);
+	xEventGroupSetBits(wdEvGroup, 1<<task);
+}
+
+/*
+ * startFromWD
+ *
+ * @return returns true if the system started due to a watchdog reset otherwise false
+ *
+ * @brief used for checking on reset if the system is starting from a watchdog reset
+ */
+bool startFromIWDG() {
+
+	bool startFromWD = false; //true if we started from watchdog reset
+
+	/* Check if the system has resumed from IWDG reset */
+	if (__HAL_RCC_GET_FLAG(RCC_FLAG_IWDGRST) != RESET) {
+
+		startFromWD = true;
+
+		/* Clear reset flags */
+        __HAL_RCC_CLEAR_RESET_FLAGS();
+	}
+
+	return startFromWD;
+}
+
+/*
+ * testWD
+ *
+ * @brief this function test the watchdog by putting the processor into an infinite loop
+ *
+ * @usage call this function and it should grab the processor causes the watchdog to restart
+ * 			the processor. Put a breakpoint at the two infinite loops and it should go to the first one once
+ * 			then always the second one.
+ */
+void testIWDGReset() {
+
+	//dirty test code
+	if (startFromIWDG()) {
+		//should end here after first reset dosent work because the IWDG init function resets the IWDG reset flag
+		for (;;)
+			;
+	} else {
+		//inifinite loop to test watchdog
+		for (;;)
+			;
+	}
+}
+
+/*
+ * testIWDGResetting
+ *
+ * This function test the kicking of the watchdog
+ */
+void testIWDGResetting() {
+
+	if (startFromIWDG()) {
+		//you fucked up dosent work because the IWDG init function resets the IWDG reset flag
+		for (;;)
+			; //put a breakpoint here so you know when you fuck up
+	}
+
+	//test kicking the watchdog
+	for (;;) {
+		for (uint32_t i = 0; i < 2000; i++)
+			; //delay
+		kickIWDG();
+	}
+
+}
+
+/*
+ * initIWDG
+ *
+ * @brief This function sets up the independent watchdog, both the task and the hardware
+ *
+ *
+ * @return returns EXIT_SUCCESS on success otherwise EXIT_FAILURE,
+ * 		car shouldnt run if EXIT_FAILURE is returned as the watchdog is not running
+ * 		and there is no protection against something grabbing the cpu
+ */
+uint8_t initIWDG() {
+
+
+	uint8_t returnVal = EXIT_FAILURE;
+
+
+	//setup the task
+	if (!TaskManagerCreate(&iwdgTask, &xTask_IWDG)) {
+		//task was not created do not intialise watchdog and warn main process that things are fucked
+		returnVal = EXIT_FAILURE;
+		log_and_handle_error(IWDG_ERROR, *wdErrorHandler);
+	} else {
+		//Its all chill, set up watchdog hardware.
+		initIWDGHardware();
+
+		//now set up the watchdog event group
+		initWdEventGroup();
+
+		returnVal = EXIT_SUCCESS;
+		logMessage("Independent Watchdog Initialized", false);
+	}
+	return returnVal;
+}
+
+/*
+ * wdErrorHandler
+ *
+ *@brief this function tries to fix the watchdog error handler
+ */
+void wdErrorHandler() {
+	logMessage("Failed to create IWDG task", true);
+}
+
+/*
+ * wdTask
+ *
+ * @brief RTOS task for periodically kicking the watchdog
+ */
+void StartWatchDogTask(void *argument) {
+	configASSERT(wdEvGroup != NULL);
+	IWDG_Enable(); //enable here so it dosent reset on long startup tasks.
+	while (1) {
+
+		//kick the watchdog
+		kickIWDG();
+
+		//testIWDGReset(); //comment this out when not testing
+
+		//wait a bit then wait for syncing
+		vTaskDelay(pdMS_TO_TICKS(WDPERIOD));
+		//((1<<wd_NumCriticalTasks)-1) this will give us all the bits for all the critical tasks
+		xEventGroupWaitBits(wdEvGroup,((1<<wd_NumCriticalTasks)-1),pdTRUE,pdTRUE,500);//wait for all the critical tasks to kick
+	}
+}
+
+/*kickWD
+ *
+ * @brief this function kicks the watchdog
+ */
+void kickIWDG() {
+	/* Reload IWDG counter */
+	IWDG_ReloadCounter();
+}
+
+/*
+ * wdinit
+ *
+ * @return returns exit success on success otherwise exit failure
+ *
+ * @brief this funciton sets up the hardware watchdog. Make sure to call before the scheduler
+ */
+static uint8_t initIWDGHardware() {
+	const uint16_t IWDGLSIFREQ = 32; //[khz]Estimated clock speed of independent watchdog clock
+	uint32_t iwdgResetCounter = 0;
+
+	/* IWDG timeout equal to 250 ms (the timeout may varies due to LSI frequency
+	 dispersion) */
+	/* Enable write access to IWDG_PR and IWDG_RLR registers */
+	IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
+
+	/* IWDG counter clock: LSI/32 */
+	IWDG_SetPrescaler(IWDG_Prescaler_256);
+
+	/* Set counter reload value to obtain 250ms IWDG TimeOut.
+	 IWDG counter clock Frequency = LsiFreq/32
+	 Counter Reload Value = 250ms/IWDG counter clock period
+	 = 0.25s / (32/LsiFreq)
+	 = 250ms * 32kHz / 32
+	 */
+	iwdgResetCounter = IWDGLSIFREQ * IWDGPERIOD / 32;
+	IWDG_SetReload((uint16_t)iwdgResetCounter);
+	//IWDG_SetReload(65000);
+	/* Reload IWDG counter */
+	IWDG_ReloadCounter();
+
+	return EXIT_SUCCESS;
+}
+

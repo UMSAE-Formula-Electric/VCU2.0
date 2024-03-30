@@ -1,0 +1,31 @@
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+*.bak
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Include makefiles
+!Makefile
+*~
+
+# Debug
+Debug
+cmake-build-*
+
+.idea
+.settings

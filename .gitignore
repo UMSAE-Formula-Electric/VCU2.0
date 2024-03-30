@@ -3,7 +3,6 @@
 *.ko
 *.obj
 *.elf
-*.bak
 
 # Shared objects (inc. Windows DLLs)
 *.dll

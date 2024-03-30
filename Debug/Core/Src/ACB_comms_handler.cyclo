@@ -1,6 +1,0 @@
-../Core/Src/ACB_comms_handler.c:22:6:process_ACB_CAN_packets	14
-../Core/Src/ACB_comms_handler.c:70:6:set_ACB_State	1
-../Core/Src/ACB_comms_handler.c:76:6:send_ACB_mesg	1
-../Core/Src/ACB_comms_handler.c:81:6:send_ACB_mesg_data	1
-../Core/Src/ACB_comms_handler.c:88:6:notify_startup_task	2
-../Core/Src/ACB_comms_handler.c:96:6:notify_heartbeat_task	2

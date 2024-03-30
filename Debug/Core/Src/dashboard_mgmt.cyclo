@@ -1,4 +1,0 @@
-../Core/Src/dashboard_mgmt.c:24:6:led_mgmt_set_error	1
-../Core/Src/dashboard_mgmt.c:28:6:led_mgmt_clear_error	1
-../Core/Src/dashboard_mgmt.c:32:6:led_mgmt_check_error	1
-../Core/Src/dashboard_mgmt.c:56:6:StartDashboardLedTask	7

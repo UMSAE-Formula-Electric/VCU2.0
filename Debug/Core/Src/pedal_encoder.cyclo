@@ -1,3 +1,0 @@
-../Core/Src/pedal_encoder.c:32:6:detectPedal	7
-../Core/Src/pedal_encoder.c:211:6:sensAgreement_990	13
-../Core/Src/pedal_encoder.c:309:6:bad_pedal_struct_err_handler	1

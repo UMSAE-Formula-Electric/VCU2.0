@@ -1,6 +1,0 @@
-../Core/Src/heartbeat.c:45:6:StartAcuHeartbeatTask	11
-../Core/Src/heartbeat.c:138:6:StartMcHeartbeatTask	8
-../Core/Src/heartbeat.c:195:18:get_acu_heartbeat_State	1
-../Core/Src/heartbeat.c:204:18:get_mc_heartbeat_State	1
-../Core/Src/heartbeat.c:208:14:heartbeat_ACU_get_task	1
-../Core/Src/heartbeat.c:212:14:heartbeat_MC_get_task	1

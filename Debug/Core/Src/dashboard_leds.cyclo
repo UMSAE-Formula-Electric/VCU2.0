@@ -1,0 +1,16 @@
+../Core/Src/dashboard_leds.c:10:6:dash_clear_all_leds	1
+../Core/Src/dashboard_leds.c:17:6:dash_set_all_leds	1
+../Core/Src/dashboard_leds.c:24:6:dash_set_both_blue	1
+../Core/Src/dashboard_leds.c:32:6:dash_set_tsa_teal	1
+../Core/Src/dashboard_leds.c:37:6:dash_set_tsa_green	1
+../Core/Src/dashboard_leds.c:42:6:dash_set_tsa_blue	1
+../Core/Src/dashboard_leds.c:47:6:dash_toggle_tsa_blue	1
+../Core/Src/dashboard_leds.c:51:6:dash_toggle_tsa_green	1
+../Core/Src/dashboard_leds.c:55:6:dash_toggle_tsa_teal	1
+../Core/Src/dashboard_leds.c:63:6:dash_set_rtd_green	1
+../Core/Src/dashboard_leds.c:68:6:dash_set_rtd_blue	1
+../Core/Src/dashboard_leds.c:73:6:dash_set_rtd_teal	1
+../Core/Src/dashboard_leds.c:78:6:dash_toggle_rtd_green	1
+../Core/Src/dashboard_leds.c:82:6:dash_toggle_rtd_blue	1
+../Core/Src/dashboard_leds.c:86:6:dash_toggle_rtd_teal	1
+../Core/Src/dashboard_leds.c:91:6:vcu_debug_led	5

@@ -1,0 +1,2 @@
+../Core/Src/lv_battery_tap.c:21:7:lv_battery_voltage	24	static
+../Core/Src/lv_battery_tap.c:34:10:lv_battery_voltage_int	8	static

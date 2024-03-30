@@ -1,0 +1,7 @@
+../Core/Src/logger.c:22:6:logInitialize	3
+../Core/Src/logger.c:41:6:logTerminate	3
+../Core/Src/logger.c:63:6:logIndicator	2
+../Core/Src/logger.c:72:6:enableVCULogging	1
+../Core/Src/logger.c:85:6:logMessage	7
+../Core/Src/logger.c:116:6:logErrorMessage	2
+../Core/Src/logger.c:130:6:logSensor	2

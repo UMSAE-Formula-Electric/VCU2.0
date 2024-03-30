@@ -1,0 +1,845 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="newVCU"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="D:/UMSAE/newVCU/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="newVCU.elf">
+				<Option output="D:/UMSAE/newVCU/cmake-build-debug/newVCU.elf" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/UMSAE/newVCU/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DARM_MATH_CM4"/>
+					<Add option="-DARM_MATH_MATRIX_CHECK"/>
+					<Add option="-DARM_MATH_ROUNDING"/>
+					<Add option="-DDEBUG"/>
+					<Add option="-DUSE_HAL_DRIVER"/>
+					<Add option="-DSTM32F446xx"/>
+					<Add option="-DSTM32_THREAD_SAFE_STRATEGY=4"/>
+					<Add directory="D:/UMSAE/newVCU/Core/Inc"/>
+					<Add directory="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc"/>
+					<Add directory="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy"/>
+					<Add directory="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include"/>
+					<Add directory="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2"/>
+					<Add directory="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F"/>
+					<Add directory="D:/UMSAE/newVCU/Drivers/CMSIS/Device/ST/STM32F4xx/Include"/>
+					<Add directory="D:/UMSAE/newVCU/Drivers/CMSIS/Include"/>
+					<Add directory="D:/UMSAE/newVCU/Core/ThreadSafe"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/arm-none-eabi"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/backward"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/include"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/include-fixed"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 newVCU.elf"/>
+					<CompileFile command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="newVCU.elf/fast">
+				<Option output="D:/UMSAE/newVCU/cmake-build-debug/newVCU.elf" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="D:/UMSAE/newVCU/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add option="-DARM_MATH_CM4"/>
+					<Add option="-DARM_MATH_MATRIX_CHECK"/>
+					<Add option="-DARM_MATH_ROUNDING"/>
+					<Add option="-DDEBUG"/>
+					<Add option="-DUSE_HAL_DRIVER"/>
+					<Add option="-DSTM32F446xx"/>
+					<Add option="-DSTM32_THREAD_SAFE_STRATEGY=4"/>
+					<Add directory="D:/UMSAE/newVCU/Core/Inc"/>
+					<Add directory="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc"/>
+					<Add directory="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy"/>
+					<Add directory="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include"/>
+					<Add directory="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2"/>
+					<Add directory="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F"/>
+					<Add directory="D:/UMSAE/newVCU/Drivers/CMSIS/Device/ST/STM32F4xx/Include"/>
+					<Add directory="D:/UMSAE/newVCU/Drivers/CMSIS/Include"/>
+					<Add directory="D:/UMSAE/newVCU/Core/ThreadSafe"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/arm-none-eabi"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/backward"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/include"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/include-fixed"/>
+					<Add directory="c:\program files (x86)\arm gnu toolchain arm-none-eabi\12.3 rel1\bin\../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 newVCU.elf/fast"/>
+					<CompileFile command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="D:/UMSAE/newVCU/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="D:/UMSAE/newVCU/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~1/JETBRA~1/CLION2~1.2/bin/mingw/bin/mingw32-make.exe -f &quot;D:/UMSAE/newVCU/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/ACB_comms_handler.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/ACB_comms_handler.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/FreeRTOSConfig.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/adc.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/apps_brake.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/bt_protocol.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/can.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/car_state.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/dashboard_leds.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/dashboard_mgmt.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/dma.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/error_handler.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/global_board_config.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/gpio.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/heartbeat.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/iwdg.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/logger.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/lv_battery_tap.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/main.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/motor_controller_can.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/pedal_encoder.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/startup_condition.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/stm32f4xx_hal_conf.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/stm32f4xx_it.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/tim.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/usart.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/vcu_startup.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/Backup/watchdog.h.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/FreeRTOSConfig.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/adc.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/apps_brake.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/bt_protocol.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/can.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/car_state.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/dashboard_leds.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/dashboard_mgmt.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/dma.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/error_handler.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/global_board_config.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/gpio.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/heartbeat.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/iwdg.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/logger.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/lv_battery_tap.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/main.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/motor_controller_can.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/pedal_encoder.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/startup_condition.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/stm32f4xx_hal_conf.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/stm32f4xx_it.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/tim.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/usart.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Inc/vcu_startup.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/ACB_comms_handler.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/ACB_comms_handler.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/adc.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/apps_brake.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/bt_protocol.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/can.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/car_state.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/dashboard_leds.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/dashboard_mgmt.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/dma.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/error_handler.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/freertos.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/gpio.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/heartbeat.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/iwdg.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/logger.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/lv_battery_tap.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/main.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/motor_controller_can.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/pedal_encoder.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/startup_condition.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/stm32f4xx_hal_msp.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/stm32f4xx_hal_timebase_tim.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/stm32f4xx_it.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/syscalls.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/sysmem.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/system_stm32f4xx.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/tim.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/usart.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/vcu_startup.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/Backup/watchdog.c.bak">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/adc.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/apps_brake.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/bt_protocol.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/can.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/car_state.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/dashboard_leds.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/dashboard_mgmt.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/dma.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/error_handler.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/freertos.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/gpio.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/heartbeat.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/iwdg.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/logger.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/lv_battery_tap.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/main.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/motor_controller_can.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/pedal_encoder.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/startup_condition.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/stm32f4xx_hal_msp.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/stm32f4xx_hal_timebase_tim.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/stm32f4xx_it.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/syscalls.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/sysmem.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/system_stm32f4xx.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/tim.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/usart.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Src/vcu_startup.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/Startup/startup_stm32f446vetx.s">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/ThreadSafe/newlib_lock_glue.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Core/ThreadSafe/stm32_lock.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f446xx.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Device/ST/STM32F4xx/LICENSE.txt">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/cachel1_armv7.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/cmsis_armcc.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/cmsis_armclang.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/cmsis_armclang_ltm.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/cmsis_compiler.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/cmsis_gcc.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/cmsis_iccarm.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/cmsis_version.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_armv81mml.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_armv8mbl.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_armv8mml.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_cm0.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_cm0plus.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_cm1.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_cm23.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_cm3.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_cm33.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_cm35p.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_cm4.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_cm55.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_cm7.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_cm85.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_sc000.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_sc300.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/core_starmc1.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/mpu_armv7.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/mpu_armv8.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/pac_armv81.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/pmu_armv8.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/Include/tz_context.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/CMSIS/LICENSE.txt">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_adc_ex.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_can.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_cortex.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_def.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dma_ex.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_exti.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ex.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_flash_ramfunc.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_gpio_ex.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_iwdg.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc_ex.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_usart.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_adc.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_bus.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_cortex.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_dma.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_exti.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_gpio.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_iwdg.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_pwr.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_rcc.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_system.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_tim.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_usart.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_ll_utils.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/LICENSE.txt">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_can.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_iwdg.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_usart.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_adc.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/freertos_mpool.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/freertos_os2.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/croutine.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/StackMacros.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/atomic.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/croutine.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/list.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/message_buffer.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/mpu_prototypes.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/portable.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/queue.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/stack_macros.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/stream_buffer.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/task.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/include/timers.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/list.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/queue.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/tasks.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/Middlewares/Third_Party/FreeRTOS/Source/timers.c">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/STM32F446VETX_FLASH.ld">
+			<Option target="newVCU.elf"/>
+		</Unit>
+		<Unit filename="D:/UMSAE/newVCU/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

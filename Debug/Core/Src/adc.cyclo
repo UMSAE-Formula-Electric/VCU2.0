@@ -1,0 +1,5 @@
+../Core/Src/adc.c:34:6:MX_ADC1_Init	6
+../Core/Src/adc.c:108:6:HAL_ADC_MspInit	3
+../Core/Src/adc.c:168:6:HAL_ADC_MspDeInit	2
+../Core/Src/adc.c:208:10:ADC_get_val	2
+../Core/Src/adc.c:221:10:adc_convert	2

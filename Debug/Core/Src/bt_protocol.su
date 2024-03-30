@@ -1,0 +1,14 @@
+../Core/Src/bt_protocol.c:188:6:btInitialize	8	static
+../Core/Src/bt_protocol.c:207:6:btTerminate	8	static
+../Core/Src/bt_protocol.c:228:6:btSendPacket	8	static
+../Core/Src/bt_protocol.c:245:6:btUpdateData	88	static
+../Core/Src/bt_protocol.c:294:13:initPacket	24	static
+../Core/Src/bt_protocol.c:322:13:buildPacket	8	static
+../Core/Src/bt_protocol.c:338:13:setStartFlag	4	static
+../Core/Src/bt_protocol.c:347:13:setAcknowledgement	4	static
+../Core/Src/bt_protocol.c:356:13:setHeader	8	static
+../Core/Src/bt_protocol.c:365:13:setExpansion	8	static
+../Core/Src/bt_protocol.c:374:13:setChecksum	8	static
+../Core/Src/bt_protocol.c:383:13:setEndFlag	4	static
+../Core/Src/bt_protocol.c:394:13:updateSequence	16	static
+../Core/Src/bt_protocol.c:412:6:StartBluetoothDumpTask	16	static

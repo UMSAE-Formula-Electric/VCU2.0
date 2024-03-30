@@ -1,0 +1,6 @@
+../Core/Src/iwdg.c:43:6:MX_IWDG_Init	8	static
+../Core/Src/iwdg.c:74:13:initWdEventGroup	16	static,ignoring_inline_asm
+../Core/Src/iwdg.c:94:6:wd_criticalTaskKick	24	static,ignoring_inline_asm
+../Core/Src/iwdg.c:106:6:startFromIWDG	16	static
+../Core/Src/iwdg.c:127:6:wdErrorHandler	8	static
+../Core/Src/iwdg.c:136:6:StartWatchDogTask	24	static

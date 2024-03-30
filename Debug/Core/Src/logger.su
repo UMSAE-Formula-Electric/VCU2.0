@@ -1,0 +1,7 @@
+../Core/Src/logger.c:22:6:logInitialize	8	static
+../Core/Src/logger.c:41:6:logTerminate	8	static
+../Core/Src/logger.c:63:6:logIndicator	16	static
+../Core/Src/logger.c:72:6:enableVCULogging	4	static
+../Core/Src/logger.c:85:6:logMessage	48	static
+../Core/Src/logger.c:116:6:logErrorMessage	16	static
+../Core/Src/logger.c:130:6:logSensor	16	static

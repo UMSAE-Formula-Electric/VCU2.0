@@ -1,0 +1,2 @@
+../Core/Src/car_state.c:5:6:set_car_state	2
+../Core/Src/car_state.c:11:16:get_car_state	1

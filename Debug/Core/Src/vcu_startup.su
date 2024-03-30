@@ -1,0 +1,6 @@
+../Core/Src/vcu_startup.c:67:6:StartVcuStateTask	72	static
+../Core/Src/vcu_startup.c:254:6:read_saftey_loop	8	static
+../Core/Src/vcu_startup.c:267:14:get_startup_task	8	static
+../Core/Src/vcu_startup.c:276:6:go_idle	8	static
+../Core/Src/vcu_startup.c:290:13:fail_pulse	8	static
+../Core/Src/vcu_startup.c:306:6:isButtonPressed	16	static

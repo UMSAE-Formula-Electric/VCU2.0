@@ -1,0 +1,6 @@
+../Core/Src/vcu_startup.c:67:6:StartVcuStateTask	29
+../Core/Src/vcu_startup.c:254:6:read_saftey_loop	2
+../Core/Src/vcu_startup.c:267:14:get_startup_task	1
+../Core/Src/vcu_startup.c:276:6:go_idle	1
+../Core/Src/vcu_startup.c:290:13:fail_pulse	1
+../Core/Src/vcu_startup.c:306:6:isButtonPressed	1

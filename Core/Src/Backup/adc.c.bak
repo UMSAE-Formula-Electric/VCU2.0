@@ -18,10 +18,10 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <assert.h>
 #include "adc.h"
 
 /* USER CODE BEGIN 0 */
+#include <assert.h>
 
 static uint32_t Sensor_DMABase[NUM_ADC_CHANNELS];
 

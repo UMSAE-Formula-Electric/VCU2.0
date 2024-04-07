@@ -59,7 +59,7 @@ void MX_IWDG_Init(void)
   }
   /* USER CODE BEGIN IWDG_Init 2 */
 
-  initWdEventGroup();
+//  initWdEventGroup();
 
   /* USER CODE END IWDG_Init 2 */
 

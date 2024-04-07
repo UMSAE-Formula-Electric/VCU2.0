@@ -178,7 +178,7 @@ void MX_FREERTOS_Init(void) {
   dashLedTaskHandle = osThreadNew(StartDashboardLedTask, NULL, &dashLedTask_attributes);
 
   /* creation of watchDogTask */
-  watchDogTaskHandle = osThreadNew(StartWatchDogTask, NULL, &watchDogTask_attributes);
+//  watchDogTaskHandle = osThreadNew(StartWatchDogTask, NULL, &watchDogTask_attributes);
 
   /* creation of canTxTask */
   canTxTaskHandle = osThreadNew(StartCanTxTask, NULL, &canTxTask_attributes);
@@ -187,22 +187,22 @@ void MX_FREERTOS_Init(void) {
   canRxTaskHandle = osThreadNew(StartCanRxTask, NULL, &canRxTask_attributes);
 
   /* creation of btDumpTask */
-  btDumpTaskHandle = osThreadNew(StartBluetoothDumpTask, NULL, &btDumpTask_attributes);
+//  btDumpTaskHandle = osThreadNew(StartBluetoothDumpTask, NULL, &btDumpTask_attributes);
 
   /* creation of vcuStateTask */
-  vcuStateTaskHandle = osThreadNew(StartVcuStateTask, NULL, &vcuStateTask_attributes);
+//  vcuStateTaskHandle = osThreadNew(StartVcuStateTask, NULL, &vcuStateTask_attributes);
 
   /* creation of mcHrtbeatTask */
-  mcHrtbeatTaskHandle = osThreadNew(StartMcHeartbeatTask, NULL, &mcHrtbeatTask_attributes);
+//  mcHrtbeatTaskHandle = osThreadNew(StartMcHeartbeatTask, NULL, &mcHrtbeatTask_attributes);
 
   /* creation of acuHrtbeatTask */
-  acuHrtbeatTaskHandle = osThreadNew(StartAcuHeartbeatTask, NULL, &acuHrtbeatTask_attributes);
+//  acuHrtbeatTaskHandle = osThreadNew(StartAcuHeartbeatTask, NULL, &acuHrtbeatTask_attributes);
 
   /* creation of brakeProcTask */
-  brakeProcTaskHandle = osThreadNew(StartBrakeProcessTask, NULL, &brakeProcTask_attributes);
+//  brakeProcTaskHandle = osThreadNew(StartBrakeProcessTask, NULL, &brakeProcTask_attributes);
 
   /* creation of appsProcTask */
-  appsProcTaskHandle = osThreadNew(StartAppsProcessTask, NULL, &appsProcTask_attributes);
+//  appsProcTaskHandle = osThreadNew(StartAppsProcessTask, NULL, &appsProcTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

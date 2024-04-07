@@ -75,7 +75,7 @@ void StartVcuStateTask(void *argument){
 	for(;;){
 
 		//kick watchdog
-		wd_criticalTaskKick(wd_STARTUP_CTask);
+		//wd_criticalTaskKick(wd_STARTUP_CTask);
 
 		state = get_car_state();
 		switch(state){

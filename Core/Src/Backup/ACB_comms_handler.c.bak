@@ -23,10 +23,10 @@ void process_ACB_CAN_packets(void * pvParameters){
     CAN_RxHeaderTypeDef packetToProcess;
     uint8_t RxData[8];
 	BaseType_t ret;
-	char strBuff[40]; //buffer for making 'nice' logs
+	char strBuff[50]; //buffer for making 'nice' logs
 
 	for(;;){
-
+		//TODO CAN Revisit
 		ret = xQueueReceive(ACB_VCU_CAN_Queue,&packetToProcess, portMAX_DELAY);
 		if(ret == pdPASS){
 			if(packetToProcess.StdId ==  CAN_VCU_CAN_ID){
@@ -57,7 +57,8 @@ void process_ACB_CAN_packets(void * pvParameters){
                     //lv_battery_handle_voltage_request(); from 2018 car
                 } else {
                     //build up string for marking unexpected can message
-                    sprintf(strBuff, "Unexpected ACB can notification: %s", RxData);
+                    sprintf(strBuff, "Unexpected ACB can notification: %s\r\n", RxData);
+                    strBuff[49] = '\0';
                     logMessage(strBuff, false);
                 }
 			}

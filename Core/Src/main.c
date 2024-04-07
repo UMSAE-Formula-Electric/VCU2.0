@@ -99,7 +99,7 @@ int main(void)
   MX_CAN1_Init();
   MX_USART2_Init();
   MX_TIM12_Init();
-  MX_IWDG_Init();
+//  MX_IWDG_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
     dash_set_all_leds();
@@ -114,7 +114,7 @@ int main(void)
     dash_clear_all_leds();
 
     vcu_debug_led(GREENLED, true);
-    logMessage("INIT: Starting Scheduler", true);
+    logMessage("INIT: Starting Scheduler\r\n", true);
 
   /* USER CODE END 2 */
 

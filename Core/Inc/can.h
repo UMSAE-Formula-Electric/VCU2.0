@@ -64,7 +64,7 @@ extern CAN_HandleTypeDef hcan1;
 
 #define CAN_ACU_CAN_ID			0x69
 #define CAN_VCU_CAN_ID			0x88
-#define CAN_SCU_CAN_ID			0x420
+#define CAN_SCU_CAN_ID			0x89
 #define CAN_AMS_CAN_ID          0x70
 #define CAN_VCU_LOG_ID			0x71 //ID for sending VCU data to ACB
 

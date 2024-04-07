@@ -1,5 +1,6 @@
 #include "logger.h"
 #include "bt_protocol.h"
+#include "usart.h"
 #include <string.h>
 
 //Stores the current state of the logger initialization
@@ -73,6 +74,14 @@ void enableVCULogging() {
 	VCU_loggingReady = 1;
 }
 
+void nullTerminate(char *str) {
+    size_t length = strlen(str);
+    uint8_t isNullTerminated = str[length - 1] != '\0';
+    if (isNullTerminated == 0) {
+        str[length] = '\0';
+    }
+}
+
 
 /*
  * logMessage(char *data, bool critical)
@@ -84,24 +93,27 @@ void enableVCULogging() {
  */
 void logMessage(char *data, bool critical) {
 	if (VCU_loggingReady && LOGGING_INITIALIZED) {
-		int sliceAmount = strlen(data - 1) / 8 + 1;
-
-		int letterCounter = 0;
-		int exit = 0;
-		char slicedMesg[8];
-		int i = 0;
-
-		//Loop for each slice, breaking it down into chunks of 8
-		for (int slice = 0; slice < sliceAmount && !exit; slice++) {
-			//Go through 1 of the chunks
-			for (i = 0; i < 8 && !exit; i++) {
-				exit = (data[letterCounter] == '\0');
-				slicedMesg[i] = data[letterCounter];
-				letterCounter++;
-			}
-			//Send the chunk of the message over CAN
-			//sendCan(CAN1, slicedMesg, i, CAN_VCU_CAN_ID, CAN_NO_EXT, CAN_NO_EXT);
-		}
+		nullTerminate(data);
+        HAL_USART_Transmit(&husart2, (uint8_t *)data, strlen(data), 10);
+        while (HAL_USART_GetState(&husart2) == HAL_USART_STATE_BUSY_TX);
+//		int sliceAmount = strlen(data - 1) / 8 + 1;
+//
+//		int letterCounter = 0;
+//		int exit = 0;
+//		char slicedMesg[8];
+//		int i = 0;
+//
+//		//Loop for each slice, breaking it down into chunks of 8
+//		for (int slice = 0; slice < sliceAmount && !exit; slice++) {
+//			//Go through 1 of the chunks
+//			for (i = 0; i < 8 && !exit; i++) {
+//				exit = (data[letterCounter] == '\0');
+//				slicedMesg[i] = data[letterCounter];
+//				letterCounter++;
+//			}
+//			//Send the chunk of the message over CAN
+//			//sendCan(CAN1, slicedMesg, i, CAN_VCU_CAN_ID, CAN_NO_EXT, CAN_NO_EXT);
+//		}
 	}
 }
 

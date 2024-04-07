@@ -108,5 +108,6 @@ void logMessage(char *data, bool critical);
 void logSensor(float value, SENSOR sens);
 void logErrorMessage(char *data, INDICATOR indc);
 void enableVCULogging();
+void nullTerminate(char *str);
 
 #endif

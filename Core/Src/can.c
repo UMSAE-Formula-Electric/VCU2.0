@@ -24,10 +24,8 @@
 #include <string.h>
 #include <stdio.h>
 #include "usart.h"
-#include "FreeRTOS.h"
-#include "error_handler.h"
-#include "semphr.h"
 #include "motor_controller_can.h"
+#include "logger.h"
 
 CAN_RxHeaderTypeDef   RxHeader;
 uint8_t               RxData[8];
@@ -45,6 +43,7 @@ void MX_CAN1_Init(void)
 {
 
   /* USER CODE BEGIN CAN1_Init 0 */
+    CAN_FilterTypeDef sFilterConfig;
 
   /* USER CODE END CAN1_Init 0 */
 
@@ -52,11 +51,11 @@ void MX_CAN1_Init(void)
 
   /* USER CODE END CAN1_Init 1 */
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 16;
+  hcan1.Init.Prescaler = 2;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
-  hcan1.Init.TimeSeg1 = CAN_BS1_1TQ;
-  hcan1.Init.TimeSeg2 = CAN_BS2_1TQ;
+  hcan1.Init.TimeSeg1 = CAN_BS1_13TQ;
+  hcan1.Init.TimeSeg2 = CAN_BS2_2TQ;
   hcan1.Init.TimeTriggeredMode = DISABLE;
   hcan1.Init.AutoBusOff = DISABLE;
   hcan1.Init.AutoWakeUp = DISABLE;
@@ -68,6 +67,22 @@ void MX_CAN1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN CAN1_Init 2 */
+    sFilterConfig.FilterBank = 0;
+    sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+    sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+    sFilterConfig.FilterIdHigh = 0x0000;
+    sFilterConfig.FilterIdLow = 0x0000;
+    sFilterConfig.FilterMaskIdHigh = 0x0000;
+    sFilterConfig.FilterMaskIdLow = 0x0000;
+    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+    sFilterConfig.FilterActivation = ENABLE;
+    sFilterConfig.SlaveStartFilterBank = 14;
+
+    if(HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK)
+    {
+        /* Filter configuration Error */
+        Error_Handler();
+    }
 
   /* USER CODE END CAN1_Init 2 */
 
@@ -182,24 +197,12 @@ uint8_t sendCan(CAN_TypeDef* CANx, uint8_t const * data, int32_t length, uint32_
     return sendSuccess;
 }
 
-void nullTerminate(char *str) {
-    size_t length = strlen(str);
-    uint8_t isNullTerminated = str[length - 1] != '\0';
-    if (isNullTerminated == 0) {
-        str[length] = '\0';
-    }
-}
-
 void messageReceivedFromControlUnit(const char *unitType) {
     char canMsg[50];
     if (strcmp(unitType, "VCU") == 0) strncpy(canMsg, "VCU received a CAN message from the VCU.\r\n", sizeof(canMsg) - 1);
     else if (strcmp(unitType, "ACU") == 0) strncpy(canMsg, "VCU received a CAN message from the ACU.\r\n", sizeof(canMsg) - 1);
     else if (strcmp(unitType, "SCU") == 0) strncpy(canMsg, "VCU received a CAN message from the SCU.\r\n", sizeof(canMsg) - 1);
-    nullTerminate(canMsg);
-    HAL_USART_Transmit(&husart2, (uint8_t *)canMsg, strlen(canMsg), 10);
-    strncpy(canMsg, (char *) RxData, RxHeader.DLC);
-    nullTerminate(canMsg);
-    HAL_USART_Transmit(&husart2, (uint8_t *)canMsg, strlen(canMsg), 10);
+    logMessage(canMsg, true);
 }
 
 HAL_StatusTypeDef CAN_Polling(void)
@@ -223,7 +226,6 @@ void StartCanRxTask(void *argument)
 {
 //	imuState state;
     char canMsg[50];
-    BaseType_t ret;
     HAL_CAN_Start(&hcan1);
 
     for (;;)
@@ -237,7 +239,7 @@ void StartCanRxTask(void *argument)
             }
             if (RxHeader.IDE == CAN_ID_STD)
             {
-                switch (RxHeader.ExtId)
+                switch (RxHeader.StdId)
                 {
                     case CAN_VCU_CAN_ID:
                         messageReceivedFromControlUnit("VCU");
@@ -291,8 +293,25 @@ void StartCanRxTask(void *argument)
 }
 
 void StartCanTxTask(void *argument){
+    char canMsg[50];
     for(;;){
-        //TODO
+        TxHeader.IDE = CAN_ID_STD; // Using Standard ID
+        TxHeader.StdId = CAN_SCU_CAN_ID;   // Transmitter's ID (11-bit wide)
+        TxHeader.RTR = CAN_RTR_DATA; // Data frame
+        TxHeader.DLC = 6; // Length of data bytes
+        TxData[0] = 'H'; // ASCII code for 'H'
+        TxData[1] = 'i'; // ASCII code for 'i'
+        TxData[2] = ' '; // ASCII code for space
+        TxData[3] = 'S'; // ASCII code for 'S'
+        TxData[4] = 'C'; // ASCII code for 'C'
+        TxData[5] = 'U'; // ASCII code for 'U'
+
+        if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox) != HAL_OK) {
+        	logMessage("VCU couldn't send a message to the CAN Bus.\r\n", true);
+        }
+        else {
+            logMessage("VCU sent a message to the CAN Bus.\r\n", true);
+        }
     }
 }
 /* USER CODE END 1 */

@@ -1,0 +1,4 @@
+
+[submodule "Firmware-Library"]
+	path = Firmware-Library
+	url = git@github.com:UMSAE-Formula-Electric/Firmware-Library.git

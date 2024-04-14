@@ -133,6 +133,7 @@ void wdErrorHandler() {
  *
  * @brief RTOS task for periodically kicking the watchdog
  */
+//TODO Fix WatchDog
 void StartWatchDogTask(void *argument) {
     while (1) {
 

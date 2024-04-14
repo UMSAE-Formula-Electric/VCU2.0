@@ -105,7 +105,7 @@ void StartAppsProcessTask(void *argument) {
 		apps2 = 0.5 * ADC_get_val(ADC_APPS2) + 0.5 * apps2;
 		brake1 = ADC_get_val(ADC_BPS);
 
-//		wd_criticalTaskKick(wd_APPS_CTask);
+		wd_criticalTaskKick(wd_APPS_CTask);
 
 		if (!detectPedal(apps1, apps2, &apps)) {
 			led_mgmt_set_error(DASH_NO_THROTTLE);
@@ -240,6 +240,7 @@ void StartBrakeProcessTask(void *argument) {
 
 		//kick wathcdog to make sure this doesn't hang
 //		wd_criticalTaskKick(wd_BRAKE_CTASK);
+        HAL_IWDG_Refresh(&hiwdg);
 
 		vTaskDelay(pdMS_TO_TICKS(1000/BRAKE_REQ_FREQ));
 

@@ -26,6 +26,7 @@
 #include "usart.h"
 #include "motor_controller_can.h"
 #include "logger.h"
+#include "cmsis_os2.h"
 
 CAN_RxHeaderTypeDef   RxHeader;
 uint8_t               RxData[8];
@@ -293,6 +294,8 @@ void StartCanRxTask(void *argument)
                 }
             }
         }
+
+        osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
     }
 }
 
@@ -321,6 +324,8 @@ void StartCanTxTask(void *argument){
         else {
             logMessage("VCU sent a message to the CAN Bus.\r\n", true);
         }
+
+        osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
     }
 }
 /* USER CODE END 1 */

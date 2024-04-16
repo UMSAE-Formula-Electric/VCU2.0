@@ -230,7 +230,7 @@ void StartVcuStateTask(void *argument){
 		default:
 			break;
 		}
-		vTaskDelay(pdMS_TO_TICKS(STARTUP_TASK_DELAY));
+		vTaskDelay(pdMS_TO_TICKS(STARTUP_TASK_DELAY));                  //TODO Revise task delay
 	}
 	logMessage("Error exiting from startup task", true);
 	//set_saftey_loop_state(LOOP_OPEN);

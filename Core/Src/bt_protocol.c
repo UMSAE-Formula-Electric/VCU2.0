@@ -8,6 +8,7 @@
 
 #include "FreeRTOS.h"
 #include "semphr.h"
+#include "main.h"
 
 //Variables for BT status/errors
 static bool BT_INITIALIZED = false;
@@ -427,5 +428,7 @@ void StartBluetoothDumpTask(void *argument) {
 		} else {
 			vTaskDelay(LONG_BT_DUMP_DELAY);
 		}
+
+        osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
 	}
 }

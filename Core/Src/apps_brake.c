@@ -161,10 +161,9 @@ void StartAppsProcessTask(void *argument) {
 					logIndicator(true, THROTTLE_ERROR); //pedal sensor doesnt agree
 				}
 			}
-			vTaskDelay(pdMS_TO_TICKS(1000/APPS_REQ_FREQ));
+			vTaskDelay(pdMS_TO_TICKS(1000/APPS_REQ_FREQ));                      //TODO Revise task Delay
 		}
 	}
-	vTaskDelete(NULL);
 }
 
 
@@ -251,10 +250,8 @@ void StartBrakeProcessTask(void *argument) {
 //		wd_criticalTaskKick(wd_BRAKE_CTASK);
         HAL_IWDG_Refresh(&hiwdg);
 
-		vTaskDelay(pdMS_TO_TICKS(1000/BRAKE_REQ_FREQ));
-
+		vTaskDelay(pdMS_TO_TICKS(1000/BRAKE_REQ_FREQ));             //TODO Revise task delay
 	}
-	vTaskDelete(NULL);
 }
 
 /*

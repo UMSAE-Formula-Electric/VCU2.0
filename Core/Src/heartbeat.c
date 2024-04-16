@@ -131,6 +131,7 @@ void StartAcuHeartbeatTask(void *argument){
 		  logIndicator(true, NO_ACB);
 		}
 
+        osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
 	}
 }
 
@@ -193,6 +194,8 @@ void StartMcHeartbeatTask(void *argument){
 
 
     }
+
+      osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
   }
 }
 

@@ -121,6 +121,6 @@ void StartDashboardLedTask(void *argument){
 //			logIndicator(false, GENERAL_ERROR);
 //		}
 
-		HAL_Delay(250);
-	}
+        osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
+    }
 }

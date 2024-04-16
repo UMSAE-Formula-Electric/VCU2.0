@@ -5,6 +5,7 @@
 #include "logger.h"
 #include "ACB_comms_handler.h"
 #include "freertos_task_handles.h"
+#include "iwdg.h"
 
 #define HEARTBEAT_TASK_DELAY_MS     100
 #define HEARTBEAT_MAX_MISSES		10
@@ -55,6 +56,8 @@ void StartAcuHeartbeatTask(void *argument){
 	uint8_t misses = 0; //indicates how many cycles we have gone without detecting ACB
 
 	for(;;){
+        kickWatchdogBit(osThreadGetId());
+
 		//send heartbeat message to ACB
 		send_ACB_mesg(CAN_HEARTBEAT_REQUEST);
 
@@ -153,6 +156,7 @@ void StartMcHeartbeatTask(void *argument){
   uint8_t misses = 0; //indicates how many cycles we have gone without detecting ACB
 
   for(;;){
+      kickWatchdogBit(osThreadGetId());
 
     //Check if MC has sent a message
     retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, HEARTBEAT_TASK_DELAY_MS);

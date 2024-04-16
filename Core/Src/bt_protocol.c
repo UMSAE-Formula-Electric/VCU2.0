@@ -9,6 +9,7 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "main.h"
+#include "iwdg.h"
 
 //Variables for BT status/errors
 static bool BT_INITIALIZED = false;
@@ -417,6 +418,8 @@ void StartBluetoothDumpTask(void *argument) {
     }
 
 	for(;;) {
+        kickWatchdogBit(osThreadGetId());
+
 		//Dump, Wait
 		btSendPacket();
 		logSensor((float)0 -1,MC_ACUAL_SPEED_REG_LOG);

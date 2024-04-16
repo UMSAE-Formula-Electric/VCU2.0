@@ -43,9 +43,24 @@ void MX_IWDG_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 typedef struct {
-    osThreadId_t taskHandle;
+    const osThreadAttr_t* task_attributes;
     uint8_t isTaskActive;
 } TaskInfo;
+
+typedef enum {
+    DEFAULT_TASK,
+    DASH_LED_TASK,
+    WATCH_DOG_TASK,
+    CAN_TX_TASK,
+    CAN_RX_TASK,
+    BT_DUMP_TASK,
+    VCU_STATE_TASK,
+    MC_HRTBEAT_TASK,
+    ACU_HRTBEAT_TASK,
+    BRAKE_PROC_TASK,
+    APPS_PROC_TASK,
+    NUM_TASKS
+} TaskBit_t;
 
 enum WD_CRITICALTASK{
     wd_APPS_CTask = 0,
@@ -54,12 +69,9 @@ enum WD_CRITICALTASK{
     wd_NumCriticalTasks
 };
 
-uint8_t initIWDG();
-void testIWDGReset();
-void testIWDGResetting();
 bool startFromIWDG();
-void wd_criticalTaskKick(enum WD_CRITICALTASK task);
 extern osEventFlagsId_t iwdgEventGroupHandle;
+void kickWatchdogBit(osThreadId_t taskHandle);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

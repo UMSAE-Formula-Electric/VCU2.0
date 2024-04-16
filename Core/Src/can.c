@@ -27,6 +27,7 @@
 #include "motor_controller_can.h"
 #include "logger.h"
 #include "cmsis_os2.h"
+#include "iwdg.h"
 
 CAN_RxHeaderTypeDef   RxHeader;
 uint8_t               RxData[8];
@@ -235,6 +236,8 @@ void StartCanRxTask(void *argument)
 
     for (;;)
     {
+        kickWatchdogBit(osThreadGetId());
+
         if (CAN_Polling() == HAL_OK)
         {
             if (RxHeader.IDE == CAN_ID_EXT)
@@ -307,6 +310,8 @@ void StartCanTxTask(void *argument){
 
     char canMsg[50];
     for(;;){
+        kickWatchdogBit(osThreadGetId());
+
         TxHeader.IDE = CAN_ID_STD; // Using Standard ID
         TxHeader.StdId = CAN_SCU_CAN_ID;   // Transmitter's ID (11-bit wide)
         TxHeader.RTR = CAN_RTR_DATA; // Data frame

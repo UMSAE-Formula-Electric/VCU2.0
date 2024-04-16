@@ -78,9 +78,7 @@ void StartVcuStateTask(void *argument){
 	char strBuff[40]; //buffer for making 'nice' logs
 	enum CAR_STATE state;
 	for(;;){
-
-		//kick watchdog
-		//wd_criticalTaskKick(wd_STARTUP_CTask);
+        kickWatchdogBit(osThreadGetId());
 
 		state = get_car_state();
 		switch(state){

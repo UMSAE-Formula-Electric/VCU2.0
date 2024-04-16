@@ -22,4 +22,16 @@ extern osThreadId_t acuHrtbeatTaskHandle;
 extern osThreadId_t brakeProcTaskHandle;
 extern osThreadId_t appsProcTaskHandle;
 
+extern const osThreadAttr_t defaultTask_attributes;
+extern const osThreadAttr_t dashLedTask_attributes;
+extern const osThreadAttr_t watchDogTask_attributes;
+extern const osThreadAttr_t canTxTask_attributes;
+extern const osThreadAttr_t canRxTask_attributes;
+extern const osThreadAttr_t btDumpTask_attributes;
+extern const osThreadAttr_t vcuStateTask_attributes;
+extern const osThreadAttr_t mcHrtbeatTask_attributes;
+extern const osThreadAttr_t acuHrtbeatTask_attributes;
+extern const osThreadAttr_t brakeProcTask_attributes;
+extern const osThreadAttr_t appsProcTask_attributes;
+
 #endif /* INC_FREERTOS_TASK_HANDLES_H_ */

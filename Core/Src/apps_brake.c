@@ -105,12 +105,12 @@ void StartAppsProcessTask(void *argument) {
 	apps.high_zero = apps.high_min;
 
 	for (;;) {
+        kickWatchdogBit(osThreadGetId());
+
 		//low pass filters to increase noise rejection
 		apps1 = 0.5 * ADC_get_val(ADC_APPS1) + 0.5 * apps1;
 		apps2 = 0.5 * ADC_get_val(ADC_APPS2) + 0.5 * apps2;
 		brake1 = ADC_get_val(ADC_BPS);
-
-		wd_criticalTaskKick(wd_APPS_CTask);
 
 		if (!detectPedal(apps1, apps2, &apps)) {
 			led_mgmt_set_error(DASH_NO_THROTTLE);
@@ -239,6 +239,8 @@ void StartBrakeProcessTask(void *argument) {
 
 	//task infinite loop
 	for (;;) {
+        kickWatchdogBit(osThreadGetId());
+
 		//log brake sensors
 		logSensor(ADC_get_val(ADC_BPS), BRAKE_1);
 //		logSensor(ADC_get_val(ADC_BRK2), BRAKE_2);

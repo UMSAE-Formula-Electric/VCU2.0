@@ -27,6 +27,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os2.h"
 
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
@@ -35,13 +36,16 @@ extern "C" {
 extern IWDG_HandleTypeDef hiwdg;
 
 /* USER CODE BEGIN Private defines */
-#define WDPERIOD 50
-#define IWDGPERIOD 500
+
 /* USER CODE END Private defines */
 
 void MX_IWDG_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+typedef struct {
+    osThreadId_t taskHandle;
+    uint8_t isTaskActive;
+} TaskInfo;
 
 enum WD_CRITICALTASK{
     wd_APPS_CTask = 0,
@@ -55,6 +59,7 @@ void testIWDGReset();
 void testIWDGResetting();
 bool startFromIWDG();
 void wd_criticalTaskKick(enum WD_CRITICALTASK task);
+extern osEventFlagsId_t iwdgEventGroupHandle;
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

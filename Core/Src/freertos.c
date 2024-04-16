@@ -124,6 +124,11 @@ const osThreadAttr_t appsProcTask_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
+/* Definitions for iwdgEventGroup */
+osEventFlagsId_t iwdgEventGroupHandle;
+const osEventFlagsAttr_t iwdgEventGroup_attributes = {
+  .name = "iwdgEventGroup"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -172,41 +177,45 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  defaultTaskHandle = osThreadNew(StartDefaultTask, (void*) DEFAULT_TASK_ENABLED, &defaultTask_attributes);
 
   /* creation of dashLedTask */
-  dashLedTaskHandle = osThreadNew(StartDashboardLedTask, NULL, &dashLedTask_attributes);
+  dashLedTaskHandle = osThreadNew(StartDashboardLedTask, (void*) DASH_LED_TASK_ENABLED, &dashLedTask_attributes);
 
   /* creation of watchDogTask */
-//  watchDogTaskHandle = osThreadNew(StartWatchDogTask, NULL, &watchDogTask_attributes);
+  watchDogTaskHandle = osThreadNew(StartWatchDogTask, (void*) WATCH_DOG_TASK_ENABLED, &watchDogTask_attributes);
 
   /* creation of canTxTask */
-  canTxTaskHandle = osThreadNew(StartCanTxTask, NULL, &canTxTask_attributes);
+  canTxTaskHandle = osThreadNew(StartCanTxTask, (void*) CAN_TX_TASK_ENABLED, &canTxTask_attributes);
 
   /* creation of canRxTask */
-  canRxTaskHandle = osThreadNew(StartCanRxTask, NULL, &canRxTask_attributes);
+  canRxTaskHandle = osThreadNew(StartCanRxTask, (void*) CAN_RX_TASK_ENABLED, &canRxTask_attributes);
 
   /* creation of btDumpTask */
-//  btDumpTaskHandle = osThreadNew(StartBluetoothDumpTask, NULL, &btDumpTask_attributes);
+  btDumpTaskHandle = osThreadNew(StartBluetoothDumpTask, (void*) BT_DUMP_TASK_ENABLED, &btDumpTask_attributes);
 
   /* creation of vcuStateTask */
-//  vcuStateTaskHandle = osThreadNew(StartVcuStateTask, NULL, &vcuStateTask_attributes);
+  vcuStateTaskHandle = osThreadNew(StartVcuStateTask, (void*) VCU_STATE_TASK_ENABLED, &vcuStateTask_attributes);
 
   /* creation of mcHrtbeatTask */
-//  mcHrtbeatTaskHandle = osThreadNew(StartMcHeartbeatTask, NULL, &mcHrtbeatTask_attributes);
+  mcHrtbeatTaskHandle = osThreadNew(StartMcHeartbeatTask, (void*) MC_HRTBEAT_TASK_ENABLED, &mcHrtbeatTask_attributes);
 
   /* creation of acuHrtbeatTask */
-//  acuHrtbeatTaskHandle = osThreadNew(StartAcuHeartbeatTask, NULL, &acuHrtbeatTask_attributes);
+  acuHrtbeatTaskHandle = osThreadNew(StartAcuHeartbeatTask, (void*) ACU_HRTBEAT_TASK_ENABLED, &acuHrtbeatTask_attributes);
 
   /* creation of brakeProcTask */
-//  brakeProcTaskHandle = osThreadNew(StartBrakeProcessTask, NULL, &brakeProcTask_attributes);
+  brakeProcTaskHandle = osThreadNew(StartBrakeProcessTask, (void*) BRAKE_PROC_TASK_ENABLED, &brakeProcTask_attributes);
 
   /* creation of appsProcTask */
-//  appsProcTaskHandle = osThreadNew(StartAppsProcessTask, NULL, &appsProcTask_attributes);
+  appsProcTaskHandle = osThreadNew(StartAppsProcessTask, (void*) APPS_PROC_TASK_ENABLED, &appsProcTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the event(s) */
+  /* creation of iwdgEventGroup */
+  iwdgEventGroupHandle = osEventFlagsNew(&iwdgEventGroup_attributes);
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */

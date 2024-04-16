@@ -57,6 +57,18 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define IWDG_RELOAD_PERIOD 500
+#define DEFAULT_TASK_ENABLED 0
+#define DASH_LED_TASK_ENABLED 1
+#define WATCH_DOG_TASK_ENABLED 0
+#define CAN_TX_TASK_ENABLED 1
+#define CAN_RX_TASK_ENABLED 1
+#define BT_DUMP_TASK_ENABLED 0
+#define VCU_STATE_TASK_ENABLED 1
+#define MC_HRTBEAT_TASK_ENABLED 1
+#define ACU_HRTBEAT_TASK_ENABLED 1
+#define BRAKE_PROC_TASK_ENABLED 0
+#define APPS_PROC_TASK_ENABLED 0
 #define RTD_LED2_BLUE_Pin GPIO_PIN_2
 #define RTD_LED2_BLUE_GPIO_Port GPIOE
 #define TSA_LED2_GREEN_Pin GPIO_PIN_3

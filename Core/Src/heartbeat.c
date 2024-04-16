@@ -44,6 +44,10 @@ void heartbeat_master_task_MC(void * pvParameters);
  * heartbeat messages to the ACB
  */
 void StartAcuHeartbeatTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        return;
+    }
 
 	BaseType_t retRTOS;
 	uint32_t ulNotifiedValue = 0;
@@ -137,6 +141,10 @@ void StartAcuHeartbeatTask(void *argument){
  * heartbeat messages to the Motor Controller
  */
 void StartMcHeartbeatTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        return;
+    }
 
   BaseType_t retRTOS;
   uint32_t ulNotifiedValue = 0;

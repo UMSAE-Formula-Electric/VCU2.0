@@ -224,7 +224,11 @@ HAL_StatusTypeDef CAN_Polling(void)
 
 void StartCanRxTask(void *argument)
 {
-//	imuState state;
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        return;
+    }
+
     char canMsg[50];
     HAL_CAN_Start(&hcan1);
 
@@ -293,6 +297,11 @@ void StartCanRxTask(void *argument)
 }
 
 void StartCanTxTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        return;
+    }
+
     char canMsg[50];
     for(;;){
         TxHeader.IDE = CAN_ID_STD; // Using Standard ID

@@ -76,6 +76,11 @@ long map(long x, long in_min, long in_max, long out_min, long out_max) {
  * This is the main task for updating and handling the throttle. This task checks for impossibility of the apps and if the apps is present
  */
 void StartAppsProcessTask(void *argument) {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        return;
+    }
+
 	int16_t mc_apps_val;
 
 	uint16_t apps1 = 0;
@@ -209,6 +214,10 @@ bool twoFootRulePassed(long appsVal, pedal_state_t * pedalState) {
  * This task is used for detecting the plausibility of the brake sensor
  */
 void StartBrakeProcessTask(void *argument) {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        return;
+    }
 
 	uint16_t brake1 = 0;
 	uint16_t brake2 = 0;

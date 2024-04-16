@@ -54,6 +54,11 @@ bool led_mgmt_check_error(dash_led_state_t state){
  * are associated with different faults
  */
 void StartDashboardLedTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        return;
+    }
+
 	dash_led_state_t prev_state = DASH_NO_ERROR;
 	dash_led_state_t cur_state = DASH_NO_ERROR;
 

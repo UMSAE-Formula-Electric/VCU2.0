@@ -4,6 +4,7 @@
 #include "task.h"
 #include "logger.h"
 #include "ACB_comms_handler.h"
+#include "freertos_task_handles.h"
 
 #define HEARTBEAT_TASK_DELAY_MS     100
 #define HEARTBEAT_MAX_MISSES		10

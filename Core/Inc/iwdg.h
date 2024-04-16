@@ -27,10 +27,10 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os2.h"
 
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
+#include "cmsis_os2.h"
 /* USER CODE END Includes */
 
 extern IWDG_HandleTypeDef hiwdg;

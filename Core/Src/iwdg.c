@@ -55,12 +55,11 @@ void MX_IWDG_Init(void)
 }
 
 /* USER CODE BEGIN 1 */
-/*
- * startFromWD
+/**
+ * @brief Checks if the system has resumed from IWDG reset
  *
- * @return returns true if the system started due to a watchdog reset otherwise false
- *
- * @brief used for checking on reset if the system is starting from a watchdog reset
+ * @return true if the system has resumed from IWDG reset
+ * @return false if the system has not resumed from IWDG reset
  */
 bool startFromIWDG() {
 
@@ -78,6 +77,12 @@ bool startFromIWDG() {
     return startFromWD;
 }
 
+/**
+ * @brief Gets a static list of all the FreeRTOS tasks' attributes and their activity status
+ *
+ * @param count The number of tasks
+ * @return TaskInfo* The array of the tasks' information
+ */
 TaskInfo* getTaskInfos(size_t* count) {
     static TaskInfo taskInfos[] = {
             {&defaultTask_attributes, DEFAULT_TASK_ENABLED},
@@ -97,6 +102,12 @@ TaskInfo* getTaskInfos(size_t* count) {
     return taskInfos;
 }
 
+/**
+ * @brief Gets the bit position of a task in the iwdgEventGroup bits
+ *
+ * @param taskHandle The handle of the task
+ * @return TaskBit_t The bit position of the task
+ */
 TaskBit_t getTaskBit(const void *taskHandle) {
     size_t taskCount;
     TaskInfo* taskInfos = getTaskInfos(&taskCount);
@@ -108,11 +119,25 @@ TaskBit_t getTaskBit(const void *taskHandle) {
     return NUM_TASKS;
 }
 
+/**
+ * @brief Sets the bit of a task in the iwdgEventGroup bits
+ *
+ * @param taskHandle The handle of the task
+ */
 void kickWatchdogBit(osThreadId_t taskHandle) {
     TaskBit_t bitPosition = getTaskBit(taskHandle);
     xEventGroupSetBits(iwdgEventGroupHandle, (1 << bitPosition));
 }
 
+/**
+ * @brief Checks if a task is active
+ *
+ * @param taskBit The bit position of the task in the taskInfos array
+ * @param taskInfos The array of the tasks' information
+ * @param taskCount The number of tasks
+ * @return true if the task is active
+ * @return false if the task is not active
+ */
 bool isTaskActive(TaskBit_t taskBit, TaskInfo *taskInfos, size_t taskCount) {
     if (taskBit < taskCount) {
         return taskInfos[taskBit].isTaskActive == 1;
@@ -121,10 +146,24 @@ bool isTaskActive(TaskBit_t taskBit, TaskInfo *taskInfos, size_t taskCount) {
     return false;
 }
 
+/**
+ * @brief Checks if a task is ready
+ *
+ * @param bitPosition The bit position of the task in the iwdgEventGroup bits
+ * @param taskBits The bits of the iwdgEventGroup
+ * @return true if the task is ready
+ * @return false if the task is not ready
+ */
 bool isTaskReady(TaskBit_t bitPosition, EventBits_t taskBits) {
     return (taskBits & (1 << bitPosition)) != 0;
 }
 
+/**
+ * @brief Checks if all active tasks have set their bits in iwdgEventGroup
+ *
+ * @return true if all active tasks have set their bits in iwdgEventGroup
+ * @return false if not all active tasks have set their bits in iwdgEventGroup
+ */
 bool areAllActiveTasksReady() {
     size_t taskCount;
     TaskBit_t currTaskBit;
@@ -143,6 +182,11 @@ bool areAllActiveTasksReady() {
     return true;
 }
 
+/**
+ * @brief The watchdog FreeRTOS task
+ *
+ * @param argument the TASK_ENABLED value of the task used in freertos.c
+ */
 void StartWatchDogTask(void *argument) {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {

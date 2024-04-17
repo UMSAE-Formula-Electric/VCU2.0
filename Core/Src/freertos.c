@@ -66,7 +66,7 @@ osThreadId_t watchDogTaskHandle;
 const osThreadAttr_t watchDogTask_attributes = {
   .name = "watchDogTask",
   .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for canTxTask */
 osThreadId_t canTxTaskHandle;

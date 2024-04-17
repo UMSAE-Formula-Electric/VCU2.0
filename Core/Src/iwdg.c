@@ -55,41 +55,6 @@ void MX_IWDG_Init(void)
 }
 
 /* USER CODE BEGIN 1 */
-TaskInfo* getTaskInfos(size_t* count) {
-    static TaskInfo taskInfos[] = {
-            {&defaultTask_attributes, DEFAULT_TASK_ENABLED},
-            {&dashLedTask_attributes, DASH_LED_TASK_ENABLED},
-            {&watchDogTask_attributes, WATCH_DOG_TASK_ENABLED},
-            {&canTxTask_attributes, CAN_TX_TASK_ENABLED},
-            {&canRxTask_attributes, CAN_RX_TASK_ENABLED},
-            {&canRxTask_attributes, BT_DUMP_TASK_ENABLED},
-            {&vcuStateTask_attributes, VCU_STATE_TASK_ENABLED},
-            {&mcHrtbeatTask_attributes, MC_HRTBEAT_TASK_ENABLED},
-            {&acuHrtbeatTask_attributes, ACU_HRTBEAT_TASK_ENABLED},
-            {&brakeProcTask_attributes, BRAKE_PROC_TASK_ENABLED},
-            {&appsProcTask_attributes, APPS_PROC_TASK_ENABLED}
-    };
-
-    *count = sizeof(taskInfos) / sizeof(TaskInfo);
-    return taskInfos;
-}
-
-TaskBit_t getTaskBit(const void *taskHandle) {
-    size_t taskCount;
-    TaskInfo* taskInfos = getTaskInfos(&taskCount);
-    for (TaskBit_t bit = 0; bit < taskCount; bit++) {
-        if (taskHandle == xTaskGetHandle(taskInfos[bit].task_attributes->name)) {
-            return bit;
-        }
-    }
-    return NUM_TASKS;
-}
-
-void kickWatchdogBit(osThreadId_t taskHandle) {
-    TaskBit_t bitPosition = getTaskBit(taskHandle);
-    xEventGroupSetBits(iwdgEventGroupHandle, (1 << bitPosition));
-}
-
 /*
  * startFromWD
  *
@@ -113,20 +78,69 @@ bool startFromIWDG() {
     return startFromWD;
 }
 
-bool areAllActiveTasksReady() {
-    EventBits_t bits = xEventGroupGetBits(iwdgEventGroupHandle);;
-    bool allTasksReady = true;
+TaskInfo* getTaskInfos(size_t* count) {
+    static TaskInfo taskInfos[] = {
+            {&defaultTask_attributes, DEFAULT_TASK_ENABLED},
+            {&dashLedTask_attributes, DASH_LED_TASK_ENABLED},
+            {&watchDogTask_attributes, WATCH_DOG_TASK_ENABLED},
+            {&canTxTask_attributes, CAN_TX_TASK_ENABLED},
+            {&canRxTask_attributes, CAN_RX_TASK_ENABLED},
+            {&canRxTask_attributes, BT_DUMP_TASK_ENABLED},
+            {&vcuStateTask_attributes, VCU_STATE_TASK_ENABLED},
+            {&mcHrtbeatTask_attributes, MC_HRTBEAT_TASK_ENABLED},
+            {&acuHrtbeatTask_attributes, ACU_HRTBEAT_TASK_ENABLED},
+            {&brakeProcTask_attributes, BRAKE_PROC_TASK_ENABLED},
+            {&appsProcTask_attributes, APPS_PROC_TASK_ENABLED}
+    };
+
+    *count = sizeof(taskInfos) / sizeof(TaskInfo);
+    return taskInfos;
+}
+
+TaskBit_t getTaskBit(const void *taskHandle) {
     size_t taskCount;
     TaskInfo* taskInfos = getTaskInfos(&taskCount);
-    for (int i = 0; i < taskCount; i++) {                                   // Iterate over the taskInfos[] array
-        if (taskInfos[i].isTaskActive == 1) {                               // Only check the bit of the task if its TASK_ENABLED value is 1
-            if ((bits & (1 << i)) == 0) {                                   // Check if the corresponding bit for the current task is set in iwdgEventGroup
-                allTasksReady = false;                                      // If the bit for the current task is not set, update allTasksReady and break the loop
-            }
+    for (TaskBit_t taskBit = 0; taskBit < taskCount; taskBit++) {
+        if (taskHandle == xTaskGetHandle(taskInfos[taskBit].task_attributes->name)) {
+            return taskBit;
         }
     }
-    xEventGroupClearBits(iwdgEventGroupHandle, 0xFFFFFFFF);                 // Clear all bits in iwdgEventGroup
-    return allTasksReady;
+    return NUM_TASKS;
+}
+
+void kickWatchdogBit(osThreadId_t taskHandle) {
+    TaskBit_t bitPosition = getTaskBit(taskHandle);
+    xEventGroupSetBits(iwdgEventGroupHandle, (1 << bitPosition));
+}
+
+bool isTaskActive(TaskBit_t taskBit, TaskInfo *taskInfos, size_t taskCount) {
+    if (taskBit < taskCount) {
+        return taskInfos[taskBit].isTaskActive == 1;
+    }
+
+    return false;
+}
+
+bool isTaskReady(TaskBit_t bitPosition, EventBits_t taskBits) {
+    return (taskBits & (1 << bitPosition)) != 0;
+}
+
+bool areAllActiveTasksReady() {
+    size_t taskCount;
+    TaskBit_t currTaskBit;
+    osThreadId_t currTask;
+    TaskInfo* taskInfos = getTaskInfos(&taskCount);
+    EventBits_t taskBits = xEventGroupGetBits(iwdgEventGroupHandle);
+
+    for (int taskBit = 0; taskBit < taskCount; taskBit++) {
+        currTask = xTaskGetHandle(taskInfos[taskBit].task_attributes->name);
+        currTaskBit = getTaskBit(currTask);
+        if (isTaskActive(currTaskBit, taskInfos, taskCount) && !isTaskReady(currTaskBit, taskBits)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void StartWatchDogTask(void *argument) {
@@ -135,6 +149,7 @@ void StartWatchDogTask(void *argument) {
         osThreadTerminate(osThreadGetId());
     }
 
+    MX_IWDG_Init();
     bool allActiveTasksReady;
 
     for(;;) {
@@ -142,6 +157,7 @@ void StartWatchDogTask(void *argument) {
         allActiveTasksReady = areAllActiveTasksReady();                               // Check if all active tasks have set their bits in iwdgEventGroup
         if (allActiveTasksReady) {                                                    // If all tasks have set their bits before IWDG_RELOAD_PERIOD, refresh the watchdog timer
             HAL_IWDG_Refresh(&hiwdg);
+            xEventGroupClearBits(iwdgEventGroupHandle, 0xFFFFFFFF);
         }
 
         osDelay(IWDG_RELOAD_PERIOD);                                       // Delay for IWDG_RELOAD_PERIOD

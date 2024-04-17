@@ -78,7 +78,7 @@ long map(long x, long in_min, long in_max, long out_min, long out_max) {
 void StartAppsProcessTask(void *argument) {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        return;
+        osThreadTerminate(osThreadGetId());
     }
 
 	int16_t mc_apps_val;
@@ -215,7 +215,7 @@ bool twoFootRulePassed(long appsVal, pedal_state_t * pedalState) {
 void StartBrakeProcessTask(void *argument) {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        return;
+        osThreadTerminate(osThreadGetId());
     }
 
 	uint16_t brake1 = 0;

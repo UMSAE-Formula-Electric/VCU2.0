@@ -132,7 +132,7 @@ bool areAllActiveTasksReady() {
 void StartWatchDogTask(void *argument) {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        return;
+        osThreadTerminate(osThreadGetId());
     }
 
     bool allActiveTasksReady;

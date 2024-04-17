@@ -228,7 +228,7 @@ void StartCanRxTask(void *argument)
 {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        return;
+        osThreadTerminate(osThreadGetId());
     }
 
     char canMsg[50];
@@ -305,7 +305,7 @@ void StartCanRxTask(void *argument)
 void StartCanTxTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        return;
+        osThreadTerminate(osThreadGetId());
     }
 
     char canMsg[50];

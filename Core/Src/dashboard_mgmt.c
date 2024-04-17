@@ -57,7 +57,7 @@ bool led_mgmt_check_error(dash_led_state_t state){
 void StartDashboardLedTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        return;
+        osThreadTerminate(osThreadGetId());
     }
 
 	dash_led_state_t prev_state = DASH_NO_ERROR;

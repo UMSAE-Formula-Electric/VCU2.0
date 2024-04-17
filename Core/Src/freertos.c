@@ -235,7 +235,7 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN StartDefaultTask */
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        return;
+        osThreadTerminate(osThreadGetId());
     }
 
   /* Infinite loop */

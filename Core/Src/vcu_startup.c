@@ -67,7 +67,7 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 void StartVcuStateTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        return;
+        osThreadTerminate(osThreadGetId());
     }
 
 	vTaskDelay(pdMS_TO_TICKS(500)); //allow mc to start before harassing it

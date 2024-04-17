@@ -47,7 +47,7 @@ void heartbeat_master_task_MC(void * pvParameters);
 void StartAcuHeartbeatTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        return;
+        osThreadTerminate(osThreadGetId());
     }
 
 	BaseType_t retRTOS;
@@ -147,7 +147,7 @@ void StartAcuHeartbeatTask(void *argument){
 void StartMcHeartbeatTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        return;
+        osThreadTerminate(osThreadGetId());
     }
 
   BaseType_t retRTOS;

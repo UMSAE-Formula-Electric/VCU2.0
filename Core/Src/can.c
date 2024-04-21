@@ -297,8 +297,6 @@ void StartCanRxTask(void *argument)
                 }
             }
         }
-
-        osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
     }
 }
 
@@ -329,8 +327,6 @@ void StartCanTxTask(void *argument){
         else {
             logMessage("VCU sent a message to the CAN Bus.\r\n", true);
         }
-
-        osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
     }
 }
 /* USER CODE END 1 */

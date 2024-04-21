@@ -62,13 +62,6 @@ typedef enum {
     NUM_TASKS
 } TaskBit_t;
 
-enum WD_CRITICALTASK{
-    wd_APPS_CTask = 0,
-    wd_BRAKE_CTASK,
-    wd_STARTUP_CTask,
-    wd_NumCriticalTasks
-};
-
 bool startFromIWDG();
 extern osEventFlagsId_t iwdgEventGroupHandle;
 void kickWatchdogBit(osThreadId_t taskHandle);

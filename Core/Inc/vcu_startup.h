@@ -9,6 +9,9 @@
 extern const osThreadAttr_t vcuStateTask_attributes;
 void startup_Init();
 void go_idle();
+int checkHeartbeat();
+void goTSA();
+void goRTD();
 bool startup_Task_start();
 TaskHandle_t get_startup_task();
 

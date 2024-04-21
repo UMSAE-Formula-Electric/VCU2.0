@@ -84,64 +84,40 @@ void StartVcuStateTask(void *argument){
 		state = get_car_state();
 		switch(state){
 		case IDLE:
-			//ignore IPC messages
 			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
 			if(retRTOS == pdTRUE){
-				//received a message from ACB that wasn't expected
 				sprintf(strBuff, "Received ACB notification: %lu", ulNotifiedValue);
 				logMessage(strBuff,false);
 			}
 
 			//Go TSA procedure
-			if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK){  //check if safety loop is closed
-				led_mgmt_clear_error(DASH_SAFETY_LOOP_OPEN_VCU);
-				if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)){ //Check if TSA Button is pressed
+			if(read_saftey_loop()) {
+				if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)) {
 					dash_set_tsa_teal();
-					if(brakePressed() || DISABLE_BRAKE_CHECK){  //Check if Brake is pressed enough
-						if((get_acu_heartbeat_State() == HEARTBEAT_PRESENT && get_mc_heartbeat_State() == HEARTBEAT_PRESENT) || DISABLE_HEARTBEAT_CHECK){
-							set_car_state(TRACTIVE_SYSTEM_ACTIVE);
-							//tell acb to change state
-							set_ACB_State(TRACTIVE_SYSTEM_ACTIVE);
-							//Send disable mc inverter to remove mc lockout
-							DisableMC();
-							mc_enable_broadcast_msgs();
-
-							if(!DISABLE_ACU_ACK) {
-								//wait for tsa ack here
-								retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, TSA_ACK_TIMEOUT + MC_STARTUP_DELAY);
-								if(ulNotifiedValue != ACB_TSA_ACK){	//nack
-									go_idle();	//reset VCU state
-									if(ulNotifiedValue != GO_IDLE_REQ_FROM_ACB){
-										set_ACB_State(IDLE);	//reset ACU state
-									}
-									logMessage("ACB failed to ack TSA Request", true);
-									fail_pulse();
+					if(brakePressed() || DISABLE_BRAKE_CHECK) {
+						if(checkHeartbeat()) {
+							goTSA();
+							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, TSA_ACK_TIMEOUT + MC_STARTUP_DELAY);
+							if(ulNotifiedValue != ACB_TSA_ACK){
+								go_idle();
+								if(ulNotifiedValue != GO_IDLE_REQ_FROM_ACB){
+									set_ACB_State(IDLE);
 								}
-								else{
-									dash_set_tsa_green();
-									logMessage("Went TSA!", false);
-								}
-							} else{
-								dash_set_tsa_green();
+								logMessage("ACB failed to ack TSA Request", true);
+								fail_pulse();
+							} else {
 								logMessage("Went TSA!", false);
+								dash_set_tsa_green();
 							}
 						}
-						else{
-							//No heartbeat
-							logMessage("Failed to go TSA due to lack of heartbeat", false);
-							fail_pulse();
-						}
-					}
-					else{
-						//No brake pressure
-						fail_pulse();
 					}
 				}
 			}
-			else{
-				//safety loop is open
-				led_mgmt_set_error(DASH_SAFETY_LOOP_OPEN_VCU);
+
+			if(get_car_state() != IDLE) {
+				fail_pulse();
 			}
+
 			break;
 		case TRACTIVE_SYSTEM_ACTIVE:
 			//Go RTD procedure
@@ -247,6 +223,17 @@ void StartVcuStateTask(void *argument){
 //	GPIO_WriteBit(VCU_SHUTDOWN_CTRL_PORT, VCU_SHUTDOWN_CTRL_PIN , state);
 //}
 
+int checkHeartbeat() {
+	if(DISABLE_BRAKE_CHECK) return true;
+
+	if(get_acu_heartbeat_State() == HEARTBEAT_PRESENT){
+		if(get_mc_heartbeat_State() == HEARTBEAT_PRESENT) {
+			return true;
+		}
+	}
+	return false;
+}
+
 /*
  * read_saftey_loop
  *
@@ -256,12 +243,19 @@ void StartVcuStateTask(void *argument){
  * otherwise returns false
  */
 bool read_saftey_loop(){
+	int state;
+
+
 	if(HAL_GPIO_ReadPin(SAFETY_LOOP_GPIO_Port, SAFETY_LOOP_Pin) == GPIO_PIN_SET){
-		return true;
+		led_mgmt_clear_error(DASH_SAFETY_LOOP_OPEN_VCU);
+		state = true;
 	}
 	else{
-		return false;
+		led_mgmt_set_error(DASH_SAFETY_LOOP_OPEN_VCU);
+		state = false;
 	}
+
+	return (state || DISABLE_SAFETY_LOOP_CHECK);
 }
 
 /**
@@ -283,6 +277,17 @@ void go_idle(){
 	mc_set_inverter_enable(0);
 	set_car_state(IDLE);
 	set_ACB_State(IDLE);
+}
+
+void goTSA() {
+	set_car_state(TRACTIVE_SYSTEM_ACTIVE);
+	set_ACB_State(TRACTIVE_SYSTEM_ACTIVE);
+	DisableMC();
+	mc_enable_broadcast_msgs();
+}
+
+void goRTD() {
+
 }
 
 /*

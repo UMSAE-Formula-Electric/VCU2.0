@@ -90,12 +90,24 @@ void mc_set_inverter_enable(uint8_t setEnable);
 void mc_set_inverter_discharge(uint8_t setEnable);
 uint8_t isMCBusCharged();
 
-void mc_process_fast_can(uint8_t * data);
+
 void mc_process_temp1_can(uint8_t * data);
+void mc_process_temp2_can(uint8_t * data); // This currently does nothing and is only made for the fact that the CAN pdf states that this should exist
 void mc_process_temp3_can(uint8_t * data);
-void mc_process_volt_can(uint8_t * data);
+void mc_process_analog_inputs_voltage_can(uint8_t * data);
+void mc_process_digital_input_status_can(uint8_t * data);
 void mc_process_motor_can(uint8_t * data);
 void mc_process_current_can(uint8_t * data);
+void mc_process_volt_can(uint8_t * data);
+void mc_process_fault_can(uint8_t * data);
+void mc_process_internal_volt_can(uint8_t * data);
+void mc_process_internal_states_can(uint8_t * data);
+void mc_process_torque_timer_info_can(uint8_t * data);
+void mc_process_modulation_index_can(uint8_t * data);
+void mc_process_firmware_info_can(uint8_t * data);
+void mc_process_diagnostic_data_can(uint8_t * data);
+void mc_process_fast_can(uint8_t * data);
+void mc_process_torque_capability(uint8_t * data);
 
 void sendTorque(int16_t);
 

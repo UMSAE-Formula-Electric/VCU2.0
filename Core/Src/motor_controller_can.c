@@ -237,8 +237,95 @@ void mc_process_temp1_can(uint8_t * data) {
 	mc_igbtC_temp = (data[5] << 8) | data[4];
 }
 
+void mc_process_temp2_can(uint8_t * data){
+    //TODO: Process temp2 data
+}
+
 void mc_process_temp3_can(uint8_t * data) {
 	mc_motor_temp = (data[5] << 8) | data[4];
+}
+
+void mc_process_analog_inputs_voltage_can(uint8_t * data){
+    //TODO: MC_FUNCTION analog input voltage
+}
+
+void mc_process_digital_input_status_can(uint8_t * data){
+    //TODO: MC_FUNCTION digital input status
+}
+
+void mc_process_faults_can(uint8_t * inData) {
+    if((inData[7] & 64) || 1) {
+        //resolver fault
+        DisableMC();
+        sendTorque(0);
+        uint8_t len = 8;
+        uint8_t data[len];
+        uint8_t dest = 0xC1;
+
+        uint8_t ret = 0;
+
+        data[0] = 20;
+        data[1] = 0;
+        data[2] = 1;
+        data[3] = 0;
+        data[4] = 0;
+        data[5] = 0;
+        data[6] = 0;
+        data[7] = 0;
+
+        ret = sendCan(CAN1, data, len, dest, CAN_NO_RTR, CAN_NO_EXT);
+        if (ret != 0) {
+            //can error, log it
+            log_and_handle_error(ERROR_CAN_ONE_TX_FAIL, NULL);
+            logMessage("MC: Failed to send MC command CAN packet\n", false); //should be critical??
+        }
+        sendTorque(0);
+        vTaskDelay(pdMS_TO_TICKS(100));
+        EnableMC();
+        //sendTorque(0);
+        return;
+
+    }
+}
+
+void mc_process_internal_volt_can(uint8_t * data){
+    //TODO: MC_FUNCTION internal voltage
+}
+
+void mc_process_internal_states_can(uint8_t * data){
+    //TODO: MC_FUNCTION internal states
+}
+
+void mc_process_torque_timer_info_can(uint8_t * data){
+    //TODO: MC_FUNCTION torque info
+}
+
+void mc_process_modulation_index_can(uint8_t * data){
+    //TODO: MC_FUNCTION modulation index
+}
+
+void mc_process_firmware_info_can(uint8_t * data){
+    //TODO: MC_FUNCTION firmware info
+}
+
+void mc_process_diagnostic_data_can(uint8_t * data){
+    //TODO: MC_FUNCTION diagnostic data ¯\_(ツ)_/¯
+}
+
+void mc_process_fast_can(uint8_t * data) {
+#ifdef VCU
+    update_heartbeat();
+#endif
+    mc_torque_command = (data[1] << 8) | data[0];
+    mc_torque_feedback = (data[3] << 8) | data[2];
+    mc_rpm = (data[5] << 8) | data[4];
+    bus_voltage = (data[7] << 8) | data[6];
+    logSensor((float) bus_voltage / 10, MC_BUS_VOLTAGE_LOG);
+    logSensor((float) (mc_rpm * 117.97) / 5500, MC_ACUAL_SPEED_REG_LOG);
+}
+
+void mc_process_torque_capability_can(uint8_t * data){
+    //TODO: MC_FUNCTION process torque capability
 }
 
 void fixFaults() {
@@ -265,52 +352,9 @@ void fixFaults() {
 	}
 }
 
-void mc_process_faults(uint8_t * inData) {
-	if((inData[7] & 64) || 1) {
-		//resolver fault
-		DisableMC();
-		sendTorque(0);
-		uint8_t len = 8;
-		uint8_t data[len];
-		uint8_t dest = 0xC1;
 
-		uint8_t ret = 0;
 
-		data[0] = 20;
-		data[1] = 0;
-		data[2] = 1;
-		data[3] = 0;
-		data[4] = 0;
-		data[5] = 0;
-		data[6] = 0;
-		data[7] = 0;
 
-		ret = sendCan(CAN1, data, len, dest, CAN_NO_RTR, CAN_NO_EXT);
-		if (ret != 0) {
-			//can error, log it
-			log_and_handle_error(ERROR_CAN_ONE_TX_FAIL, NULL);
-			logMessage("MC: Failed to send MC command CAN packet\n", false); //should be critical??
-		}
-		sendTorque(0);
-		vTaskDelay(pdMS_TO_TICKS(100));
-		EnableMC();
-		//sendTorque(0);
-		return;
-
-	}
-}
-
-void mc_process_fast_can(uint8_t * data) {
-#ifdef VCU
-	update_heartbeat();
-#endif
-	mc_torque_command = (data[1] << 8) | data[0];
-	mc_torque_feedback = (data[3] << 8) | data[2];
-	mc_rpm = (data[5] << 8) | data[4];
-	bus_voltage = (data[7] << 8) | data[6];
-	logSensor((float) bus_voltage / 10, MC_BUS_VOLTAGE_LOG);
-	logSensor((float) (mc_rpm * 117.97) / 5500, MC_ACUAL_SPEED_REG_LOG);
-}
 
 #ifdef ACB
 

@@ -24,16 +24,7 @@
 #include "FreeRTOS.h"
 #include <stdbool.h>
 #include "event_groups.h"
-#include "error_handler.h"
-#include "logger.h"
-
-static EventGroupHandle_t wdEvGroup = NULL;	//watchdog event group
-
-void iwdgTask(void * pvParameters);
-static void initWdEventGroup();
-void kickIWDG();
-static uint8_t initIWDGHardware();
-void wdErrorHandler();
+#include "freertos_task_handles.h"
 
 /* USER CODE END 0 */
 
@@ -52,56 +43,23 @@ void MX_IWDG_Init(void)
   /* USER CODE END IWDG_Init 1 */
   hiwdg.Instance = IWDG;
   hiwdg.Init.Prescaler = IWDG_PRESCALER_256;
-  hiwdg.Init.Reload = 500;
+  hiwdg.Init.Reload = IWDG_RELOAD_PERIOD;
   if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
   {
     Error_Handler();
   }
   /* USER CODE BEGIN IWDG_Init 2 */
 
-//  initWdEventGroup();
-
   /* USER CODE END IWDG_Init 2 */
 
 }
 
 /* USER CODE BEGIN 1 */
-/*
- * initWdEventGroup
+/**
+ * @brief Checks if the system has resumed from IWDG reset
  *
- * @brief this function sets up the watchdog event group. This event group is used for monitoring critical tasks
- */
-static void initWdEventGroup(){
-    configASSERT(wdEvGroup == NULL);
-    wdEvGroup = xEventGroupCreate();
-
-    /* Was the event group created successfully? */
-    if( wdEvGroup == NULL )
-    {
-        /* The event group was not created because there was insufficient FreeRTOS heap available. */
-        log_and_handle_error(IWDG_ERROR, wdErrorHandler);
-    }
-}
-
-/*
- * wd_criticalTaskKick
- *
- * @brief this function is used for allowing critical tasks to notify the watchdog that they have not hanged yet
- *
- * @WD_CRITICALTASK the critical task notifying the watchdog that it has not hung yet
- *
- */
-void wd_criticalTaskKick(enum WD_CRITICALTASK task){
-    configASSERT(wdEvGroup != NULL);
-    xEventGroupSetBits(wdEvGroup, 1<<task);
-}
-
-/*
- * startFromWD
- *
- * @return returns true if the system started due to a watchdog reset otherwise false
- *
- * @brief used for checking on reset if the system is starting from a watchdog reset
+ * @return true if the system has resumed from IWDG reset
+ * @return false if the system has not resumed from IWDG reset
  */
 bool startFromIWDG() {
 
@@ -119,33 +77,134 @@ bool startFromIWDG() {
     return startFromWD;
 }
 
-/*
- * wdErrorHandler
+/**
+ * @brief Gets a static list of all the FreeRTOS tasks' attributes and their activity status
  *
- *@brief this function tries to fix the watchdog error handler
+ * @param count The number of tasks
+ * @return TaskInfo* The array of the tasks' information
  */
-void wdErrorHandler() {
-    logMessage("Failed to create IWDG task", true);
+TaskInfo* getTaskInfos(size_t* count) {
+    static TaskInfo taskInfos[] = {
+            {&defaultTask_attributes, DEFAULT_TASK_ENABLED},
+            {&dashLedTask_attributes, DASH_LED_TASK_ENABLED},
+            {&watchDogTask_attributes, WATCH_DOG_TASK_ENABLED},
+            {&canTxTask_attributes, CAN_TX_TASK_ENABLED},
+            {&canRxTask_attributes, CAN_RX_TASK_ENABLED},
+            {&canRxTask_attributes, BT_DUMP_TASK_ENABLED},
+            {&vcuStateTask_attributes, VCU_STATE_TASK_ENABLED},
+            {&mcHrtbeatTask_attributes, MC_HRTBEAT_TASK_ENABLED},
+            {&acuHrtbeatTask_attributes, ACU_HRTBEAT_TASK_ENABLED},
+            {&brakeProcTask_attributes, BRAKE_PROC_TASK_ENABLED},
+            {&appsProcTask_attributes, APPS_PROC_TASK_ENABLED}
+    };
+
+    *count = sizeof(taskInfos) / sizeof(TaskInfo);
+    return taskInfos;
 }
 
-/*
- * wdTask
+/**
+ * @brief Gets the bit position of a task in the iwdgEventGroup bits
  *
- * @brief RTOS task for periodically kicking the watchdog
+ * @param taskHandle The handle of the task
+ * @return TaskBit_t The bit position of the task
  */
-//TODO Fix WatchDog
+TaskBit_t getTaskBit(const void *taskHandle) {
+    size_t taskCount;
+    TaskInfo* taskInfos = getTaskInfos(&taskCount);
+    for (TaskBit_t taskBit = 0; taskBit < taskCount; taskBit++) {
+        if (taskHandle == xTaskGetHandle(taskInfos[taskBit].task_attributes->name)) {
+            return taskBit;
+        }
+    }
+    return NUM_TASKS;
+}
+
+/**
+ * @brief Sets the bit of a task in the iwdgEventGroup bits
+ *
+ * @param taskHandle The handle of the task
+ */
+void kickWatchdogBit(osThreadId_t taskHandle) {
+    TaskBit_t bitPosition = getTaskBit(taskHandle);
+    xEventGroupSetBits(iwdgEventGroupHandle, (1 << bitPosition));
+}
+
+/**
+ * @brief Checks if a task is active
+ *
+ * @param taskBit The bit position of the task in the taskInfos array
+ * @param taskInfos The array of the tasks' information
+ * @param taskCount The number of tasks
+ * @return true if the task is active
+ * @return false if the task is not active
+ */
+bool isTaskActive(TaskBit_t taskBit, TaskInfo *taskInfos, size_t taskCount) {
+    if (taskBit < taskCount) {
+        return taskInfos[taskBit].isTaskActive == 1;
+    }
+
+    return false;
+}
+
+/**
+ * @brief Checks if a task is ready
+ *
+ * @param bitPosition The bit position of the task in the iwdgEventGroup bits
+ * @param taskBits The bits of the iwdgEventGroup
+ * @return true if the task is ready
+ * @return false if the task is not ready
+ */
+bool isTaskReady(TaskBit_t bitPosition, EventBits_t taskBits) {
+    return (taskBits & (1 << bitPosition)) != 0;
+}
+
+/**
+ * @brief Checks if all active tasks have set their bits in iwdgEventGroup
+ *
+ * @return true if all active tasks have set their bits in iwdgEventGroup
+ * @return false if not all active tasks have set their bits in iwdgEventGroup
+ */
+bool areAllActiveTasksReady() {
+    size_t taskCount;
+    TaskBit_t currTaskBit;
+    osThreadId_t currTask;
+    TaskInfo* taskInfos = getTaskInfos(&taskCount);
+    EventBits_t taskBits = xEventGroupGetBits(iwdgEventGroupHandle);
+
+    for (int taskBit = 0; taskBit < taskCount; taskBit++) {
+        currTask = xTaskGetHandle(taskInfos[taskBit].task_attributes->name);
+        currTaskBit = getTaskBit(currTask);
+        if (isTaskActive(currTaskBit, taskInfos, taskCount) && !isTaskReady(currTaskBit, taskBits)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * @brief The watchdog FreeRTOS task
+ *
+ * @param argument the TASK_ENABLED value of the task used in freertos.c
+ */
 void StartWatchDogTask(void *argument) {
-    while (1) {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
 
-        //kick the watchdog
-        HAL_IWDG_Refresh(&hiwdg);
+    MX_IWDG_Init();
+    bool allActiveTasksReady;
 
-        //testIWDGReset(); //comment this out when not testing
+    for(;;) {
+        kickWatchdogBit(osThreadGetId());
+        allActiveTasksReady = areAllActiveTasksReady();                               // Check if all active tasks have set their bits in iwdgEventGroup
+        if (allActiveTasksReady) {                                                    // If all tasks have set their bits before IWDG_RELOAD_PERIOD, refresh the watchdog timer
+            HAL_IWDG_Refresh(&hiwdg);
+            xEventGroupClearBits(iwdgEventGroupHandle, IWDG_EVENT_ALL_ALLOWED_BITS);
+        }
 
-        //wait a bit then wait for syncing
-        HAL_Delay(WDPERIOD);
-        //((1<<wd_NumCriticalTasks)-1) this will give us all the bits for all the critical tasks
-        xEventGroupWaitBits(wdEvGroup, ((1<<wd_NumCriticalTasks)-1), pdTRUE, pdTRUE, 500);//wait for all the critical tasks to kick
+        osDelay(IWDG_RELOAD_PERIOD / 2);                                       // Delay for IWDG_RELOAD_PERIOD
     }
 }
 

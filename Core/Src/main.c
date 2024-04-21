@@ -22,7 +22,6 @@
 #include "adc.h"
 #include "can.h"
 #include "dma.h"
-#include "iwdg.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -73,6 +72,7 @@ void MX_FREERTOS_Init(void);
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -99,7 +99,6 @@ int main(void)
   MX_CAN1_Init();
   MX_USART2_Init();
   MX_TIM12_Init();
-  MX_IWDG_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
     dash_set_all_leds();
@@ -121,13 +120,14 @@ int main(void)
   /* Init scheduler */
   osKernelInitialize();
 
-  /* Call init function for freertos objects (in freertos.c) */
+  /* Call init function for freertos objects (in cmsis_os2.c) */
   MX_FREERTOS_Init();
 
   /* Start scheduler */
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)

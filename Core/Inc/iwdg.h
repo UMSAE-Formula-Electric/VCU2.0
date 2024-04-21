@@ -30,31 +30,41 @@ extern "C" {
 
 /* USER CODE BEGIN Includes */
 #include <stdbool.h>
+#include "cmsis_os2.h"
 /* USER CODE END Includes */
 
 extern IWDG_HandleTypeDef hiwdg;
 
 /* USER CODE BEGIN Private defines */
-#define WDPERIOD 50
-#define IWDGPERIOD 500
+
 /* USER CODE END Private defines */
 
 void MX_IWDG_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+typedef struct {
+    const osThreadAttr_t* task_attributes;
+    uint8_t isTaskActive;
+} TaskInfo;
 
-enum WD_CRITICALTASK{
-    wd_APPS_CTask = 0,
-    wd_BRAKE_CTASK,
-    wd_STARTUP_CTask,
-    wd_NumCriticalTasks
-};
+typedef enum {
+    DEFAULT_TASK,
+    DASH_LED_TASK,
+    WATCH_DOG_TASK,
+    CAN_TX_TASK,
+    CAN_RX_TASK,
+    BT_DUMP_TASK,
+    VCU_STATE_TASK,
+    MC_HRTBEAT_TASK,
+    ACU_HRTBEAT_TASK,
+    BRAKE_PROC_TASK,
+    APPS_PROC_TASK,
+    NUM_TASKS
+} TaskBit_t;
 
-uint8_t initIWDG();
-void testIWDGReset();
-void testIWDGResetting();
 bool startFromIWDG();
-void wd_criticalTaskKick(enum WD_CRITICALTASK task);
+extern osEventFlagsId_t iwdgEventGroupHandle;
+void kickWatchdogBit(osThreadId_t taskHandle);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

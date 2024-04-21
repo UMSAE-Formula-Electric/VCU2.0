@@ -65,6 +65,11 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
  * @retval never return from a freeRTOS task, kills task if infinite task ends
  */
 void StartVcuStateTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
 	vTaskDelay(pdMS_TO_TICKS(500)); //allow mc to start before harassing it
 
 	//Keep user led on to simulate LV key is on
@@ -73,9 +78,7 @@ void StartVcuStateTask(void *argument){
 	char strBuff[40]; //buffer for making 'nice' logs
 	enum CAR_STATE state;
 	for(;;){
-
-		//kick watchdog
-		//wd_criticalTaskKick(wd_STARTUP_CTask);
+        kickWatchdogBit(osThreadGetId());
 
 		state = get_car_state();
 		switch(state){
@@ -225,7 +228,7 @@ void StartVcuStateTask(void *argument){
 		default:
 			break;
 		}
-		vTaskDelay(pdMS_TO_TICKS(STARTUP_TASK_DELAY));
+		vTaskDelay(pdMS_TO_TICKS(STARTUP_TASK_DELAY));                  //TODO Revise task delay
 	}
 	logMessage("Error exiting from startup task", true);
 	//set_saftey_loop_state(LOOP_OPEN);

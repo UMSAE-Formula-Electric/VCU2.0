@@ -76,6 +76,11 @@ long map(long x, long in_min, long in_max, long out_min, long out_max) {
  * This is the main task for updating and handling the throttle. This task checks for impossibility of the apps and if the apps is present
  */
 void StartAppsProcessTask(void *argument) {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
 	int16_t mc_apps_val;
 
 	uint16_t apps1 = 0;
@@ -100,12 +105,12 @@ void StartAppsProcessTask(void *argument) {
 	apps.high_zero = apps.high_min;
 
 	for (;;) {
+        kickWatchdogBit(osThreadGetId());
+
 		//low pass filters to increase noise rejection
 		apps1 = 0.5 * ADC_get_val(ADC_APPS1) + 0.5 * apps1;
 		apps2 = 0.5 * ADC_get_val(ADC_APPS2) + 0.5 * apps2;
 		brake1 = ADC_get_val(ADC_BPS);
-
-		wd_criticalTaskKick(wd_APPS_CTask);
 
 		if (!detectPedal(apps1, apps2, &apps)) {
 			led_mgmt_set_error(DASH_NO_THROTTLE);
@@ -156,10 +161,9 @@ void StartAppsProcessTask(void *argument) {
 					logIndicator(true, THROTTLE_ERROR); //pedal sensor doesnt agree
 				}
 			}
-			vTaskDelay(pdMS_TO_TICKS(1000/APPS_REQ_FREQ));
+			vTaskDelay(pdMS_TO_TICKS(1000/APPS_REQ_FREQ));                      //TODO Revise task Delay
 		}
 	}
-	vTaskDelete(NULL);
 }
 
 
@@ -209,6 +213,10 @@ bool twoFootRulePassed(long appsVal, pedal_state_t * pedalState) {
  * This task is used for detecting the plausibility of the brake sensor
  */
 void StartBrakeProcessTask(void *argument) {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
 
 	uint16_t brake1 = 0;
 	uint16_t brake2 = 0;
@@ -231,6 +239,8 @@ void StartBrakeProcessTask(void *argument) {
 
 	//task infinite loop
 	for (;;) {
+        kickWatchdogBit(osThreadGetId());
+
 		//log brake sensors
 		logSensor(ADC_get_val(ADC_BPS), BRAKE_1);
 //		logSensor(ADC_get_val(ADC_BRK2), BRAKE_2);
@@ -242,10 +252,8 @@ void StartBrakeProcessTask(void *argument) {
 //		wd_criticalTaskKick(wd_BRAKE_CTASK);
         HAL_IWDG_Refresh(&hiwdg);
 
-		vTaskDelay(pdMS_TO_TICKS(1000/BRAKE_REQ_FREQ));
-
+		vTaskDelay(pdMS_TO_TICKS(1000/BRAKE_REQ_FREQ));             //TODO Revise task delay
 	}
-	vTaskDelete(NULL);
 }
 
 /*

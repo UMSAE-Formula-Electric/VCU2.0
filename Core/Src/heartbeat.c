@@ -4,6 +4,8 @@
 #include "task.h"
 #include "logger.h"
 #include "ACB_comms_handler.h"
+#include "freertos_task_handles.h"
+#include "iwdg.h"
 
 #define HEARTBEAT_TASK_DELAY_MS     100
 #define HEARTBEAT_MAX_MISSES		10
@@ -43,6 +45,10 @@ void heartbeat_master_task_MC(void * pvParameters);
  * heartbeat messages to the ACB
  */
 void StartAcuHeartbeatTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
 
 	BaseType_t retRTOS;
 	uint32_t ulNotifiedValue = 0;
@@ -50,6 +56,8 @@ void StartAcuHeartbeatTask(void *argument){
 	uint8_t misses = 0; //indicates how many cycles we have gone without detecting ACB
 
 	for(;;){
+        kickWatchdogBit(osThreadGetId());
+
 		//send heartbeat message to ACB
 		send_ACB_mesg(CAN_HEARTBEAT_REQUEST);
 
@@ -126,6 +134,7 @@ void StartAcuHeartbeatTask(void *argument){
 		  logIndicator(true, NO_ACB);
 		}
 
+        osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
 	}
 }
 
@@ -136,6 +145,10 @@ void StartAcuHeartbeatTask(void *argument){
  * heartbeat messages to the Motor Controller
  */
 void StartMcHeartbeatTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
 
   BaseType_t retRTOS;
   uint32_t ulNotifiedValue = 0;
@@ -143,6 +156,7 @@ void StartMcHeartbeatTask(void *argument){
   uint8_t misses = 0; //indicates how many cycles we have gone without detecting ACB
 
   for(;;){
+      kickWatchdogBit(osThreadGetId());
 
     //Check if MC has sent a message
     retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, HEARTBEAT_TASK_DELAY_MS);
@@ -184,6 +198,8 @@ void StartMcHeartbeatTask(void *argument){
 
 
     }
+
+      osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
   }
 }
 

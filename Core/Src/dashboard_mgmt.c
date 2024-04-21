@@ -15,6 +15,7 @@
 #include "vcu_startup.h"
 #include "global_board_config.h"
 #include "motor_controller_can.h"
+#include "iwdg.h"
 
 static bool dash_state_flags[DASH_NUM_LED_STATES] = {false};
 
@@ -54,10 +55,17 @@ bool led_mgmt_check_error(dash_led_state_t state){
  * are associated with different faults
  */
 void StartDashboardLedTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
 	dash_led_state_t prev_state = DASH_NO_ERROR;
 	dash_led_state_t cur_state = DASH_NO_ERROR;
 
 	for(;;){
+        kickWatchdogBit(osThreadGetId());
+
 		cur_state = DASH_NO_ERROR;
 		//determine highest priority error
 		for(uint8_t i = 0; i < DASH_NUM_LED_STATES; i++){
@@ -116,6 +124,6 @@ void StartDashboardLedTask(void *argument){
 //			logIndicator(false, GENERAL_ERROR);
 //		}
 
-		HAL_Delay(250);
-	}
+        osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
+    }
 }

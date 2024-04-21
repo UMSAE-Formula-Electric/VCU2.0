@@ -79,7 +79,6 @@ void StartVcuStateTask(void *argument){
 
 	for(;;){
         kickWatchdogBit(osThreadGetId());
-
 		state = get_car_state();
 		switch(state){
 		case IDLE:
@@ -104,9 +103,6 @@ void StartVcuStateTask(void *argument){
 							if(ulNotifiedValue != ACB_TSA_ACK){
 								//ACU did not ACK
 								go_idle();
-								if(ulNotifiedValue != GO_IDLE_REQ_FROM_ACB){
-									set_ACB_State(IDLE);
-								}
 								logMessage("ACB failed to ack TSA Request", true);
 								fail_pulse();
 							} else {

@@ -54,14 +54,6 @@ extern CAN_HandleTypeDef hcan1;
 #define CAN_MC_ACTIVE_MESSAGES  0x0C1
 #define CAN_MC_RESPONSE_MSG     0x0C2
 
-#define CAN_MC_RX_HIGHSPEED		0x0B0
-#define CAN_MC_RX_TEMP1_ID		0x0A0
-#define CAN_MC_RX_TEMP3_ID		0x0A2
-#define CAN_MC_RX_MOTOR_ID		0x0A5
-#define CAN_MC_RX_CURRENT_ID	0x0A6
-#define CAN_MC_RX_VOLT_ID		0x0A7
-#define CAN_MC_RX_FAULT_ID		0x0AB
-
 #define CAN_ACU_CAN_ID			0x69
 #define CAN_VCU_CAN_ID			0x88
 #define CAN_SCU_CAN_ID			0x89

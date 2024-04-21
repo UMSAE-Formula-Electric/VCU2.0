@@ -270,14 +270,6 @@ void StartCanRxTask(void *argument)
                     case CAN_SCU_CAN_ID:
                         messageReceivedFromControlUnit("SCU");
                         break;
-                    case 0xAB:
-                        //mc_process_faults(packetToProcess.Data);
-                        break;
-
-                    case 0xA6:
-                        mc_process_current_can(RxData);
-                        break;
-
 
                     case CAN_MC_RX_HIGHSPEED: //High speed message, 333Hz
                         mc_process_fast_can(RxData);
@@ -286,6 +278,62 @@ void StartCanRxTask(void *argument)
                         //Motor Controller Messages
                     case CAN_MC_RX_TEMP1_ID: //IGBT temp readings
                         mc_process_temp1_can(RxData);
+                        break;
+
+                    case CAN_MC_RX_TEMP2_ID:
+
+                        break;
+
+                    case CAN_MC_RX_ANALOG_INPUTS_VOLTAGE:
+
+                        break;
+
+                    case CAN_MC_RX_DIGITAL_INPUT_STATUS:
+
+                        break;
+
+                    case CAN_MC_RX_MOTOR_ID:
+
+                        break;
+
+                    case CAN_MC_RX_CURRENT_ID:
+                        mc_process_current_can(RxData);
+                        break;
+
+                    case CAN_MC_RX_VOLT_ID:
+
+                        break;
+
+                    case CAN_MC_RX_FAULT_ID:
+                        //mc_process_faults(packetToProcess.Data);
+                        break;
+
+                    case CAN_MC_RX_INTERNAL_VOLTAGES:
+
+                        break;
+
+                    case CAN_MC_RX_INTERNAL_STATES:
+
+                        break;
+
+                    case CAN_MC_RX_TORQUE_TIMER_INFO:
+
+                        break;
+
+                    case CAN_MC_RX_MODULATION_INDEX:
+
+                        break;
+
+                    case CAN_MC_RX_FIRMWARE_INFO:
+
+                        break;
+
+                    case CAN_MC_RX_DIAGNOSTIC_DATA:
+
+                        break;
+
+                    case CAN_MC_RX_TORQUE_CAPABILITY:
+
                         break;
 
                     case CAN_MC_RX_TEMP3_ID: //Motor temp reading

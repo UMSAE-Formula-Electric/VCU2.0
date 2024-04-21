@@ -333,7 +333,7 @@ void StartCanRxTask(void *argument)
                         break;
 
                     case CAN_MC_RX_TORQUE_CAPABILITY:
-                        mc_process_torque_capability(RxData);
+                        mc_process_torque_capability_can(RxData);
                         break;
 
                     case CAN_MC_RX_TEMP3_ID: //Motor temp reading

@@ -201,7 +201,7 @@ void StartWatchDogTask(void *argument) {
         allActiveTasksReady = areAllActiveTasksReady();                               // Check if all active tasks have set their bits in iwdgEventGroup
         if (allActiveTasksReady) {                                                    // If all tasks have set their bits before IWDG_RELOAD_PERIOD, refresh the watchdog timer
             HAL_IWDG_Refresh(&hiwdg);
-            xEventGroupClearBits(iwdgEventGroupHandle, 0xFFFFFFFF);
+            xEventGroupClearBits(iwdgEventGroupHandle, IWDG_EVENT_ALL_ALLOWED_BITS);
         }
 
         osDelay(IWDG_RELOAD_PERIOD);                                       // Delay for IWDG_RELOAD_PERIOD

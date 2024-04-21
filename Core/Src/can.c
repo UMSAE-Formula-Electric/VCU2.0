@@ -305,7 +305,7 @@ void StartCanRxTask(void *argument)
                         break;
 
                     case CAN_MC_RX_FAULT_ID:
-                        //mc_process_faults(packetToProcess.Data);
+                        mc_process_fault_can(RxData);
                         break;
 
                     case CAN_MC_RX_INTERNAL_VOLTAGES:

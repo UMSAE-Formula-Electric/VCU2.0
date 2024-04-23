@@ -1,5 +1,4 @@
 #include <dashboard_mgmt.h>
-#include "lv_battery_tap.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
@@ -69,20 +68,20 @@ void process_ACB_CAN_packets(void * pvParameters){
 
 void set_ACB_State(enum CAR_STATE new_state){
 	uint8_t data = (uint8_t) new_state;
-	sendCan(CAN1, &data, 1, CAN_VCU_SET_ACB_STATE_ID, CAN_NO_EXT, CAN_NO_EXT);
+	sendCan(&hcan1, &data, 1, CAN_VCU_SET_ACB_STATE_ID, CAN_NO_EXT, CAN_NO_EXT);
 	//wait for acknowledge?
 }
 
 void send_ACB_mesg(enum ACB_TO_CAN_MSG msg){
 	uint8_t data = (uint8_t)msg;
-	sendCan(CAN1, &data, 1, CAN_ACU_CAN_ID, CAN_NO_EXT, CAN_NO_EXT);
+	sendCan(&hcan1, &data, 1, CAN_ACU_CAN_ID, CAN_NO_EXT, CAN_NO_EXT);
 }
 
 void send_ACB_mesg_data(enum ACB_TO_CAN_MSG msg_id, uint8_t data_len, uint8_t * msg_data){
 	uint8_t data[8] = {0};
 	data[0] = msg_id;
 	memcpy(&data[1], msg_data, data_len);
-	sendCan(CAN1, data, data_len+1, CAN_ACU_CAN_ID, CAN_NO_EXT, CAN_NO_EXT);
+	sendCan(&hcan1, data, data_len+1, CAN_ACU_CAN_ID, CAN_NO_EXT, CAN_NO_EXT);
 }
 
 void notify_startup_task(enum startup_notify_value notify_val){

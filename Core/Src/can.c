@@ -145,60 +145,6 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 
 /* USER CODE BEGIN 1 */
 
-
-/**
-  * @brief  send a can message, delays until sent confirmed.
-  * @param  CANx: where x can be 1 or 2 to select the CAN peripheral.
-  * @param  data: bytes of data to send, max length 8.
-  * @param	length: length of data to send. (Length is 1 indexed for some reason, 7 means 8), likely a bug
-  * @param 	dest: destination ID ??? Austin sucks, don't understand CAN at all
-  * @param	isRTR: is request for transmission, 1 for request, 0 for data
-  * @param	isExtended: is the ID and extended address, 0 for standard, 1 for extended
-  * @retval 0 on success, 1 if timeout, 2 CANx not init, 3 length too long
-  */
-uint8_t sendCan(CAN_TypeDef* CANx, uint8_t const * data, int32_t length, uint32_t dest, uint8_t isRTR, uint8_t isExtended){
-    uint8_t sendSuccess = 0x0;
-
-    //check the length of the data
-    if(length > 8){
-        sendSuccess = 0x3;
-        return sendSuccess;
-    }
-    //check type of message to send
-    if(isRTR){
-        TxHeader.RTR = CAN_RTR_REMOTE;
-    }
-    else{
-        TxHeader.RTR = CAN_RTR_DATA;
-    }
-    if(isExtended){
-        TxHeader.IDE = CAN_ID_EXT;
-        TxHeader.ExtId = dest;
-    }
-    else{
-        TxHeader.IDE = CAN_ID_STD;
-        TxHeader.StdId = dest;
-    }
-    //copy data
-    for(int i = 0; i < length; i++){
-        TxData[i] = data[i];
-    }
-    TxHeader.DLC = length;
-
-    //send the can message
-    if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox) != HAL_OK) {
-        strncpy((char *) TxData, "VCU couldn't send a message to the CAN Bus.\r\n", sizeof(TxData) - 1);
-        HAL_USART_Transmit(&husart2, data, length+1, 10);
-    }
-    else {
-        strncpy((char *) TxData, "VCU sent a message to the CAN Bus.\r\n", sizeof(TxData) - 1);
-        HAL_USART_Transmit(&husart2,  data, length+1, 10);
-        sendSuccess = 0x1;
-    }
-
-    return sendSuccess;
-}
-
 void messageReceivedFromControlUnit(const char *unitType) {
     char canMsg[50];
     if (strcmp(unitType, "VCU") == 0) strncpy(canMsg, "VCU received a CAN message from the VCU.\r\n", sizeof(canMsg) - 1);

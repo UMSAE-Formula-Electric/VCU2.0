@@ -10,7 +10,7 @@
 
 #include "vcu_errors.h"
 #include "errors.h"
-
+#include "can.h"
 
 // The Handle to our logging queue
 extern osMessageQueueId_t errorLogQueueHandle;

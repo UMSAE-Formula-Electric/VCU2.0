@@ -29,11 +29,6 @@
 #include "cmsis_os2.h"
 #include "iwdg.h"
 
-CAN_RxHeaderTypeDef   RxHeader;
-uint8_t               RxData[8];
-
-CAN_TxHeaderTypeDef TxHeader;
-uint8_t TxData[8];
 uint32_t TxMailbox;
 
 /* USER CODE END 0 */

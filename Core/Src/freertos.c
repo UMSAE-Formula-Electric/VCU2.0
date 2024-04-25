@@ -26,6 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "iwdg.h"
+#include "can_utils.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -124,6 +125,16 @@ const osThreadAttr_t appsProcTask_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
+/* Definitions for canRxPacketQueue */
+osMessageQueueId_t canRxPacketQueueHandle;
+const osMessageQueueAttr_t canRxPacketQueue_attributes = {
+  .name = "canRxPacketQueue"
+};
+/* Definitions for canTxPacketQueue */
+osMessageQueueId_t canTxPacketQueueHandle;
+const osMessageQueueAttr_t canTxPacketQueue_attributes = {
+  .name = "canTxPacketQueue"
+};
 /* Definitions for iwdgEventGroup */
 osEventFlagsId_t iwdgEventGroupHandle;
 const osEventFlagsAttr_t iwdgEventGroup_attributes = {
@@ -170,6 +181,13 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
+
+  /* Create the queue(s) */
+  /* creation of canRxPacketQueue */
+  canRxPacketQueueHandle = osMessageQueueNew (32, sizeof(CAN_RxPacketTypeDef), &canRxPacketQueue_attributes);
+
+  /* creation of canTxPacketQueue */
+  canTxPacketQueueHandle = osMessageQueueNew (32, sizeof(CAN_TxPacketTypeDef), &canTxPacketQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */

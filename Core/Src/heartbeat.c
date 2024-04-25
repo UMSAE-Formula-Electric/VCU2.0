@@ -14,29 +14,6 @@
 //file level variables
 static heatbeat_state_t acb_connection_state;
 static heatbeat_state_t mc_connection_state;
-void heartbeat_master_task_ACU(void * pvParameters);
-void heartbeat_master_task_MC(void * pvParameters);
-
-//TODO CleanUP
-//This is now handled by freertos.c
-///**
-//  * @brief  Starts the heartbeat master task
-//  * @retval 0 on success, 1 if failed to start tasks(probably out of rtos heap mem.)
-//  */
-//bool heartbeat_init() {
-//	bool created = false;
-//
-//	created = TaskManagerCreate(&heartbeat_master_task_ACU, &xTask_Heartbeat_ACU);
-//	if(created){
-//	  created = TaskManagerCreate(&heartbeat_master_task_MC, &xTask_Heartbeat_MC);
-//	}
-//
-//	if(!created){
-//		logMessage("Failed to create heartbeat task", true);
-//	}
-//
-//	return created;
-//}
 
 /*
  * heartbeat_master_task

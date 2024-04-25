@@ -28,6 +28,7 @@
 #include "logger.h"
 #include "cmsis_os2.h"
 #include "iwdg.h"
+#include "ACB_comms_handler.h"
 
 uint32_t TxMailbox;
 
@@ -191,19 +192,7 @@ void StartCanRxTask(void *argument)
                 switch (RxHeader.StdId)
                 {
                     case CAN_VCU_CAN_ID:
-                        messageReceivedFromControlUnit("VCU");
-                        sprintf(canMsg, "Received a VCU message.\r\n");
-                        HAL_USART_Transmit(&husart2, (uint8_t *)canMsg, strlen(canMsg), 10);
-                        sprintf(canMsg, "%s", RxData);
-                        HAL_USART_Transmit(&husart2, (uint8_t *)canMsg, strlen(canMsg), 10);
-                        sprintf(canMsg, "\r\n");
-                        HAL_USART_Transmit(&husart2, (uint8_t *)canMsg, strlen(canMsg), 10);
-                        //TODO CleanUp
-//                        ret = xQueueSendToBack(ACB_VCU_CAN_Queue, &RxHeader, pdMS_TO_TICKS(CAN_SUB_Q_DELAY_MS));
-//                        if(ret != pdPASS){
-//                            //qfull
-//                            log_and_handle_error(ERROR_Q_FULL, NULL);
-//                        }
+                        processVcuCanIdRxData(rxPacket.rxPacketData);
                         break;
                     case CAN_ACU_CAN_ID:
                         messageReceivedFromControlUnit("ACU");

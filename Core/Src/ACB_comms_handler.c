@@ -18,52 +18,56 @@ extern QueueHandle_t ACB_VCU_CAN_Queue;
 static void notify_startup_task(enum startup_notify_value notify_val);
 static void notify_heartbeat_task(heatbeat_notif_vals_t notify_val);
 
+// TODO Create separate queues for different functionalities
 void process_ACB_CAN_packets(void * pvParameters){
     CAN_RxHeaderTypeDef packetToProcess;
     uint8_t RxData[8];
 	BaseType_t ret;
-	char strBuff[50]; //buffer for making 'nice' logs
 
 	for(;;){
 		//TODO CAN Revisit
 		ret = xQueueReceive(ACB_VCU_CAN_Queue,&packetToProcess, portMAX_DELAY);
 		if(ret == pdPASS){
 			if(packetToProcess.StdId ==  CAN_VCU_CAN_ID){
-			//need to handle more than 256 messages?
-                if (RxData[0] == CAN_ACB_TSA_ACK) {
-                    notify_startup_task(ACB_TSA_ACK);
-                } else if (RxData[0] == CAN_ACB_TSA_NACK) {
-                    notify_startup_task(ACB_TSA_NACK);
-                } else if (RxData[0] == CAN_ACB_RTD_ACK) {
-                    notify_startup_task(ACB_RTD_ACK);
-                } else if (RxData[0] == CAN_ACB_RTD_NACK) {
-                    notify_startup_task(ACB_RTD_NACK);
-                } else if (RxData[0] == CAN_GO_IDLE_REQ) {
-                    notify_startup_task(GO_IDLE_REQ_FROM_ACB);
-                } else if (RxData[0] == CAN_NO_SAFETY_LOOP_SET) {
-                    logIndicator(true, SAFETY_LOOP);
-                    led_mgmt_set_error(DASH_SAFETY_LOOP_OPEN_ACB);
-                } else if (RxData[0] == CAN_NO_SAFETY_LOOP_CLEAR) {
-                    logIndicator(false, SAFETY_LOOP);
-                    led_mgmt_clear_error(DASH_SAFETY_LOOP_OPEN_ACB);
-                } else if (RxData[0] == CAN_AIR_WELD_SET) {
-                    led_mgmt_set_error(DASH_AIR_WELD);
-                } else if (RxData[0] == CAN_HEARTBEAT_REQUEST) {
-                    // Do nothing
-                } else if (RxData[0] == CAN_HEARTBEAT_RESPONSE) {
-                    notify_heartbeat_task(HEARTBEAT_RESPONSE_NOTIFY);
-                } else if (RxData[0] == CAN_BATTERY_VOLTAGE_REQUEST) {
-                    //lv_battery_handle_voltage_request(); from 2018 car
-                } else {
-                    //build up string for marking unexpected can message
-                    sprintf(strBuff, "Unexpected ACB can notification: %s\r\n", RxData);
-                    strBuff[49] = '\0';
-                    logMessage(strBuff, false);
-                }
-			}
+                processVcuCanIdRxData(RxData);
+            }
 		}
 	}
 	vTaskDelete(NULL);
+}
+
+void processVcuCanIdRxData(const uint8_t *RxData) {
+    char strBuff[50]; //buffer for making 'nice' logs
+
+    if (RxData[0] == CAN_ACB_TSA_ACK) {
+        notify_startup_task(ACB_TSA_ACK);
+    } else if (RxData[0] == CAN_ACB_TSA_NACK) {
+        notify_startup_task(ACB_TSA_NACK);
+    } else if (RxData[0] == CAN_ACB_RTD_ACK) {
+        notify_startup_task(ACB_RTD_ACK);
+    } else if (RxData[0] == CAN_ACB_RTD_NACK) {
+        notify_startup_task(ACB_RTD_NACK);
+    } else if (RxData[0] == CAN_GO_IDLE_REQ) {
+        notify_startup_task(GO_IDLE_REQ_FROM_ACB);
+    } else if (RxData[0] == CAN_NO_SAFETY_LOOP_SET) {
+        logIndicator(true, SAFETY_LOOP);
+        led_mgmt_set_error(DASH_SAFETY_LOOP_OPEN_ACB);
+    } else if (RxData[0] == CAN_NO_SAFETY_LOOP_CLEAR) {
+        logIndicator(false, SAFETY_LOOP);
+        led_mgmt_clear_error(DASH_SAFETY_LOOP_OPEN_ACB);
+    } else if (RxData[0] == CAN_AIR_WELD_SET) {
+        led_mgmt_set_error(DASH_AIR_WELD);
+    } else if (RxData[0] == CAN_HEARTBEAT_REQUEST) {
+        // Do nothing
+    } else if (RxData[0] == CAN_HEARTBEAT_RESPONSE) {
+        notify_heartbeat_task(HEARTBEAT_RESPONSE_NOTIFY);
+    } else if (RxData[0] == CAN_BATTERY_VOLTAGE_REQUEST) {
+        //lv_battery_handle_voltage_request(); from 2018 car
+    } else {
+        //build up string for marking unexpected can message
+        sprintf(strBuff, "Unexpected ACB can notification: %s\r\n", RxData);
+        logMessage(strBuff, false);
+    }
 }
 
 void set_ACB_State(enum CAR_STATE new_state){
@@ -99,19 +103,3 @@ void notify_heartbeat_task(heatbeat_notif_vals_t notify_val){
 		xTaskNotify( task, notify_val, eSetValueWithOverwrite);
 	}
 }
-
-//TODO CleanUp
-/*
- * acb_comms_init
- *
- * @Brief: This function initializes the code for handling acb communications
- *
- * @Brief: Returns true if the task was successfully created.
- */
-//bool acb_comms_init(){
-//	bool created = false;
-//
-//	created = TaskManagerCreate(&process_ACB_CAN_packets, &xTask_Process_ACU_CAN);
-//
-//	return created;
-//}

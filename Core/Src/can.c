@@ -110,6 +110,11 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     GPIO_InitStruct.Alternate = GPIO_AF9_CAN1;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+    /* CAN1 interrupt Init */
+    HAL_NVIC_SetPriority(CAN1_TX_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(CAN1_TX_IRQn);
+    HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
   /* USER CODE BEGIN CAN1_MspInit 1 */
 
   /* USER CODE END CAN1_MspInit 1 */
@@ -133,6 +138,9 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
     */
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_8|GPIO_PIN_9);
 
+    /* CAN1 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(CAN1_TX_IRQn);
+    HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
   /* USER CODE BEGIN CAN1_MspDeInit 1 */
 
   /* USER CODE END CAN1_MspDeInit 1 */
@@ -140,6 +148,24 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 }
 
 /* USER CODE BEGIN 1 */
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+    CAN_RxPacketTypeDef rxPacket;
+
+    if (!(HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &(rxPacket.rxPacketHeader), rxPacket.rxPacketData) == HAL_OK &&
+            osMessageQueuePut(canRxPacketQueueHandle, &rxPacket, 0, 0) == osOK)) {
+        uint32_t currQueueSize = osMessageQueueGetCount(canRxPacketQueueHandle);
+        uint32_t maxQueueCapacity = osMessageQueueGetCapacity(canRxPacketQueueHandle);
+
+        if (currQueueSize == maxQueueCapacity) {  /* Queue is full */
+            logMessage("Error adding received message to the CAN Rx queue because the queue is full.\r\n", true);
+        }
+        else {  /* Error receiving message from CAN */
+            logMessage("Error receiving message from the CAN Bus and adding it to the Rx queue.\r\n", true);
+        }
+        Error_Handler();
+    }
+}
 
 void messageReceivedFromControlUnit(const char *unitType) {
     char canMsg[50];
@@ -149,23 +175,6 @@ void messageReceivedFromControlUnit(const char *unitType) {
     logMessage(canMsg, true);
 }
 
-HAL_StatusTypeDef CAN_Polling(void)
-{
-    uint32_t isCanRxFifoFilled = HAL_CAN_GetRxFifoFillLevel(&hcan1, CAN_RX_FIFO0);
-    if (isCanRxFifoFilled < 1)
-    {
-        return HAL_ERROR;
-    }
-
-    HAL_StatusTypeDef isCanMsgReceived = HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &RxHeader, RxData);
-    if (isCanMsgReceived != HAL_OK)
-    {
-        return HAL_ERROR;
-    }
-
-    return HAL_OK;
-}
-
 void StartCanRxTask(void *argument)
 {
     uint8_t isTaskActivated = (int)argument;
@@ -173,23 +182,29 @@ void StartCanRxTask(void *argument)
         osThreadTerminate(osThreadGetId());
     }
 
-    char canMsg[50];
-    HAL_CAN_Start(&hcan1);
+    if (!(HAL_CAN_Start(&hcan1) == HAL_OK && HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING) == HAL_OK))
+    {
+        Error_Handler();
+    }
+
+    CAN_RxPacketTypeDef rxPacket;
+    osStatus_t isMsgTakenFromQueue;
 
     for (;;)
     {
         kickWatchdogBit(osThreadGetId());
 
-        if (CAN_Polling() == HAL_OK)
+        isMsgTakenFromQueue = osMessageQueueGet(canRxPacketQueueHandle, &rxPacket, 0, 0);
+        if (isMsgTakenFromQueue == osOK)
         {
-            if (RxHeader.IDE == CAN_ID_EXT)
+            if (rxPacket.rxPacketHeader.IDE == CAN_ID_EXT)
             {
-                switch (RxHeader.ExtId)
+                switch (rxPacket.rxPacketHeader.ExtId)
                 {}
             }
-            if (RxHeader.IDE == CAN_ID_STD)
+            if (rxPacket.rxPacketHeader.IDE == CAN_ID_STD)
             {
-                switch (RxHeader.StdId)
+                switch (rxPacket.rxPacketHeader.StdId)
                 {
                     case CAN_VCU_CAN_ID:
                         processVcuCanIdRxData(rxPacket.rxPacketData);
@@ -202,72 +217,72 @@ void StartCanRxTask(void *argument)
                         break;
 
                     case CAN_MC_RX_HIGHSPEED: //High speed message, 333Hz
-                        mc_process_fast_can(RxData);
+                        mc_process_fast_can(rxPacket.rxPacketData);
                         break;
 
                         //Motor Controller Messages
                     case CAN_MC_RX_TEMP1_ID: //IGBT temp readings
-                        mc_process_temp1_can(RxData);
+                        mc_process_temp1_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_TEMP2_ID:
-                        mc_process_temp2_can(RxData);
+                        mc_process_temp2_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_ANALOG_INPUTS_VOLTAGE:
-                        mc_process_analog_inputs_voltage_can(RxData);
+                        mc_process_analog_inputs_voltage_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_DIGITAL_INPUT_STATUS:
-                        mc_process_digital_input_status_can(RxData);
+                        mc_process_digital_input_status_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_MOTOR_ID:
-                        mc_process_motor_can(RxData);
+                        mc_process_motor_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_CURRENT_ID:
-                        mc_process_current_can(RxData);
+                        mc_process_current_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_VOLT_ID:
-                        mc_process_volt_can(RxData);
+                        mc_process_volt_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_FAULT_ID:
-                        mc_process_fault_can(RxData);
+                        mc_process_fault_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_INTERNAL_VOLTAGES:
-                        mc_process_internal_volt_can(RxData);
+                        mc_process_internal_volt_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_INTERNAL_STATES:
-                        mc_process_internal_states_can(RxData);
+                        mc_process_internal_states_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_TORQUE_TIMER_INFO:
-                        mc_process_torque_timer_info_can(RxData);
+                        mc_process_torque_timer_info_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_MODULATION_INDEX:
-                        mc_process_modulation_index_can(RxData);
+                        mc_process_modulation_index_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_FIRMWARE_INFO:
-                        mc_process_firmware_info_can(RxData);
+                        mc_process_firmware_info_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_DIAGNOSTIC_DATA:
-                        mc_process_diagnostic_data_can(RxData);
+                        mc_process_diagnostic_data_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_TORQUE_CAPABILITY:
-                        mc_process_torque_capability_can(RxData);
+                        mc_process_torque_capability_can(rxPacket.rxPacketData);
                         break;
 
                     case CAN_MC_RX_TEMP3_ID: //Motor temp reading
-                        mc_process_temp3_can(RxData);
+                        mc_process_temp3_can(rxPacket.rxPacketData);
                         break;
 
                     default:
@@ -284,26 +299,20 @@ void StartCanTxTask(void *argument){
         osThreadTerminate(osThreadGetId());
     }
 
-    char canMsg[50];
+    CAN_TxPacketTypeDef txPacket;
+    osStatus_t isMsgTakenFromQueue;
+
     for(;;){
         kickWatchdogBit(osThreadGetId());
 
-        TxHeader.IDE = CAN_ID_STD; // Using Standard ID
-        TxHeader.StdId = CAN_SCU_CAN_ID;   // Transmitter's ID (11-bit wide)
-        TxHeader.RTR = CAN_RTR_DATA; // Data frame
-        TxHeader.DLC = 6; // Length of data bytes
-        TxData[0] = 'H'; // ASCII code for 'H'
-        TxData[1] = 'i'; // ASCII code for 'i'
-        TxData[2] = ' '; // ASCII code for space
-        TxData[3] = 'S'; // ASCII code for 'S'
-        TxData[4] = 'C'; // ASCII code for 'C'
-        TxData[5] = 'U'; // ASCII code for 'U'
-
-        if (HAL_CAN_AddTxMessage(&hcan1, &TxHeader, TxData, &TxMailbox) != HAL_OK) {
-        	logMessage("VCU couldn't send a message to the CAN Bus.\r\n", true);
-        }
-        else {
-            logMessage("VCU sent a message to the CAN Bus.\r\n", true);
+        isMsgTakenFromQueue = osMessageQueueGet(canTxPacketQueueHandle, &txPacket, 0, 0);
+        if (isMsgTakenFromQueue == osOK) {
+            if (HAL_CAN_AddTxMessage(&hcan1, &txPacket.txPacketHeader, txPacket.txPacketData, &TxMailbox) != HAL_OK) {
+                logMessage("VCU couldn't send a message to the CAN Bus.\r\n", true);
+            }
+            else {
+                logMessage("VCU sent a message to the CAN Bus.\r\n", true);
+            }
         }
     }
 }

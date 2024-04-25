@@ -25,6 +25,7 @@
 #include "queue.h"
 
 #include "stdio.h"
+#include "freertos_task_handles.h"
 
 static void fail_pulse();
 bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
@@ -268,7 +269,7 @@ bool read_saftey_loop(){
  * @retval
  */
 TaskHandle_t get_startup_task(){
-	return xTaskGetHandle(vcuStateTask_attributes.name);
+	return vcuStateTaskHandle;
 }
 
 /*

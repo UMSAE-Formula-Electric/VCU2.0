@@ -14,7 +14,7 @@
 #include "car_state.h"
 #include "vcu_startup.h"
 #include "logger.h"
-#include "motor_controller_can.h"
+#include "motor_controller_can_utils.h"
 #include "dashboard_leds.h"
 #include "iwdg.h"
 #include "heartbeat.h"

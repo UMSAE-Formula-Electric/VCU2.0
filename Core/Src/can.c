@@ -22,13 +22,13 @@
 
 /* USER CODE BEGIN 0 */
 #include <string.h>
-#include <stdio.h>
 #include "usart.h"
-#include "motor_controller_can.h"
+#include "motor_controller_can_utils.h"
 #include "logger.h"
 #include "cmsis_os2.h"
 #include "iwdg.h"
 #include "ACB_comms_handler.h"
+#include "mc_comms_handler.h"
 
 uint32_t TxMailbox;
 
@@ -217,6 +217,7 @@ void StartCanRxTask(void *argument)
                         break;
 
                     case CAN_MC_RX_HIGHSPEED: //High speed message, 333Hz
+                        update_heartbeat();
                         mc_process_fast_can(rxPacket.rxPacketData);
                         break;
 

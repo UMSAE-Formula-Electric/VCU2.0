@@ -108,11 +108,11 @@ TaskInfo* getTaskInfos(size_t* count) {
  * @param taskHandle The handle of the task
  * @return TaskBit_t The bit position of the task
  */
-TaskBit_t getTaskBit(const void *taskHandle) {
+TaskBit_t getTaskBit(osThreadId_t taskHandle) {
     size_t taskCount;
     TaskInfo* taskInfos = getTaskInfos(&taskCount);
     for (TaskBit_t taskBit = 0; taskBit < taskCount; taskBit++) {
-        if (taskHandle == taskInfos[taskBit].taskHandle) {
+        if (taskHandle == *taskInfos[taskBit].taskHandle) {
             return taskBit;
         }
     }
@@ -172,7 +172,7 @@ bool areAllActiveTasksReady() {
     EventBits_t taskBits = xEventGroupGetBits(iwdgEventGroupHandle);
 
     for (int taskBit = 0; taskBit < taskCount; taskBit++) {
-        currTask = &taskInfos[taskBit].taskHandle;
+        currTask = *taskInfos[taskBit].taskHandle;
         currTaskBit = getTaskBit(currTask);
         if (isTaskActive(currTaskBit, taskInfos, taskCount) && !isTaskReady(currTaskBit, taskBits)) {
             return false;

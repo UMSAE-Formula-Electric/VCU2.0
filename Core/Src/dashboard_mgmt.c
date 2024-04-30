@@ -6,7 +6,6 @@
  */
 
 #include "dashboard_mgmt.h"
-#include "main.h"
 #include "lv_battery_tap.h"
 #include "logger.h"
 #include "vcu_startup.h"
@@ -119,7 +118,5 @@ void StartDashboardLedTask(void *argument){
 //		else{
 //			logIndicator(false, GENERAL_ERROR);
 //		}
-
-        osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
     }
 }

@@ -60,7 +60,7 @@ osThreadId_t dashLedTaskHandle;
 const osThreadAttr_t dashLedTask_attributes = {
   .name = "dashLedTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 /* Definitions for watchDogTask */
 osThreadId_t watchDogTaskHandle;

@@ -8,6 +8,8 @@
 #ifndef INC_DASHBOARD_MGMT_H_
 #define INC_DASHBOARD_MGMT_H_
 
+
+#include "main.h"
 #include "stdbool.h"
 #include "stm32f4xx.h"
 
@@ -29,7 +31,5 @@ void led_mgmt_set_error(dash_led_state_t state);
 void led_mgmt_clear_error(dash_led_state_t state);
 bool led_mgmt_check_error(dash_led_state_t state);
 bool led_mgmt_init();
-
-void StartDashboardLedTask(void *argument);
 
 #endif /* INC_DASHBOARD_MGMT_H_ */

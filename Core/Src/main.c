@@ -216,12 +216,9 @@ void Error_Handler(void)
   /* User can add his own implementation to report the HAL error return state */
   //TODO LEDs
   //TODO Error Handling
-  __disable_irq();
-  while (1)
-  {
-      HAL_USART_Transmit(&husart2, (uint8_t*) "ERROR\r\n\0", 10, 10);
-      HAL_Delay(500);
-  }
+    //__disable_irq();
+    logMessage("ERROR\r\n", true);
+    //__enable_irq();
   /* USER CODE END Error_Handler_Debug */
 }
 

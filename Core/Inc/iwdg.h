@@ -43,7 +43,7 @@ void MX_IWDG_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 typedef struct {
-    const osThreadAttr_t* task_attributes;
+    const osThreadId_t* taskHandle;
     uint8_t isTaskActive;
 } TaskInfo;
 

@@ -9,7 +9,7 @@
 #include <dashboard_mgmt.h>
 #include "pedal_encoder.h"
 #include "apps_brake.h"
-#include "motor_controller_can.h"
+#include "motor_controller_can_utils.h"
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "task.h"

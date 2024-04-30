@@ -72,8 +72,8 @@ void MX_CAN1_Init(void)
     sFilterConfig.FilterIdLow = 0x0000;
     sFilterConfig.FilterMaskIdHigh = 0x0000;
     sFilterConfig.FilterMaskIdLow = 0x0000;
-    sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-    sFilterConfig.FilterActivation = ENABLE;
+    sFilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+    sFilterConfig.FilterActivation = CAN_FILTER_ENABLE;
     sFilterConfig.SlaveStartFilterBank = 14;
 
     if(HAL_CAN_ConfigFilter(&hcan1, &sFilterConfig) != HAL_OK)
@@ -111,10 +111,10 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* CAN1 interrupt Init */
-    HAL_NVIC_SetPriority(CAN1_TX_IRQn, 5, 0);
-    HAL_NVIC_EnableIRQ(CAN1_TX_IRQn);
     HAL_NVIC_SetPriority(CAN1_RX0_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(CAN1_RX0_IRQn);
+    HAL_NVIC_SetPriority(CAN1_SCE_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(CAN1_SCE_IRQn);
   /* USER CODE BEGIN CAN1_MspInit 1 */
 
   /* USER CODE END CAN1_MspInit 1 */
@@ -139,8 +139,8 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_8|GPIO_PIN_9);
 
     /* CAN1 interrupt Deinit */
-    HAL_NVIC_DisableIRQ(CAN1_TX_IRQn);
     HAL_NVIC_DisableIRQ(CAN1_RX0_IRQn);
+    HAL_NVIC_DisableIRQ(CAN1_SCE_IRQn);
   /* USER CODE BEGIN CAN1_MspDeInit 1 */
 
   /* USER CODE END CAN1_MspDeInit 1 */
@@ -167,6 +167,19 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
     }
 }
 
+void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *hcan)
+{
+    logMessage("CAN Rx FIFO0 is full.\r\n", true);
+}
+
+void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
+{
+    uint32_t canError = HAL_CAN_GetError(hcan);
+    if (canError != HAL_CAN_ERROR_NONE) {
+        logMessage("CAN ERROR CAN ERROR CAN ERROR!!\r\n", true);
+    }
+}
+
 void messageReceivedFromControlUnit(const char *unitType) {
     char canMsg[50];
     if (strcmp(unitType, "VCU") == 0) strncpy(canMsg, "VCU received a CAN message from the VCU.\r\n", sizeof(canMsg) - 1);
@@ -182,7 +195,7 @@ void StartCanRxTask(void *argument)
         osThreadTerminate(osThreadGetId());
     }
 
-    if (!(HAL_CAN_Start(&hcan1) == HAL_OK && HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING) == HAL_OK))
+    if (!(HAL_CAN_Start(&hcan1) == HAL_OK && HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_RX_FIFO0_OVERRUN | CAN_IT_RX_FIFO0_FULL | CAN_IT_ERROR) == HAL_OK))
     {
         Error_Handler();
     }
@@ -206,8 +219,8 @@ void StartCanRxTask(void *argument)
             {
                 switch (rxPacket.rxPacketHeader.StdId)
                 {
-                    case CAN_VCU_CAN_ID:
-                        processVcuCanIdRxData(rxPacket.rxPacketData);
+                    case CAN_ACU_TO_VCU_ID:
+                        processAcuToVcuCanIdRxData(rxPacket.rxPacketData);
                         break;
                     case CAN_ACU_CAN_ID:
                         messageReceivedFromControlUnit("ACU");
@@ -308,7 +321,7 @@ void StartCanTxTask(void *argument){
 
         isMsgTakenFromQueue = osMessageQueueGet(canTxPacketQueueHandle, &txPacket, 0, 0);
         if (isMsgTakenFromQueue == osOK) {
-            if (HAL_CAN_AddTxMessage(&hcan1, &txPacket.txPacketHeader, txPacket.txPacketData, &TxMailbox) != HAL_OK) {
+            if (HAL_CAN_AddTxMessage(&hcan1, &(txPacket.txPacketHeader), txPacket.txPacketData, &TxMailbox) != HAL_OK) {
                 logMessage("VCU couldn't send a message to the CAN Bus.\r\n", true);
             }
             else {

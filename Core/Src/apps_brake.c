@@ -23,6 +23,7 @@
 #include <string.h>
 #include "vcu_startup.h"
 #include "global_board_config.h"
+#include "bt_protocol.h"
 
 #define APPS_REQ_FREQ 200 //[Hz] frequency of polling loop for APPS
 #define BRAKE_REQ_FREQ 100 //[Hz] frequency of polling loop for BRAKE PEDAL
@@ -114,7 +115,7 @@ void StartAppsProcessTask(void *argument) {
 
 		if (!detectPedal(apps1, apps2, &apps)) {
 			led_mgmt_set_error(DASH_NO_THROTTLE);
-			logIndicator(true, THROTTLE_ERROR);
+            btLogIndicator(true, THROTTLE_ERROR);
 			if (get_car_state() == READY_TO_DRIVE) {
 				handleImpossiblilty();
 			}
@@ -126,14 +127,14 @@ void StartAppsProcessTask(void *argument) {
 				} else {
 					if (!sensAgreement_990(apps1, apps2, &apps)) {
 						handleImpossiblilty();
-						logIndicator(true, THROTTLE_ERROR);
+                        btLogIndicator(true, THROTTLE_ERROR);
 					} else {
 						if (BYPASS_BRAKE) {
 							sendTorqueWithFaultFixing(mc_apps_val);
 						} else {
 							if (detectBrake()) {
 								if (twoFootRulePassed(apps1, &apps)) {
-									logIndicator(false, THROTTLE_ERROR);
+                                    btLogIndicator(false, THROTTLE_ERROR);
 									led_mgmt_clear_error(DASH_NO_THROTTLE);
 									sendTorqueWithFaultFixing(mc_apps_val);
 								} else {
@@ -150,15 +151,15 @@ void StartAppsProcessTask(void *argument) {
 				if (detectPedal(apps1, apps2, &apps)) {
 					if (detectBrake()) {
 						if(twoFootRulePassed(apps1, &apps)) {
-							logIndicator(false, THROTTLE_ERROR); //all good, just not rtd
+                            btLogIndicator(false, THROTTLE_ERROR); //all good, just not rtd
 						} else {
-							logIndicator(true, THROTTLE_ERROR); //brake offline
+                            btLogIndicator(true, THROTTLE_ERROR); //brake offline
 						}
 					} else {
-						logIndicator(true, THROTTLE_ERROR); //two foot fail
+                        btLogIndicator(true, THROTTLE_ERROR); //two foot fail
 					}
 				} else {
-					logIndicator(true, THROTTLE_ERROR); //pedal sensor doesnt agree
+                    btLogIndicator(true, THROTTLE_ERROR); //pedal sensor doesnt agree
 				}
 			}
 			vTaskDelay(pdMS_TO_TICKS(1000/APPS_REQ_FREQ));                      //TODO Revise task Delay
@@ -242,8 +243,8 @@ void StartBrakeProcessTask(void *argument) {
         kickWatchdogBit(osThreadGetId());
 
 		//log brake sensors
-		logSensor(ADC_get_val(ADC_BPS), BRAKE_1);
-//		logSensor(ADC_get_val(ADC_BRK2), BRAKE_2);
+        btLogSensor(ADC_get_val(ADC_BPS), BRAKE_1);
+//		btLogSensor(ADC_get_val(ADC_BRK2), BRAKE_2);
 
 		brake1 = ADC_get_val(ADC_BPS);
 //		brake2 = ADC_get_val(ADC_BRK2);

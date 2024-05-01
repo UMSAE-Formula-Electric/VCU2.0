@@ -6,6 +6,7 @@
 #include "ACB_comms_handler.h"
 #include "freertos_task_handles.h"
 #include "iwdg.h"
+#include "bt_protocol.h"
 
 #define HEARTBEAT_TASK_DELAY_MS     100
 #define HEARTBEAT_MAX_MISSES		10
@@ -102,13 +103,13 @@ void StartAcuHeartbeatTask(void *argument){
 		//do dash leds and indicators
 		if(get_mc_heartbeat_State() == HEARTBEAT_PRESENT && get_acu_heartbeat_State()==HEARTBEAT_PRESENT){
 		  //heartbeat all good
-      logIndicator(false, NO_ACB);
+            btLogIndicator(false, NO_ACB);
       led_mgmt_clear_error(DASH_NO_ACB);
 		}
 		else{
 		  //heartbeat sadness
 		  led_mgmt_set_error(DASH_NO_ACB);
-		  logIndicator(true, NO_ACB);
+            btLogIndicator(true, NO_ACB);
 		}
 
         osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD

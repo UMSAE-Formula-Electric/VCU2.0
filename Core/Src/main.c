@@ -31,6 +31,7 @@
 #include "dashboard_leds.h"
 #include "logger.h"
 #include "startup_condition.h"
+#include "bt_protocol.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -107,6 +108,7 @@ int main(void)
         vcu_debug_led(REDLED, true);
     }
 
+    btInitialize();
     checkStartupCondition();
     enableVCULogging();
 

@@ -11,6 +11,7 @@
 #include "vcu_startup.h"
 #include "motor_controller_can_utils.h"
 #include "iwdg.h"
+#include "bt_protocol.h"
 
 static bool dash_state_flags[DASH_NUM_LED_STATES] = {false};
 
@@ -72,51 +73,51 @@ void StartDashboardLedTask(void *argument){
 		//check battery voltage
 		if(lv_battery_voltage() < 13){
 			//low battery situation
-			logIndicator(true, LOW_BATTERY);
+            btLogIndicator(true, LOW_BATTERY);
 			//go_idle();
 		}
 		else{
-			logIndicator(false, LOW_BATTERY);
+            btLogIndicator(false, LOW_BATTERY);
 		}
 
 		//check saftey loop
 		if(read_saftey_loop() && !dash_state_flags[DASH_SAFETY_LOOP_OPEN_ACB] ){
-			//logIndicator(false, SAFETY_LOOP);
+			//btLogIndicator(false, SAFETY_LOOP);
 		}
 		else{
-			//logIndicator(true, SAFETY_LOOP);
+			//btLogIndicator(true, SAFETY_LOOP);
 		}
 
 		//overheat warnings
 		if(mc_getAverageIGBTTemp() > 21000 || mc_getMotorTemp() > 14500){
-			logIndicator(true, GENERAL_WARNING);
+            btLogIndicator(true, GENERAL_WARNING);
 		}
 		else{
-			logIndicator(false, GENERAL_WARNING);
+            btLogIndicator(false, GENERAL_WARNING);
 		}
 
 		//overall error
 			//actual IGBT overheat,
 		if(mc_getAverageIGBTTemp() > 23000){
-			logIndicator(true, GENERAL_ERROR);
+            btLogIndicator(true, GENERAL_ERROR);
 		}
 		else{
-			logIndicator(false, GENERAL_ERROR);
+            btLogIndicator(false, GENERAL_ERROR);
 		}
 //		if(MC_getIGBTTemp() > 21000 || MC_getMotorTTemp() > 14500){
-//			logIndicator(true, GENERAL_WARNING);
+//			btLogIndicator(true, GENERAL_WARNING);
 //		}
 //		else{
-//			logIndicator(false, GENERAL_WARNING);
+//			btLogIndicator(false, GENERAL_WARNING);
 //		}
 //
 //		//overall error
 //			//actual IGBT overheat,
 //		if(MC_getIGBTTemp() > 23000){
-//			logIndicator(true, GENERAL_ERROR);
+//			btLogIndicator(true, GENERAL_ERROR);
 //		}
 //		else{
-//			logIndicator(false, GENERAL_ERROR);
+//			btLogIndicator(false, GENERAL_ERROR);
 //		}
     }
 }

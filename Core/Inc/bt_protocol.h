@@ -4,6 +4,7 @@
 #include "logger.h"
 #include "cmsis_os.h"
 #include "FreeRTOS.h"
+#include "logger.h"
 
 //Protocol start and end flags
 #define BT_START_FLAG 0x01
@@ -53,5 +54,8 @@ void btSendPacket();
 void btDumpingTask(void *pvParameters);
 extern osThreadId_t btDumpTaskHandle;
 extern const osThreadAttr_t btDumpTask_attributes;
+void btLogIndicator(bool value, INDICATOR indc);
+void btLogErrorMessage(char *data, INDICATOR indc);
+void btLogSensor(float value, SENSOR sens);
 
 #endif

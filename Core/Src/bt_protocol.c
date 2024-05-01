@@ -409,8 +409,6 @@ static void updateSequence() {
  *
  *		btDumpingTask(void *pvParameters): Timed task to dump the packet to the Bluetooth USART channel
  */
-
-
 void StartBluetoothDumpTask(void *argument) {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
@@ -422,9 +420,11 @@ void StartBluetoothDumpTask(void *argument) {
 
 		//Dump, Wait
 		btSendPacket();
-		logSensor((float)0 -1,MC_ACUAL_SPEED_REG_LOG);
-		logSensor(mc_getBusCurrent(),MC_I_ACTUAL_LOG);
-		logSensor((float)0,MC_BUS_VOLTAGE_LOG);
+        btLogSensor((float) 0 - 1, MC_ACUAL_SPEED_REG_LOG);
+        btLogSensor(mc_getBusCurrent(), MC_I_ACTUAL_LOG);
+        btLogSensor((float) 0, MC_BUS_VOLTAGE_LOG);
+        btLogSensor((float) bus_voltage / 10, MC_BUS_VOLTAGE_LOG);
+        btLogSensor((float) (mc_rpm * 117.97) / 5500, MC_ACUAL_SPEED_REG_LOG);
 
 		if(get_car_state() == READY_TO_DRIVE) {
 			vTaskDelay(BT_DUMP_DELAY);
@@ -433,5 +433,47 @@ void StartBluetoothDumpTask(void *argument) {
 		}
 
         osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
+	}
+}
+
+/*
+ * btLogIndicator(bool value, INDICATOR indc)
+ *
+ * Log a indicator value to be added to the Bluetooth packet
+ *
+ * value = Bool value of the indicator
+ * indc = An indicator that has been defined in the enum typedef in logger.h
+ */
+void btLogIndicator(bool value, INDICATOR indc) {
+	if(BT_INITIALIZED) {
+		btUpdateData((void *)&value, NUM_OF_SENSORS+indc);
+	}
+}
+
+/*
+ * btLogErrorMessage(char *data, INDICATOR indc)
+ *
+ * Log a diagnostics message to the SD card
+ *
+ * data = Char array (String) that contains the message
+ * critical = Boolean flag on if the message is critical, bypassing the log buffer
+ */
+void btLogErrorMessage(char *data, INDICATOR indc){
+	if(BT_INITIALIZED) {
+		btUpdateData(data, NUM_OF_SENSORS + indc);
+	}
+}
+
+/*
+ * btLogSensor(float value, SENSOR sens)
+ *
+ * Log a sensor value to the SD card and Bluetooth packet
+ *
+ * value = Float value of the sensor
+ * sens = A sensor that has been defined in the enum typedef in logger.h
+ */
+void btLogSensor(float value, SENSOR sens) {
+	if(BT_INITIALIZED) {
+        btUpdateData((void *)&value, sens);
 	}
 }

@@ -12,6 +12,7 @@
 
 #include "string.h"
 #include "stdio.h"
+#include "bt_protocol.h"
 
 extern QueueHandle_t ACB_VCU_CAN_Queue;
 
@@ -50,10 +51,10 @@ void processAcuToVcuCanIdRxData(const uint8_t *RxData) {
     } else if (RxData[0] == CAN_GO_IDLE_REQ) {
         notify_startup_task(GO_IDLE_REQ_FROM_ACB);
     } else if (RxData[0] == CAN_NO_SAFETY_LOOP_SET) {
-        logIndicator(true, SAFETY_LOOP);
+        btLogIndicator(true, SAFETY_LOOP);
         led_mgmt_set_error(DASH_SAFETY_LOOP_OPEN_ACB);
     } else if (RxData[0] == CAN_NO_SAFETY_LOOP_CLEAR) {
-        logIndicator(false, SAFETY_LOOP);
+        btLogIndicator(false, SAFETY_LOOP);
         led_mgmt_clear_error(DASH_SAFETY_LOOP_OPEN_ACB);
     } else if (RxData[0] == CAN_AIR_WELD_SET) {
         led_mgmt_set_error(DASH_AIR_WELD);

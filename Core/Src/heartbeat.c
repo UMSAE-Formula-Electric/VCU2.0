@@ -13,8 +13,8 @@
 //Max number of times we can miss a heartbeat notification
 
 //file level variables
-static heatbeat_state_t acb_connection_state;
-static heatbeat_state_t mc_connection_state;
+static HeartbeatState_t acb_connection_state;
+static HeartbeatState_t mc_connection_state;
 
 /*
  * heartbeat_master_task
@@ -186,7 +186,7 @@ void StartMcHeartbeatTask(void *argument){
  *
  * @Brief: This method is used to get the current state of heartbeat
  */
-heatbeat_state_t get_acu_heartbeat_State(){
+HeartbeatState_t get_acu_heartbeat_State(){
 	return acb_connection_state;
 }
 
@@ -195,7 +195,7 @@ heatbeat_state_t get_acu_heartbeat_State(){
  *
  * @Brief: This method is used to get the current state of heartbeat
  */
-heatbeat_state_t get_mc_heartbeat_State(){
+HeartbeatState_t get_mc_heartbeat_State(){
   return mc_connection_state;
 }
 

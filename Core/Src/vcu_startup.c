@@ -200,8 +200,8 @@ void StartVcuStateTask(void *argument){
 int checkHeartbeat() {
 	if(DISABLE_HEARTBEAT_CHECK) return true;
 
-	if(get_acu_heartbeat_State() == HEARTBEAT_PRESENT){
-		if(get_mc_heartbeat_State() == HEARTBEAT_PRESENT) {
+	if(get_acu_heartbeat_state() == HEARTBEAT_PRESENT){
+		if(get_mc_heartbeat_state() == HEARTBEAT_PRESENT) {
 			return true;
 		}
 	}

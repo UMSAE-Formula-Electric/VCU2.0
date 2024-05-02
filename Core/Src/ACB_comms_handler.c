@@ -99,7 +99,7 @@ void notify_startup_task(enum startup_notify_value notify_val){
 
 void notify_heartbeat_task(HeartbeatNotify_t notify_val){
 	osThreadId_t task = NULL;
-	task = heartbeat_ACU_get_task();
+	task = get_acu_heartbeat_task_handle();
 	if(task != NULL){
 		xTaskNotify( task, notify_val, eSetValueWithOverwrite);
 	}

@@ -8,9 +8,9 @@
 #include "heartbeat_utils.h"
 
 bool heartbeat_init();
-osThreadId_t heartbeat_ACU_get_task();
-osThreadId_t heartbeat_MC_get_task();
-HeartbeatState_t get_acu_heartbeat_State();
-HeartbeatState_t get_mc_heartbeat_State();
+osThreadId_t get_acu_heartbeat_task_handle();
+osThreadId_t get_mc_heartbeat_task_handle();
+HeartbeatState_t get_acu_heartbeat_state();
+HeartbeatState_t get_mc_heartbeat_state();
 
 #endif

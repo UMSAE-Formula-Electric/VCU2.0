@@ -13,7 +13,7 @@
 //Max number of times we can miss a heartbeat notification
 
 //file level variables
-static HeartbeatState_t acb_connection_state;
+static HeartbeatState_t acb_connection_state = HEARTBEAT_NONE;
 static HeartbeatState_t mc_connection_state;
 
 /*
@@ -29,8 +29,7 @@ void StartAcuHeartbeatTask(void *argument){
     }
 
 	BaseType_t retRTOS;
-	uint32_t ulNotifiedValue = 0;
-	acb_connection_state = HEARTBEAT_NONE;
+    HeartbeatNotify_t acuNotification = 0;
 	uint8_t misses = 0; //indicates how many cycles we have gone without detecting ACB
 
 	for(;;){
@@ -40,10 +39,10 @@ void StartAcuHeartbeatTask(void *argument){
 		send_ACB_mesg(CAN_HEARTBEAT_REQUEST);
 
 		//Check if ACB has sent a message
-		retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, HEARTBEAT_TASK_DELAY_MS);
+		retRTOS = xTaskNotifyWait(0x00, 0x00, (uint32_t*) &acuNotification, HEARTBEAT_TASK_DELAY_MS);
 
 		//check if the ACB responded
-		if(retRTOS == pdTRUE && ulNotifiedValue == HEARTBEAT_RESPONSE_NOTIFY){
+		if(retRTOS == pdTRUE && acuNotification == HEARTBEAT_RESPONSE_NOTIFY){
 			//received notification from ACB
 
 			//reset misses counter
@@ -101,14 +100,14 @@ void StartAcuHeartbeatTask(void *argument){
 
 
 		//do dash leds and indicators
-		if(get_mc_heartbeat_State() == HEARTBEAT_PRESENT && get_acu_heartbeat_State()==HEARTBEAT_PRESENT){
+		if(get_mc_heartbeat_state() == HEARTBEAT_PRESENT && get_acu_heartbeat_state() == HEARTBEAT_PRESENT){
 		  //heartbeat all good
             btLogIndicator(false, NO_ACB);
-      led_mgmt_clear_error(DASH_NO_ACB);
+            led_mgmt_clear_error(DASH_NO_ACB);
 		}
 		else{
 		  //heartbeat sadness
-		  led_mgmt_set_error(DASH_NO_ACB);
+		    led_mgmt_set_error(DASH_NO_ACB);
             btLogIndicator(true, NO_ACB);
 		}
 
@@ -186,7 +185,7 @@ void StartMcHeartbeatTask(void *argument){
  *
  * @Brief: This method is used to get the current state of heartbeat
  */
-HeartbeatState_t get_acu_heartbeat_State(){
+HeartbeatState_t get_acu_heartbeat_state(){
 	return acb_connection_state;
 }
 
@@ -195,15 +194,15 @@ HeartbeatState_t get_acu_heartbeat_State(){
  *
  * @Brief: This method is used to get the current state of heartbeat
  */
-HeartbeatState_t get_mc_heartbeat_State(){
+HeartbeatState_t get_mc_heartbeat_state(){
   return mc_connection_state;
 }
 
-osThreadId_t heartbeat_ACU_get_task(){
+osThreadId_t get_acu_heartbeat_task_handle(){
     return acuHrtbeatTaskHandle;
 }
 
-osThreadId_t heartbeat_MC_get_task(){
+osThreadId_t get_mc_heartbeat_task_handle(){
     return mcHrtbeatTaskHandle;
 }
 

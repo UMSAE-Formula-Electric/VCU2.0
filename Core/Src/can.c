@@ -230,7 +230,7 @@ void StartCanRxTask(void *argument)
                         break;
 
                     case CAN_MC_RX_HIGHSPEED: //High speed message, 333Hz
-                        update_heartbeat();
+                        notify_mc_heartbeat_task();
                         mc_process_fast_can(rxPacket.rxPacketData);
                         break;
 

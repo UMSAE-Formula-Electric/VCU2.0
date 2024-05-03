@@ -15,7 +15,7 @@
  * @Brief: this function updates the heartbeat task to the presence of the
  * motor controller
  */
-void update_heartbeat() {
+void notify_mc_heartbeat_task() {
     TaskHandle_t task = NULL;
     task = get_mc_heartbeat_task_handle();
     if (task != NULL) {

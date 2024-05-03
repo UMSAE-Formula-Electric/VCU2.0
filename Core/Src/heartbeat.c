@@ -14,7 +14,7 @@
 
 //file level variables
 static HeartbeatState_t acu_connection_state = HEARTBEAT_NONE;
-static HeartbeatState_t mc_connection_state;
+static HeartbeatState_t mc_connection_state = HEARTBEAT_NONE;
 
 void updateAcuStateLedsAndIndicators() {
     if(acu_connection_state == HEARTBEAT_PRESENT){
@@ -91,55 +91,29 @@ void StartMcHeartbeatTask(void *argument){
     }
 
   BaseType_t retRTOS;
-  uint32_t ulNotifiedValue = 0;
-  mc_connection_state = HEARTBEAT_NONE;
+  HeartbeatNotify_t mcNotification = 0;
   uint8_t misses = 0; //indicates how many cycles we have gone without detecting ACU
 
   for(;;){
       kickWatchdogBit(osThreadGetId());
 
     //Check if MC has sent a message
-    retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, HEARTBEAT_TASK_DELAY_MS);
+    retRTOS = xTaskNotifyWait(0x00, 0x00, (uint32_t*) &mcNotification, pdMS_TO_TICKS(HEARTBEAT_TASK_DELAY_MS));
     if(retRTOS == pdPASS){
-      misses = 0;
-
-      //log connection
-      if(mc_connection_state == HEARTBEAT_NONE){
-        logMessage("HEARTBEAT: Connected with MC", false);
-      }
-      else if(mc_connection_state == HEARTBEAT_LOST){
-        logMessage("HEARTBEAT: Reconnected with MC", false);
-      }
-
-      //set connection state
-      mc_connection_state = HEARTBEAT_PRESENT;
-
+        // Received notification from MC
+        misses = 0; // Reset misses counter
+        logMessage(mc_connection_state == HEARTBEAT_LOST ? "Heartbeat: MC re-connection\r\n" : "Heartbeat: Heartbeat received from the MC\r\n", true);
+        mc_connection_state = HEARTBEAT_PRESENT; // Set state
     }
     else{
-      if(misses < HEARTBEAT_MAX_MISSES){
-        misses++;
-      }
-      else if(misses >= HEARTBEAT_MAX_MISSES){
-
-        //log loss of mc if was just lost
-        if(mc_connection_state == HEARTBEAT_PRESENT){
-          logMessage("HEARTBEAT: LOST MC", false);
+        // Did not receive notification from MC
+        if(++misses > HEARTBEAT_MAX_MISSES){
+            // Lost MC
+            logMessage(mc_connection_state == HEARTBEAT_PRESENT ? "Heartbeat: Lost Connection with MC\r\n" : "Heartbeat: Could not connect with MC\r\n", true);
+            mc_connection_state = HEARTBEAT_LOST;
         }
-
-
-        if(mc_connection_state == HEARTBEAT_NONE){
-          mc_connection_state = HEARTBEAT_NONE; //still haven't connected yet
-        }
-        else{
-          //was previously connected to MC
-          mc_connection_state = HEARTBEAT_LOST;
-        }
-      }
-
-
     }
-
-      osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
+      osThreadYield();
   }
 }
 

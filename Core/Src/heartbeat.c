@@ -32,8 +32,8 @@ void updateAcuStateLedsAndIndicators() {
 /*
  * heartbeat_master_task
  *
- * @Brief: This task is used to check if the ACB is reachable as well as send
- * heartbeat messages to the ACB
+ * @Brief: This task is used to check if the ACU is reachable as well as send
+ * heartbeat messages to the ACU
  */
 void StartAcuHeartbeatTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
@@ -43,19 +43,19 @@ void StartAcuHeartbeatTask(void *argument){
 
 	BaseType_t retRTOS;
     HeartbeatNotify_t acuNotification = 0;
-	uint8_t misses = 0; //indicates how many cycles we have gone without detecting ACB
+	uint8_t misses = 0; //indicates how many cycles we have gone without detecting ACU
 
 	for(;;){
         kickWatchdogBit(osThreadGetId());
 
-		//send heartbeat message to ACB
-		send_ACB_mesg(CAN_HEARTBEAT_REQUEST);
+		//send heartbeat message to ACU
+        send_ACU_mesg(CAN_HEARTBEAT_REQUEST);
         logMessage("Heartbeat: Sent heartbeat request to ACU\r\n", true);
 
-		//Check if ACB has sent a message
+		//Check if ACU has sent a message
 		retRTOS = xTaskNotifyWait(0x00, 0x00, (uint32_t*) &acuNotification, pdMS_TO_TICKS(HEARTBEAT_TASK_DELAY_MS));
 
-		//check if the ACB responded
+		//check if the ACU responded
 		if(retRTOS == pdTRUE && acuNotification == HEARTBEAT_RESPONSE_NOTIFY){
             // Received notification from ACU
             misses = 0; // Reset misses counter
@@ -63,9 +63,9 @@ void StartAcuHeartbeatTask(void *argument){
             acu_connection_state = HEARTBEAT_PRESENT; // Set state
 		}
 		else{
-            // Did not receive notification from ACB
+            // Did not receive notification from ACU
             if(++misses > HEARTBEAT_MAX_MISSES){
-                // Lost ACB
+                // Lost ACU
                 logMessage(acu_connection_state == HEARTBEAT_PRESENT ? "Heartbeat: Lost Connection with ACU\r\n" : "Heartbeat: Could not connect with ACU\r\n", true);
                 acu_connection_state = HEARTBEAT_LOST;
             }
@@ -93,7 +93,7 @@ void StartMcHeartbeatTask(void *argument){
   BaseType_t retRTOS;
   uint32_t ulNotifiedValue = 0;
   mc_connection_state = HEARTBEAT_NONE;
-  uint8_t misses = 0; //indicates how many cycles we have gone without detecting ACB
+  uint8_t misses = 0; //indicates how many cycles we have gone without detecting ACU
 
   for(;;){
       kickWatchdogBit(osThreadGetId());

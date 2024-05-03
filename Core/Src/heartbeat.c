@@ -9,12 +9,25 @@
 #include "bt_protocol.h"
 
 #define HEARTBEAT_TASK_DELAY_MS     100
-#define HEARTBEAT_MAX_MISSES		10
+#define HEARTBEAT_MAX_MISSES		50
 //Max number of times we can miss a heartbeat notification
 
 //file level variables
-static HeartbeatState_t acb_connection_state = HEARTBEAT_NONE;
+static HeartbeatState_t acu_connection_state = HEARTBEAT_NONE;
 static HeartbeatState_t mc_connection_state;
+
+void updateAcuStateLedsAndIndicators() {
+    if(acu_connection_state == HEARTBEAT_PRESENT){
+      //heartbeat all good
+        btLogIndicator(false, NO_ACB);
+        led_mgmt_clear_error(DASH_NO_ACB);
+    }
+    else{
+      //heartbeat sadness
+        btLogIndicator(true, NO_ACB);
+        led_mgmt_set_error(DASH_NO_ACB);
+    }
+}
 
 /*
  * heartbeat_master_task
@@ -37,81 +50,31 @@ void StartAcuHeartbeatTask(void *argument){
 
 		//send heartbeat message to ACB
 		send_ACB_mesg(CAN_HEARTBEAT_REQUEST);
+        logMessage("Heartbeat: Sent heartbeat request to ACU\r\n", true);
 
 		//Check if ACB has sent a message
-		retRTOS = xTaskNotifyWait(0x00, 0x00, (uint32_t*) &acuNotification, HEARTBEAT_TASK_DELAY_MS);
+		retRTOS = xTaskNotifyWait(0x00, 0x00, (uint32_t*) &acuNotification, pdMS_TO_TICKS(HEARTBEAT_TASK_DELAY_MS));
 
 		//check if the ACB responded
 		if(retRTOS == pdTRUE && acuNotification == HEARTBEAT_RESPONSE_NOTIFY){
-			//received notification from ACB
-
-			//reset misses counter
-			misses = 0;
-
-			//check if we have previously lost the ACB
-			if(acb_connection_state == HEARTBEAT_LOST){
-				logMessage("Heartbeat: ACB re-connection", true);
-			}
-			else if(acb_connection_state == HEARTBEAT_NONE){
-				//connecting with acb for first time
-				logMessage("Heartbeat: Made connection with ACB", true);
-			}
-
-			//set state
-			acb_connection_state = HEARTBEAT_PRESENT;
+            // Received notification from ACU
+            misses = 0; // Reset misses counter
+            logMessage(acu_connection_state == HEARTBEAT_LOST ? "Heartbeat: ACU re-connection\r\n" : "Heartbeat: Heartbeat received from the ACU\r\n", true);
+            acu_connection_state = HEARTBEAT_PRESENT; // Set state
 		}
 		else{
-			//did not receive notification from ACB
-			if(acb_connection_state == HEARTBEAT_PRESENT){
-
-				if(misses < HEARTBEAT_MAX_MISSES){
-					//losing ACB
-					misses++;
-
-					//just for safety
-					acb_connection_state = HEARTBEAT_PRESENT;
-				}
-				else{
-					//lost ACB
-					acb_connection_state = HEARTBEAT_LOST;
-					logMessage("Heartbeat: Lost Connection with ACB", true);
-				}
-			}
-			else if(acb_connection_state == HEARTBEAT_NONE ){
-				if(misses < HEARTBEAT_MAX_MISSES){
-					//losing ACB
-					misses++;
-
-					//just for safety
-					acb_connection_state = HEARTBEAT_NONE;
-
-				}
-				else{
-					//lost ACB
-					acb_connection_state = HEARTBEAT_NONE;
-					logMessage("Heartbeat: Could not connect with ACB", true);
-				}
-			}
-			else{
-				//acb_connection_state = HEARTBEAT_LOST_ACB;
-				led_mgmt_set_error(DASH_NO_ACB);
-			}
+            // Did not receive notification from ACB
+            if(++misses > HEARTBEAT_MAX_MISSES){
+                // Lost ACB
+                logMessage(acu_connection_state == HEARTBEAT_PRESENT ? "Heartbeat: Lost Connection with ACU\r\n" : "Heartbeat: Could not connect with ACU\r\n", true);
+                acu_connection_state = HEARTBEAT_LOST;
+            }
 		}
-
 
 		//do dash leds and indicators
-		if(get_mc_heartbeat_state() == HEARTBEAT_PRESENT && get_acu_heartbeat_state() == HEARTBEAT_PRESENT){
-		  //heartbeat all good
-            btLogIndicator(false, NO_ACB);
-            led_mgmt_clear_error(DASH_NO_ACB);
-		}
-		else{
-		  //heartbeat sadness
-		    led_mgmt_set_error(DASH_NO_ACB);
-            btLogIndicator(true, NO_ACB);
-		}
+        updateAcuStateLedsAndIndicators();
 
-        osDelay(IWDG_RELOAD_PERIOD / 2);                                   // Delay for half IWDG_RELOAD_PERIOD
+        osThreadYield();
 	}
 }
 
@@ -186,7 +149,7 @@ void StartMcHeartbeatTask(void *argument){
  * @Brief: This method is used to get the current state of heartbeat
  */
 HeartbeatState_t get_acu_heartbeat_state(){
-	return acb_connection_state;
+	return acu_connection_state;
 }
 
 /*

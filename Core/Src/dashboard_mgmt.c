@@ -81,7 +81,7 @@ void StartDashboardLedTask(void *argument){
 		}
 
 		//check saftey loop
-		if(read_saftey_loop() && !dash_state_flags[DASH_SAFETY_LOOP_OPEN_ACB] ){
+		if(read_saftey_loop() && !dash_state_flags[DASH_SAFETY_LOOP_OPEN_ACU] ){
 			//btLogIndicator(false, SAFETY_LOOP);
 		}
 		else{

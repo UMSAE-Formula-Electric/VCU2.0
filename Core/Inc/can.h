@@ -42,7 +42,7 @@ void MX_CAN1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
-enum ACB_TO_CAN_MSG{
+enum ACU_TO_CAN_MSG{
     CAN_ACB_TSA_ACK = 0,
     CAN_ACB_TSA_NACK,
     CAN_ACB_RTD_ACK,

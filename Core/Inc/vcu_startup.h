@@ -6,7 +6,7 @@
 
 #define LOOP_CLOSE 1
 #define LOOP_OPEN 0
-extern const osThreadAttr_t vcuStateTask_attributes;
+
 void startup_Init();
 void go_idle();
 int checkHeartbeat();
@@ -17,11 +17,11 @@ TaskHandle_t get_startup_task();
 
 
 enum startup_notify_value{
-	ACB_TSA_NACK = 0,
-	ACB_TSA_ACK,
-	ACB_RTD_NACK,
-	ACB_RTD_ACK,
-	GO_IDLE_REQ_FROM_ACB
+	ACU_TSA_NACK = 0,
+	ACU_TSA_ACK,
+	ACU_RTD_NACK,
+	ACU_RTD_ACK,
+	GO_IDLE_REQ_FROM_ACU
 };
 
 void set_saftey_loop_state(uint8_t state); //use this for blocking the safety loop in scary conditions

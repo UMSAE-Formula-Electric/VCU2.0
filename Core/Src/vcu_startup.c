@@ -9,7 +9,7 @@
 
 #include <dashboard_mgmt.h>
 #include "apps_brake.h"
-#include "ACB_comms_handler.h"
+#include "acu_comms_handler.h"
 #include "can.h"
 #include "car_state.h"
 #include "vcu_startup.h"
@@ -31,8 +31,8 @@ static void fail_pulse();
 bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 
 //timing
-#define TSA_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACB when going TSA
-#define RTD_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACB when going RTD
+#define TSA_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACU when going TSA
+#define RTD_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACU when going RTD
 #define FAIL_FLASH_LEN 1000		//[ms] length of warning flash on failed arm
 #define STARTUP_TASK_DELAY 100	//[ms] how often the startup task is executed
 #define MC_STARTUP_DELAY 1000	//[ms] delay used to wait for the motor controller
@@ -84,7 +84,7 @@ void StartVcuStateTask(void *argument){
 		case IDLE:
 			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
 			if(retRTOS == pdTRUE){
-				sprintf(strBuff, "Received ACB notification: %lu", ulNotifiedValue);
+				sprintf(strBuff, "Received ACU notification: %lu", ulNotifiedValue);
 				logMessage(strBuff,false);
 			}
 
@@ -100,10 +100,10 @@ void StartVcuStateTask(void *argument){
 							//Heartbeats are valid
 							goTSA();
 							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, TSA_ACK_TIMEOUT + MC_STARTUP_DELAY);
-							if(ulNotifiedValue != ACB_TSA_ACK){
+							if(ulNotifiedValue != ACU_TSA_ACK){
 								//ACU did not ACK
 								go_idle();
-								logMessage("ACB failed to ack TSA Request", true);
+								logMessage("ACU failed to ack TSA Request", true);
 								fail_pulse();
 							} else {
 								logMessage("Went TSA!", false);
@@ -128,8 +128,8 @@ void StartVcuStateTask(void *argument){
 						if(brakePressed() || DISABLE_BRAKE_CHECK){
 							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, RTD_ACK_TIMEOUT);
 							EnableMC();
-							if(retRTOS != pdPASS || ulNotifiedValue != ACB_RTD_ACK){
-								logMessage("ACB failed to ack RTD Request", false);
+							if(retRTOS != pdPASS || ulNotifiedValue != ACU_RTD_ACK){
+								logMessage("ACU failed to ack RTD Request", false);
 								go_idle();
 								fail_pulse();
 							}
@@ -150,8 +150,8 @@ void StartVcuStateTask(void *argument){
 			}
 
 			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
-			if(retRTOS == pdTRUE && ulNotifiedValue == GO_IDLE_REQ_FROM_ACB){
-				logMessage("ACB request IDLE state change", true);
+			if(retRTOS == pdTRUE && ulNotifiedValue == GO_IDLE_REQ_FROM_ACU){
+				logMessage("ACU request IDLE state change", true);
 				go_idle();
 			}
 
@@ -159,20 +159,20 @@ void StartVcuStateTask(void *argument){
 		case READY_TO_DRIVE:
 			EnableMC();
 			if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin) || isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)){
-				set_ACB_State(IDLE);
+                set_ACU_State(IDLE);
 				go_idle();
 				logMessage("RTD or VCU Button Pressed, going IDLE", false);
 			}
 
 			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
-			if(retRTOS == pdTRUE && ulNotifiedValue == GO_IDLE_REQ_FROM_ACB){
-				logMessage("ACB request IDLE state change", true);
+			if(retRTOS == pdTRUE && ulNotifiedValue == GO_IDLE_REQ_FROM_ACU){
+				logMessage("ACU request IDLE state change", true);
 				go_idle();
 			}
 
 			if(!DISABLE_HEARTBEAT_CHECK) {
-				if(checkHeartbeat()){//make sure we have ACB heartbeat
-					logMessage("Going Idle due to lack of ACB", true);
+				if(checkHeartbeat()){//make sure we have ACU heartbeat
+					logMessage("Going Idle due to lack of ACU", true);
 					go_idle();
 				}
 			}
@@ -200,8 +200,8 @@ void StartVcuStateTask(void *argument){
 int checkHeartbeat() {
 	if(DISABLE_HEARTBEAT_CHECK) return true;
 
-	if(get_acu_heartbeat_State() == HEARTBEAT_PRESENT){
-		if(get_mc_heartbeat_State() == HEARTBEAT_PRESENT) {
+	if(get_acu_heartbeat_state() == HEARTBEAT_PRESENT){
+		if(get_mc_heartbeat_state() == HEARTBEAT_PRESENT) {
 			return true;
 		}
 	}
@@ -233,7 +233,7 @@ bool read_saftey_loop(){
 }
 
 /**
- * @brief  Returns the handle for the ACB task
+ * @brief  Returns the handle for the ACU task
  * @retval
  */
 TaskHandle_t get_startup_task(){
@@ -250,12 +250,12 @@ void go_idle(){
 	DisableMC();
 	mc_set_inverter_enable(0);
 	set_car_state(IDLE);
-	set_ACB_State(IDLE);
+    set_ACU_State(IDLE);
 }
 
 void goTSA() {
 	set_car_state(TRACTIVE_SYSTEM_ACTIVE);
-	set_ACB_State(TRACTIVE_SYSTEM_ACTIVE);
+    set_ACU_State(TRACTIVE_SYSTEM_ACTIVE);
 	DisableMC();
 	mc_enable_broadcast_msgs();
 }
@@ -263,7 +263,7 @@ void goTSA() {
 void goRTD() {
 	dash_set_rtd_teal();
 	set_car_state(READY_TO_DRIVE);
-	set_ACB_State(READY_TO_DRIVE);
+    set_ACU_State(READY_TO_DRIVE);
 }
 
 /*

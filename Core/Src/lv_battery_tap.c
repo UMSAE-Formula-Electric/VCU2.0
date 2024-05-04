@@ -42,7 +42,7 @@ void lv_battery_handle_voltage_request(){
 	voltage = lv_battery_voltage_int();
 	buffer[0] = voltage & 0xff;
 	buffer[1] = voltage >> 8;
-	send_ACB_mesg_data(	CAN_BATTERY_VOLTAGE_RESPONSE, 2, buffer);
+	send_ACU_mesg_data(	CAN_BATTERY_VOLTAGE_RESPONSE, 2, buffer);
 
 }
 */

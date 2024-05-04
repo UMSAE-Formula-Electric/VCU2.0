@@ -27,7 +27,7 @@
 #include "logger.h"
 #include "cmsis_os2.h"
 #include "iwdg.h"
-#include "ACB_comms_handler.h"
+#include "acu_comms_handler.h"
 #include "mc_comms_handler.h"
 
 uint32_t TxMailbox;
@@ -230,7 +230,7 @@ void StartCanRxTask(void *argument)
                         break;
 
                     case CAN_MC_RX_HIGHSPEED: //High speed message, 333Hz
-                        update_heartbeat();
+                        notify_mc_heartbeat_task();
                         mc_process_fast_can(rxPacket.rxPacketData);
                         break;
 

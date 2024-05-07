@@ -135,6 +135,16 @@ osMessageQueueId_t canTxPacketQueueHandle;
 const osMessageQueueAttr_t canTxPacketQueue_attributes = {
   .name = "canTxPacketQueue"
 };
+/* Definitions for USARTRxPacketQueue */
+osMessageQueueId_t USARTRxPacketQueueHandle;
+const osMessageQueueAttr_t USARTRxPacketQueue_attributes = {
+  .name = "USARTRxPacketQueue"
+};
+/* Definitions for USARTTxPacketQueue */
+osMessageQueueId_t USARTTxPacketQueueHandle;
+const osMessageQueueAttr_t USARTTxPacketQueue_attributes = {
+  .name = "USARTTxPacketQueue"
+};
 /* Definitions for iwdgEventGroup */
 osEventFlagsId_t iwdgEventGroupHandle;
 const osEventFlagsAttr_t iwdgEventGroup_attributes = {
@@ -188,6 +198,12 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of canTxPacketQueue */
   canTxPacketQueueHandle = osMessageQueueNew (32, sizeof(CAN_TxPacketTypeDef), &canTxPacketQueue_attributes);
+
+  /* creation of USARTRxPacketQueue */
+  USARTRxPacketQueueHandle = osMessageQueueNew (32, sizeof(char*), &USARTRxPacketQueue_attributes);
+
+  /* creation of USARTTxPacketQueue */
+  USARTTxPacketQueueHandle = osMessageQueueNew (32, sizeof(char*), &USARTTxPacketQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */

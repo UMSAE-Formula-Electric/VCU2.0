@@ -57,8 +57,8 @@ void MX_ADC1_Init(void);
 /* USER CODE BEGIN Prototypes */
 
 uint8_t ADC_init();
-uint16_t ADC_get_val(uint8_t item);
-uint16_t adc_convert();
+uint32_t ADC_get_val(uint8_t item);
+uint32_t adc_convert();
 
 /* USER CODE END Prototypes */
 

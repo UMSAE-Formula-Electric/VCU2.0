@@ -19,9 +19,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
-#include "FreeRTOS.h"
-#include "cmsis_os.h"
-#include "queue.h"
 
 /* USER CODE BEGIN 0 */
 
@@ -118,6 +115,17 @@ void HAL_USART_MspDeInit(USART_HandleTypeDef* usartHandle)
 }
 
 /* USER CODE BEGIN 1 */
+
+void StartUSARTTxTask(void *argument){
+	char * currMsg = NULL;
+
+	for(;;){
+		if(uxQueueMessagesWaiting( USARTRxPacketQueue ) != 0){
+			xQueueReceive( USARTRxPacketQueue, currMsg, pdMS_TO_TICKS( USART_DELAY ) );
+			HAL_USART_Transmit(&husart2, currMsg, strlen(currMsg), pdMS_TO_TICKS( USART_DELAY ) );
+		}
+	}
+}
 
 uint8_t USART2_Transmit(char* msg){
 	//Check if usart2 is initialized

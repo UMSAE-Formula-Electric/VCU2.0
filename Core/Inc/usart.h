@@ -51,6 +51,8 @@ void MX_USART2_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
+uint8_t USART2_Transmit(char* msg);
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

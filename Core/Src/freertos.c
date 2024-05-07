@@ -125,6 +125,13 @@ const osThreadAttr_t appsProcTask_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
+/* Definitions for USARTTxTask */
+osThreadId_t USARTTxTaskHandle;
+const osThreadAttr_t USARTTxTask_attributes = {
+  .name = "USARTTxTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for canRxPacketQueue */
 osMessageQueueId_t canRxPacketQueueHandle;
 const osMessageQueueAttr_t canRxPacketQueue_attributes = {
@@ -167,6 +174,7 @@ extern void StartMcHeartbeatTask(void *argument);
 extern void StartAcuHeartbeatTask(void *argument);
 extern void StartBrakeProcessTask(void *argument);
 extern void StartAppsProcessTask(void *argument);
+extern void StartUSARTTxTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -242,6 +250,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of appsProcTask */
   appsProcTaskHandle = osThreadNew(StartAppsProcessTask, (void*) APPS_PROC_TASK_ENABLED, &appsProcTask_attributes);
+
+  /* creation of USARTTxTask */
+  USARTTxTaskHandle = osThreadNew(StartUSARTTxTask, NULL, &USARTTxTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

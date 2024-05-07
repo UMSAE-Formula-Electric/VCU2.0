@@ -36,6 +36,15 @@ extern USART_HandleTypeDef husart2;
 
 /* USER CODE BEGIN Private defines */
 
+#define USART_DELAY 50			//milliseconds
+
+typedef enum
+{
+  USART_OK     		= 0x00U,	//Success
+  USART_ERROR 		= 0x01U,	//Failure
+  USART_DNE    		= 0x02U,	//Does Not Exist
+} USART_StatusTypeDef;
+
 /* USER CODE END Private defines */
 
 void MX_USART2_Init(void);

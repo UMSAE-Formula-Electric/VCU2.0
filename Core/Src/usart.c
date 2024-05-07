@@ -19,8 +19,14 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
+#include "FreeRTOS.h"
+#include "cmsis_os.h"
+#include "queue.h"
 
 /* USER CODE BEGIN 0 */
+
+extern osThreadId_t USARTRxPacketQueue;
+extern osThreadId_t USARTTxPacketQueue;
 
 /* USER CODE END 0 */
 
@@ -112,6 +118,23 @@ void HAL_USART_MspDeInit(USART_HandleTypeDef* usartHandle)
 }
 
 /* USER CODE BEGIN 1 */
+
+uint8_t USART2_Transmit(char* msg){
+	//Check if usart2 is initialized
+	if(husart2.Instance != USART2) return USART_DNE;
+
+	//Check if queue exists
+	if(!USARTTxPacketQueue) return USART_DNE;
+
+	//Try Pushing to Queue
+	int retval = xQueueSend(USARTTxPacketQueue, msg, pdMS_TO_TICKS(USART_DELAY));
+
+	if(retval != 1) return USART_ERROR;
+
+	return USART_OK;
+}
+
+
 //TODO Bluetooth
 //uint8_t usartBTSend( char * Data){
 //    BaseType_t retRTOS = 0;

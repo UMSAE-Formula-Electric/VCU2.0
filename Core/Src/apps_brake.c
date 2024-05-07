@@ -29,7 +29,7 @@
 #define BRAKE_REQ_FREQ 100 //[Hz] frequency of polling loop for BRAKE PEDAL
 #define MAX_TORQUE_REQUESTABLE 2000
 #define BYPASS_SAFETY 0
-#define BYPASS_BRAKE 0
+#define BYPASS_BRAKE 1
 
 #define APPS_LOW_END 300
 #define APPS_HIGH_END 600
@@ -57,8 +57,8 @@ static uint32_t current_max_power = TR_MAX_POWER; //update based on data from AM
 static pedal_state_t brake; //Brake pedal position sensor / brake sensor
 static pedal_state_t apps; //Accelerator pedal position sensor / throttle sensor
 
-long map(long x, long in_min, long in_max, long out_min, long out_max) {
-	long outVal = (x - in_min) * (out_max - out_min) / (in_max - in_min)
+uint32_t map(uint32_t x, uint32_t in_min, uint32_t in_max, uint32_t out_min, uint32_t out_max) {
+	uint32_t outVal = (x - in_min) * (out_max - out_min) / (in_max - in_min)
 			+ out_min;
 
 	if (x < in_min) {
@@ -82,12 +82,12 @@ void StartAppsProcessTask(void *argument) {
         osThreadTerminate(osThreadGetId());
     }
 
-	int16_t mc_apps_val;
+	int32_t mc_apps_val;
 
-	uint16_t apps1 = 0;
-	uint16_t apps2 = 0;
-	uint16_t brake1 = 0;
-	uint16_t brake2 = 0;
+	uint32_t apps1 = 0;
+	uint32_t apps2 = 0;
+	uint32_t brake1 = 0;
+	uint32_t brake2 = 0;
 
 	//setup apps state
 	strcpy(apps.name, "Apps");
@@ -120,7 +120,7 @@ void StartAppsProcessTask(void *argument) {
 				handleImpossiblilty();
 			}
 		} else {
-			if (get_car_state() == READY_TO_DRIVE) {
+			if (get_car_state() == READY_TO_DRIVE || 1) {
 				mc_apps_val = map(apps1, 310, 600, 0, MAX_TORQUE_REQUESTABLE);
 				if (BYPASS_SAFETY) {
 					sendTorqueWithFaultFixing(mc_apps_val);
@@ -162,7 +162,7 @@ void StartAppsProcessTask(void *argument) {
                     btLogIndicator(true, THROTTLE_ERROR); //pedal sensor doesnt agree
 				}
 			}
-			vTaskDelay(pdMS_TO_TICKS(1000/APPS_REQ_FREQ));                      //TODO Revise task Delay
+//			vTaskDelay(pdMS_TO_TICKS(1000/APPS_REQ_FREQ));                      //TODO Revise task Delay
 		}
 	}
 }
@@ -251,9 +251,8 @@ void StartBrakeProcessTask(void *argument) {
 
 		//kick wathcdog to make sure this doesn't hang
 //		wd_criticalTaskKick(wd_BRAKE_CTASK);
-        HAL_IWDG_Refresh(&hiwdg);
 
-		vTaskDelay(pdMS_TO_TICKS(1000/BRAKE_REQ_FREQ));             //TODO Revise task delay
+//		vTaskDelay(pdMS_TO_TICKS(1000/BRAKE_REQ_FREQ));             //TODO Revise task delay
 	}
 }
 

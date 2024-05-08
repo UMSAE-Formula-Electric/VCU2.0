@@ -83,6 +83,7 @@ void StartVcuStateTask(void *argument){
         //TODO VCU#32 Car state changed
 		switch(state){
 		case IDLE:
+            dash_clear_all_leds();
 			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
 			if(retRTOS == pdTRUE){
 				sprintf(strBuff, "Received ACU notification: %lu", ulNotifiedValue);
@@ -116,11 +117,6 @@ void StartVcuStateTask(void *argument){
 				} //Dash button not pressed
 			} //Safety loop open
 
-			if(get_car_state() != IDLE) {
-				fail_pulse();
-				go_idle();
-			}
-
 			break;
 		case TRACTIVE_SYSTEM_ACTIVE:
             //TODO VCU#32 INFO Tractive system active Ready to drive procedure begun
@@ -129,6 +125,7 @@ void StartVcuStateTask(void *argument){
 					if(checkHeartbeat()){
 						dash_set_rtd_teal();
 						if(brakePressed() || DISABLE_BRAKE_CHECK){
+                            goRTD();
 							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, RTD_ACK_TIMEOUT);
 							EnableMC();
 							if(retRTOS != pdPASS || ulNotifiedValue != ACU_RTD_ACK){

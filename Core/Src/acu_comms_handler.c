@@ -13,6 +13,7 @@
 #include "string.h"
 #include "stdio.h"
 #include "bt_protocol.h"
+#include "can_utils.h"
 
 static void notify_startup_task(enum startup_notify_value notify_val);
 static void notify_acu_heartbeat_task(HeartbeatNotify_t notify_val);

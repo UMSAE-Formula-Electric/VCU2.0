@@ -40,7 +40,8 @@ void StartErrorLogTask(void *argument)
     }
 
     // Send to CAN Bus
-    return sendCan(CAN1, queue_data, 8, CAN_LOG_ERROR_ID, CAN_NO_EXT, CAN_NO_EXT) == 0;
+    //return sendCan(&hcan1, queue_data, 8, CAN_LOG_ERROR_ID, CAN_NO_EXT, CAN_NO_EXT) == 0;
+    return sendCan(&hcan1, queue_data, 8, 0, CAN_NO_EXT, CAN_NO_EXT) == 0;
   }
   /* USER CODE END StartErrorLogTask */
 }
@@ -48,6 +49,7 @@ void StartErrorLogTask(void *argument)
 
 //bool push_msg_to_queue()
 
+/*
 // Logging functions
 bool log_error(ERR_TABLE error_type, DataType data_type, uint8_t *data) {
 	LogLevel log_level = LOG_Error;	// Error
@@ -129,3 +131,4 @@ bool log_info(INFO_TABLE info_type, DataType data_type, uint8_t* data) {
 
 	return result == osOK;
 };
+*/

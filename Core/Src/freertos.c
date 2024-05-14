@@ -125,6 +125,13 @@ const osThreadAttr_t appsProcTask_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
+/* Definitions for errorLogTask */
+osThreadId_t errorLogTaskHandle;
+const osThreadAttr_t errorLogTask_attributes = {
+  .name = "errorLogTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for canRxPacketQueue */
 osMessageQueueId_t canRxPacketQueueHandle;
 const osMessageQueueAttr_t canRxPacketQueue_attributes = {
@@ -134,6 +141,11 @@ const osMessageQueueAttr_t canRxPacketQueue_attributes = {
 osMessageQueueId_t canTxPacketQueueHandle;
 const osMessageQueueAttr_t canTxPacketQueue_attributes = {
   .name = "canTxPacketQueue"
+};
+/* Definitions for errorLogQueue */
+osMessageQueueId_t errorLogQueueHandle;
+const osMessageQueueAttr_t errorLogQueue_attributes = {
+  .name = "errorLogQueue"
 };
 /* Definitions for iwdgEventGroup */
 osEventFlagsId_t iwdgEventGroupHandle;
@@ -157,6 +169,7 @@ extern void StartMcHeartbeatTask(void *argument);
 extern void StartAcuHeartbeatTask(void *argument);
 extern void StartBrakeProcessTask(void *argument);
 extern void StartAppsProcessTask(void *argument);
+extern void StartErrorLogTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -188,6 +201,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of canTxPacketQueue */
   canTxPacketQueueHandle = osMessageQueueNew (32, sizeof(CAN_TxPacketTypeDef), &canTxPacketQueue_attributes);
+
+  /* creation of errorLogQueue */
+  errorLogQueueHandle = osMessageQueueNew (256, sizeof(uint16_t), &errorLogQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -226,6 +242,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of appsProcTask */
   appsProcTaskHandle = osThreadNew(StartAppsProcessTask, (void*) APPS_PROC_TASK_ENABLED, &appsProcTask_attributes);
+
+  /* creation of errorLogTask */
+  errorLogTaskHandle = osThreadNew(StartErrorLogTask, (void*) ERROR_LOG_TASK_ENABLED, &errorLogTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

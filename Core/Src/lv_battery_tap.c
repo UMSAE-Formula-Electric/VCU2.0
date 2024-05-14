@@ -5,7 +5,7 @@
 #include "stm32f4xx.h"
 #include "stdint.h"
 #include "can.h"
-#include "ADC.h"
+#include "adc.h"
 
 //local constants
 #define MAX_ADC_VAL 0x0fff

@@ -41,7 +41,7 @@ void StartErrorLogTask(void *argument)
 
     // Send to CAN Bus
     //return sendCan(&hcan1, queue_data, 8, CAN_LOG_ERROR_ID, CAN_NO_EXT, CAN_NO_EXT) == 0;
-    return sendCan(&hcan1, queue_data, 8, 0, CAN_NO_EXT, CAN_NO_EXT) == 0;
+     sendCan(&hcan1, queue_data, 8, 0, CAN_NO_EXT, CAN_NO_EXT) == 0;
   }
   /* USER CODE END StartErrorLogTask */
 }

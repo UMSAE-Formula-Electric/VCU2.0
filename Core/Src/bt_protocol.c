@@ -423,8 +423,8 @@ void StartBluetoothDumpTask(void *argument) {
         btLogSensor((float) 0 - 1, MC_ACUAL_SPEED_REG_LOG);
         btLogSensor(mc_getBusCurrent(), MC_I_ACTUAL_LOG);
         btLogSensor((float) 0, MC_BUS_VOLTAGE_LOG);
-        btLogSensor((float) bus_voltage / 10, MC_BUS_VOLTAGE_LOG);
-        btLogSensor((float) (mc_rpm * 117.97) / 5500, MC_ACUAL_SPEED_REG_LOG);
+        btLogSensor((float) mc_getBusVoltage() / 10, MC_BUS_VOLTAGE_LOG);
+        btLogSensor((float) (mc_get_motor_RPM() * 117.97) / 5500, MC_ACUAL_SPEED_REG_LOG);
 
 		if(get_car_state() == READY_TO_DRIVE) {
 			vTaskDelay(BT_DUMP_DELAY);

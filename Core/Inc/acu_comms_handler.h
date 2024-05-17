@@ -7,7 +7,7 @@
 
 void processAcuToVcuCanIdRxData(const uint8_t *RxData);
 void set_ACU_State(enum CAR_STATE new_state);
-void send_ACU_mesg(enum ACU_TO_CAN_MSG msg);
-void send_ACU_mesg_data(enum ACU_TO_CAN_MSG msg_id, uint8_t data_len, uint8_t * msg_data);
+void send_ACU_mesg(enum STARTUP_STATUS_NOTIFY_MSG msg);
+void send_ACU_mesg_data(enum STARTUP_STATUS_NOTIFY_MSG msg_id, uint8_t data_len, uint8_t * msg_data);
 
 #endif

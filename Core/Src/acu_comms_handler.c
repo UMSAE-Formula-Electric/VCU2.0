@@ -57,12 +57,12 @@ void set_ACU_State(enum CAR_STATE new_state){
 	//wait for acknowledge?
 }
 
-void send_ACU_mesg(enum ACU_TO_CAN_MSG msg){
+void send_ACU_mesg(enum STARTUP_STATUS_NOTIFY_MSG msg){
 	uint8_t data = (uint8_t)msg;
 	sendCan(&hcan1, &data, 1, CAN_VCU_TO_ACU_ID, CAN_RTR_DATA, CAN_NO_EXT);
 }
 
-void send_ACU_mesg_data(enum ACU_TO_CAN_MSG msg_id, uint8_t data_len, uint8_t * msg_data){
+void send_ACU_mesg_data(enum STARTUP_STATUS_NOTIFY_MSG msg_id, uint8_t data_len, uint8_t * msg_data){
 	uint8_t data[8] = {0};
 	data[0] = msg_id;
 	memcpy(&data[1], msg_data, data_len);

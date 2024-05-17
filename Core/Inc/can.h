@@ -42,21 +42,6 @@ void MX_CAN1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
-enum ACU_TO_CAN_MSG{
-    CAN_ACB_TSA_ACK = 0,
-    CAN_ACB_TSA_NACK,
-    CAN_ACB_RTD_ACK,
-    CAN_ACB_RTD_NACK,
-    CAN_GO_IDLE_REQ,  //Request to go idle
-    CAN_NO_SAFETY_LOOP_SET,  //Message to VCU to indicate that the safety loop is open at the VCU. Used when the car is idle
-    CAN_NO_SAFETY_LOOP_CLEAR,//Message to VCU to indicate that the safety loop is closed at the VCU. Used when the car is idle
-    CAN_AIR_WELD_SET,
-    CAN_HEARTBEAT_REQUEST,
-    CAN_HEARTBEAT_RESPONSE,
-    CAN_BATTERY_VOLTAGE_REQUEST,
-    CAN_BATTERY_VOLTAGE_RESPONSE
-};
-
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

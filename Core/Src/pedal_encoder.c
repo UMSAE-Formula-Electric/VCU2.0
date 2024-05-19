@@ -212,15 +212,15 @@ bool sensAgreement_990(uint16_t sens_1, uint16_t sens_2, pedal_state_t * state)
 {
 
 	bool agrees = false;
-	float normalized_sens_1;
-	float normalized_sens_2;
+	int32_t normalized_sens_1;
+	int32_t normalized_sens_2;
 	uint16_t sens_agree_range_max;
 	uint16_t sens_agree_range_min;
-	uint32_t agreement_range_size = (state->high_max) * PEDAL_AGREEMENT_PERCENT; //(state->high_max - state->high_min) * PEDAL_AGREEMENT_PERCENT;
+	int32_t agreement_range_size = (state->gain) * (state->high_max - state->high_zero) * (state->low_max - state->low_zero) * PEDAL_AGREEMENT_PERCENT; //(state->high_max - state->high_min) * PEDAL_AGREEMENT_PERCENT;
 
 	// get normalized ranges
-	normalized_sens_2 = (sens_2 - state->high_zero) / (state->high_max - state->high_zero);//sens_2 * 2;//state->gain; //(sens_2 - state->low_zero) * state->gain;
-	normalized_sens_1 = (sens_1 - state->low_zero) / (state->low_max - state->low_zero);//sens_1 - state->high_zero;
+	normalized_sens_1 = (sens_1 - state->high_zero) * (state->low_max - state->low_zero);//sens_2 * 2;//state->gain; //(sens_2 - state->low_zero) * state->gain;
+	normalized_sens_2 = (state->gain) * (sens_2 - state->low_zero) * (state->high_max - state->high_zero);//sens_1 - state->high_zero;
 
 //	if(normalized_sens_2 > 0xfff){
 //		normalized_sens_2 = 0;
@@ -259,8 +259,8 @@ bool sensAgreement_990(uint16_t sens_1, uint16_t sens_2, pedal_state_t * state)
 //	}
 	if (state->possibility == PEDAL_POSSIBLE)
 	{
-		if (normalized_sens_1 - normalized_sens_2 < PEDAL_AGREEMENT_PERCENT
-			&& normalized_sens_2 - normalized_sens_1 < PEDAL_AGREEMENT_PERCENT){
+		if ((normalized_sens_1 - normalized_sens_2) < agreement_range_size
+			&& (normalized_sens_2 - normalized_sens_1) < agreement_range_size){
 
 			state->impos_count = 0;
 			agrees = true;
@@ -300,8 +300,8 @@ bool sensAgreement_990(uint16_t sens_1, uint16_t sens_2, pedal_state_t * state)
 	else {
 		agrees = false;
 
-		if (normalized_sens_1 - normalized_sens_2 < PEDAL_AGREEMENT_PERCENT
-			&& normalized_sens_2 - normalized_sens_1 < PEDAL_AGREEMENT_PERCENT){
+		if ((normalized_sens_1 - normalized_sens_2) < agreement_range_size
+			&& (normalized_sens_2 - normalized_sens_1) < agreement_range_size){
 
 			state->possible_count++;
 		}

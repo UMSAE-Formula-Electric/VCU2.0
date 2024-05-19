@@ -29,7 +29,7 @@
 #define BRAKE_REQ_FREQ 100 //[Hz] frequency of polling loop for BRAKE PEDAL
 #define MAX_TORQUE_REQUESTABLE 2000
 #define BYPASS_SAFETY 0
-#define BYPASS_BRAKE 1
+#define BYPASS_BRAKE 0
 
 #define APPS_LOW_END 300
 #define APPS_HIGH_END 600
@@ -57,8 +57,8 @@ static uint32_t current_max_power = TR_MAX_POWER; //update based on data from AM
 static pedal_state_t brake; //Brake pedal position sensor / brake sensor
 static pedal_state_t apps; //Accelerator pedal position sensor / throttle sensor
 
-uint32_t map(uint32_t x, uint32_t in_min, uint32_t in_max, uint32_t out_min, uint32_t out_max) {
-	uint32_t outVal = (x - in_min) * (out_max - out_min) / (in_max - in_min)
+uint16_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max) {
+	uint16_t outVal = (x - in_min) * (out_max - out_min) / (in_max - in_min)
 			+ out_min;
 
 	if (x < in_min) {
@@ -82,12 +82,12 @@ void StartAppsProcessTask(void *argument) {
         osThreadTerminate(osThreadGetId());
     }
 
-	int32_t mc_apps_val;
+	int16_t mc_apps_val;
 
-	uint32_t apps1 = 0;
-	uint32_t apps2 = 0;
-	uint32_t brake1 = 0;
-	uint32_t brake2 = 0;
+	uint16_t apps1 = 0;
+	uint16_t apps2 = 0;
+	uint16_t brake1 = 0;
+	uint16_t brake2 = 0;
 
 	//setup apps state
 	strcpy(apps.name, "Apps");
@@ -97,11 +97,11 @@ void StartAppsProcessTask(void *argument) {
 	apps.impos_count = 0;
 	apps.possible_count = 0;
 	apps.impos_limit = (APPS_REQ_FREQ / 10); //100ms limit max (T.6.2.4) //TODO check
-	apps.low_min = 180; //133;//
-	apps.low_max = 839; //
-	apps.high_min = 130; //34;//
-	apps.high_max = 1049; //
-	apps.gain = 1.24;
+	apps.low_min = 2;//180; //133;//
+	apps.low_max = 1196;//839; //
+	apps.high_min = 4;//130; //34;//
+	apps.high_max = 2208;//1049; //
+	apps.gain = 1.85;
 	apps.low_zero = apps.low_min;
 	apps.high_zero = apps.high_min;
 

@@ -308,4 +308,5 @@ bool sensAgreement_990(uint16_t sens_1, uint16_t sens_2, pedal_state_t * state)
  */
 void bad_pedal_struct_err_handler() {
 	//do nothing :(
+    //TODO VCU#32 ERROR Bad pedal struct thing
 }

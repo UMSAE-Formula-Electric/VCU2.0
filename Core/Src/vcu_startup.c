@@ -51,7 +51,7 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
  */
 //bool startup_Task_start(){
 //	bool created = false;
-//
+//  //TODO VCU#32 VCU start up task begin
 //	created = TaskManagerCreate(&VCU_startup_Task, &xTask_VCU_Startup);
 //
 //	if(!created){
@@ -80,6 +80,7 @@ void StartVcuStateTask(void *argument){
 	for(;;){
         kickWatchdogBit(osThreadGetId());
 		state = get_car_state();
+        //TODO VCU#32 Car state changed
 		switch(state){
 		case IDLE:
 			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
@@ -106,11 +107,12 @@ void StartVcuStateTask(void *argument){
 								logMessage("ACU failed to ack TSA Request", true);
 								fail_pulse();
 							} else {
+                                //TODO VCU#32 INFO ACK check disabled
 								logMessage("Went TSA!", false);
 								dash_set_tsa_green();
 							}
 						} //Heartbeats not valid
-					} //Brake not pressed
+					} //Brake not pressed //TODO VCU#32 ERROR Brake check failed [software/hardware fault]
 				} //Dash button not pressed
 			} //Safety loop open
 
@@ -121,6 +123,7 @@ void StartVcuStateTask(void *argument){
 
 			break;
 		case TRACTIVE_SYSTEM_ACTIVE:
+            //TODO VCU#32 INFO Tractive system active Ready to drive procedure begun
 			if(read_saftey_loop) {
 				if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin)){
 					if(checkHeartbeat()){
@@ -134,6 +137,7 @@ void StartVcuStateTask(void *argument){
 								fail_pulse();
 							}
 							else{
+                                //TODO VCU#32 INFO ASU acknowledge ignored going RDT
 								dash_set_rtd_green();
 								mc_set_inverter_enable(1);
 								logMessage("Went RTD!", false);
@@ -172,6 +176,7 @@ void StartVcuStateTask(void *argument){
 
 			if(!DISABLE_HEARTBEAT_CHECK) {
 				if(checkHeartbeat()){//make sure we have ACU heartbeat
+                    //TODO VCU#32 ERROR Going idle because ACB hasn't sent a heart beat
 					logMessage("Going Idle due to lack of ACU", true);
 					go_idle();
 				}
@@ -225,6 +230,7 @@ bool read_saftey_loop(){
 		state = true;
 	}
 	else{
+        //TODO VCU#32 ERROR Safety loop open [hardware fault]A
 		led_mgmt_set_error(DASH_SAFETY_LOOP_OPEN_VCU);
 		state = false;
 	}
@@ -240,12 +246,11 @@ TaskHandle_t get_startup_task(){
 	return vcuStateTaskHandle;
 }
 
-/*
- * go_idle
- *
+/**
  * @Brief: This function is used to bring the entire car into the idle state
  */
 void go_idle(){
+    //TODO VCU#32 INFO Going idle
 	dash_clear_all_leds();
 	DisableMC();
 	mc_set_inverter_enable(0);
@@ -273,6 +278,7 @@ void goRTD() {
  * This function delays and must be called from a running task
  */
 static void fail_pulse(){
+    //TODO VCU#32 ERROR pulse failed
 	go_idle();
 	dash_set_rtd_blue();
 	dash_set_tsa_blue();

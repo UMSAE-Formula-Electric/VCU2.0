@@ -105,6 +105,7 @@ int main(void)
     dash_set_all_leds();
 
     if(!logInitialize()){
+        //TODO VCU#32 ERROR log initialization failed
         vcu_debug_led(REDLED, true);
     }
 

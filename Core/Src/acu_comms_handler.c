@@ -18,6 +18,7 @@ static void notify_startup_task(enum startup_notify_value notify_val);
 static void notify_acu_heartbeat_task(HeartbeatNotify_t notify_val);
 
 void processAcuToVcuCanIdRxData(const uint8_t *RxData) {
+    //TODO VCU#32 INFO Processing ACB CAN message
     char strBuff[50]; //buffer for making 'nice' logs
 
     if (RxData[0] == CAN_ACB_TSA_ACK) {
@@ -46,6 +47,7 @@ void processAcuToVcuCanIdRxData(const uint8_t *RxData) {
         //lv_battery_handle_voltage_request(); from 2018 car
     } else {
         //build up string for marking unexpected can message
+        //TODO VCU#32 ERROR/INFO unexpected ACB notification
         sprintf(strBuff, "Unexpected ACU can notification: %s\r\n", RxData);
         logMessage(strBuff, false);
     }

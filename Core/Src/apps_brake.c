@@ -119,7 +119,7 @@ void StartAppsProcessTask(void *argument) {
 				handleImpossiblilty();
 			}
 		} else {
-			if (get_car_state() == READY_TO_DRIVE || 1) {
+			if (get_car_state() == READY_TO_DRIVE) {
 				mc_apps_val = map(apps1, 310, 600, 0, MAX_TORQUE_REQUESTABLE);
 				if (BYPASS_SAFETY) {
 					sendTorqueWithFaultFixing(mc_apps_val);
@@ -160,6 +160,7 @@ void StartAppsProcessTask(void *argument) {
                     btLogIndicator(true, THROTTLE_ERROR); //pedal sensor doesnt agree
 				}
 			}
+            osThreadYield();
 //			vTaskDelay(pdMS_TO_TICKS(1000/APPS_REQ_FREQ));                      //TODO Revise task Delay
 		}
 	}

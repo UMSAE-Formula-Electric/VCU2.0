@@ -36,6 +36,7 @@ extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */
 
+// Use an enum instead?
 #define ADC_APPS1 	0
 #define ADC_APPS2	1
 #define ADC_BPS	    2

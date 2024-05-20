@@ -23,7 +23,8 @@
 /* USER CODE BEGIN 0 */
 #include <assert.h>
 
-static volatile uint32_t Sensor_DMABase[NUM_ADC_CHANNELS];
+static volatile uint32_t Sensor_DMABase[NUM_ADC_CHANNELS] = {0};
+
 
 /* USER CODE END 0 */
 

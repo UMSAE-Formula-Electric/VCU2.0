@@ -23,9 +23,7 @@
 /* USER CODE BEGIN 0 */
 #include <assert.h>
 
-static volatile uint32_t Sensor_DMABase[NUM_ADC_CHANNELS*2];
-uint8_t Buffer_Src[] = {0,1,2,3};
-
+static uint32_t Sensor_DMABase[NUM_ADC_CHANNELS];
 
 /* USER CODE END 0 */
 
@@ -102,8 +100,7 @@ void MX_ADC1_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN ADC1_Init 2 */
-  HAL_ADC_MspInit(&hadc1);
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*) Sensor_DMABase, sizeof(uint32_t));
+
   /* USER CODE END ADC1_Init 2 */
 
 }
@@ -208,12 +205,12 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
  * @Param item: The item to get. Should be one of @ADC Vals
  * @Return: returns the most recent conversion of the given value. on failure returns 0
  */
-uint32_t ADC_get_val(uint8_t item){
+uint16_t ADC_get_val(uint8_t item){
     assert(item < NUM_ADC_CHANNELS);
 
-    uint32_t retVal = 33;
+    uint32_t retVal = 0;
 
-    if(item < NUM_ADC_CHANNELS){// && HAL_DMA_PollForTransfer(&hdma_adc1, HAL_DMA_FULL_TRANSFER, 100)){
+    if(item < NUM_ADC_CHANNELS){
         retVal = Sensor_DMABase[item];
     }
     return retVal;
@@ -221,7 +218,7 @@ uint32_t ADC_get_val(uint8_t item){
 
 // adc_convert() is for if you wanted one sample and
 // had something against the "nice" DMA I(bouchard) set up....
-uint32_t adc_convert(){
+uint16_t adc_convert(){
     HAL_ADC_Start(&hadc1);//Start the conversion
     while(!__HAL_ADC_GET_FLAG(&hadc1, ADC_FLAG_EOC));//Processing the conversion
     return HAL_ADC_GetValue(&hadc1); //Return the converted data

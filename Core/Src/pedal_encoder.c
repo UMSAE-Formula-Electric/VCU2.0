@@ -212,111 +212,82 @@ bool sensAgreement_990(uint16_t sens_1, uint16_t sens_2, pedal_state_t * state)
 {
 
 	bool agrees = false;
-	int32_t normalized_sens_1;
-	int32_t normalized_sens_2;
+	uint16_t normalized_sens_1;
+	uint16_t normalized_sens_2;
 	uint16_t sens_agree_range_max;
 	uint16_t sens_agree_range_min;
-	int32_t agreement_range_size = (state->gain) * (state->high_max - state->high_zero) * (state->low_max - state->low_zero) * PEDAL_AGREEMENT_PERCENT; //(state->high_max - state->high_min) * PEDAL_AGREEMENT_PERCENT;
+	uint32_t agreement_range_size = (state->high_max) * PEDAL_AGREEMENT_PERCENT; //(state->high_max - state->high_min) * PEDAL_AGREEMENT_PERCENT;
 
-	// get normalized ranges
-	normalized_sens_1 = (sens_1 - state->high_zero) * (state->low_max - state->low_zero);//sens_2 * 2;//state->gain; //(sens_2 - state->low_zero) * state->gain;
-	normalized_sens_2 = (state->gain) * (sens_2 - state->low_zero) * (state->high_max - state->high_zero);//sens_1 - state->high_zero;
+	normalized_sens_2 = sens_2 * state->gain; //(sens_2 - state->low_zero) * state->gain;
+	normalized_sens_1 = sens_1; //sens_1 - state->high_zero;
 
-//	if(normalized_sens_2 > 0xfff){
-//		normalized_sens_2 = 0;
-//	}
-//
-//	if(normalized_sens_1 > 0xfff){
-//		normalized_sens_1 = 0;
-//	}
+	if(normalized_sens_2 > 0xfff){
+		normalized_sens_2 = 0;
+	}
+
+	if(normalized_sens_1 > 0xfff){
+		normalized_sens_1 = 0;
+	}
 
 
-//	if (normalized_sens_1 < agreement_range_size)
-//	{
-//		sens_agree_range_min = 0;
-//	}
-//	else {
-//		sens_agree_range_min = normalized_sens_1 - agreement_range_size;
-//		//sens_agree_range_min = normalized_sens_1 - agreement_range_size;
-//	}
-//	//double check underflow
-//
-//	if(sens_agree_range_min > normalized_sens_1){
-//		//TODO: handle proper
-//		//throttle underflow
-//		configASSERT(0);
-//	}
-//	//no overflows here unless TR_MAX_ERROR >> max throttle value, impossisble
-//	sens_agree_range_max = normalized_sens_1 + agreement_range_size;
-//	//sens_agree_range_max = normalized_sens_1 + agreement_range_size;
-//
-//	//check overflow anyway	//cant overflow on high end because only using 12 bits of 16bit int, watch lowend
-//
-//	if (sens_agree_range_max < normalized_sens_1) {
-//		//TODO: handle proper
-//		//throttle overflow
-//		configASSERT(0);
-//	}
+	if (normalized_sens_1 < agreement_range_size)
+	{
+		sens_agree_range_min = 0;
+	}
+	else {
+		sens_agree_range_min = normalized_sens_1 - agreement_range_size;
+		//sens_agree_range_min = normalized_sens_1 - agreement_range_size;
+	}
+	//double check underflow
+
+	if(sens_agree_range_min > normalized_sens_1){
+		//TODO: handle proper
+		//throttle underflow
+		configASSERT(0);
+	}
+	//no overflows here unless TR_MAX_ERROR >> max throttle value, impossisble
+	sens_agree_range_max = normalized_sens_1 + agreement_range_size;
+	//sens_agree_range_max = normalized_sens_1 + agreement_range_size;
+
+	//check overflow anyway	//cant overflow on high end because only using 12 bits of 16bit int, watch lowend
+
+	if (sens_agree_range_max < normalized_sens_1) {
+		//TODO: handle proper
+		//throttle overflow
+		configASSERT(0);
+	}
 	if (state->possibility == PEDAL_POSSIBLE)
 	{
-		if ((normalized_sens_1 - normalized_sens_2) < agreement_range_size
-			&& (normalized_sens_2 - normalized_sens_1) < agreement_range_size){
-
+		if (normalized_sens_2 >= sens_agree_range_min
+				&& normalized_sens_2 < sens_agree_range_max) {
 			state->impos_count = 0;
+		}
+		else {
+			state->impos_count++;
+		}
+		if (state->impos_count < state->impos_limit) {
 			agrees = true;
 		}
-		else{
-			state->impos_count++;
-
-			if(state->impos_count < state->impos_limit){
-				agrees = true;
-			}
-			else{
-				state->possibility = PEDAL_IMPOSSIBLE;
-				agrees = false;
-
-				logMessage("APPS/BRAKE: Sensor Disagreement", false);
-			}
+		else {
+			agrees = false;
+			//state->impos_count = 0;
+			state->possible_count = 0;
+			state->possibility = PEDAL_IMPOSSIBLE;
+			//handleImpossiblilty();
+			logMessage("APPS/BRAKE: Sensor Disagreement", false);
 		}
-//		if (normalized_sens_2 >= sens_agree_range_min
-//				&& normalized_sens_2 < sens_agree_range_max) {
-//			state->impos_count = 0;
-//		}
-//		else {
-//			state->impos_count++;
-//		}
-//		if (state->impos_count < state->impos_limit) {
-//			agrees = true;
-//		}
-//		else {
-//			agrees = false;
-//			//state->impos_count = 0;
-//			state->possible_count = 0;
-//			state->possibility = PEDAL_IMPOSSIBLE;
-//			//handleImpossiblilty();
-//			logMessage("APPS/BRAKE: Sensor Disagreement", false);
-//		}
 	}
 	else {
 		agrees = false;
 
-		if ((normalized_sens_1 - normalized_sens_2) < agreement_range_size
-			&& (normalized_sens_2 - normalized_sens_1) < agreement_range_size){
-
+		//try to recover from impossible state, ambiguous in rules
+		if (normalized_sens_2 >= sens_agree_range_min
+				&& normalized_sens_2 < sens_agree_range_max) {
 			state->possible_count++;
 		}
-		else{
+		else {
 			state->possible_count = 0;
 		}
-
-		//try to recover from impossible state, ambiguous in rules
-//		if (normalized_sens_2 >= sens_agree_range_min
-//				&& normalized_sens_2 < sens_agree_range_max) {
-//			state->possible_count++;
-//		}
-//		else {
-//			state->possible_count = 0;
-//		}
 		if (state->possible_count < (state->impos_limit )) {
 			agrees = false;
 		}
@@ -329,7 +300,7 @@ bool sensAgreement_990(uint16_t sens_1, uint16_t sens_2, pedal_state_t * state)
 		}
 
 	}
-	return agrees;
+	return true;
 }
 
 /*

@@ -57,8 +57,8 @@ static uint32_t current_max_power = TR_MAX_POWER; //update based on data from AM
 static pedal_state_t brake; //Brake pedal position sensor / brake sensor
 static pedal_state_t apps; //Accelerator pedal position sensor / throttle sensor
 
-long map(long x, long in_min, long in_max, long out_min, long out_max) {
-	long outVal = (x - in_min) * (out_max - out_min) / (in_max - in_min)
+uint16_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max) {
+	uint16_t outVal = (x - in_min) * (out_max - out_min) / (in_max - in_min)
 			+ out_min;
 
 	if (x < in_min) {
@@ -97,11 +97,11 @@ void StartAppsProcessTask(void *argument) {
 	apps.impos_count = 0;
 	apps.possible_count = 0;
 	apps.impos_limit = (APPS_REQ_FREQ / 10); //100ms limit max (T.6.2.4) //TODO check
-	apps.low_min = 180; //133;//
-	apps.low_max = 839; //
-	apps.high_min = 130; //34;//
-	apps.high_max = 1049; //
-	apps.gain = 1.24;
+	apps.low_min = 2;//180; //133;//
+	apps.low_max = 1196;//839; //
+	apps.high_min = 4;//130; //34;//
+	apps.high_max = 2208;//1049; //
+	apps.gain = 1.85;
 	apps.low_zero = apps.low_min;
 	apps.high_zero = apps.high_min;
 
@@ -119,7 +119,7 @@ void StartAppsProcessTask(void *argument) {
 				handleImpossiblilty();
 			}
 		} else {
-			if (get_car_state() == READY_TO_DRIVE) {
+			if (get_car_state() == READY_TO_DRIVE || 1) {
 				mc_apps_val = map(apps1, 310, 600, 0, MAX_TORQUE_REQUESTABLE);
 				if (BYPASS_SAFETY) {
 					sendTorqueWithFaultFixing(mc_apps_val);
@@ -160,7 +160,7 @@ void StartAppsProcessTask(void *argument) {
                     btLogIndicator(true, THROTTLE_ERROR); //pedal sensor doesnt agree
 				}
 			}
-			vTaskDelay(pdMS_TO_TICKS(1000/APPS_REQ_FREQ));                      //TODO Revise task Delay
+//			vTaskDelay(pdMS_TO_TICKS(1000/APPS_REQ_FREQ));                      //TODO Revise task Delay
 		}
 	}
 }
@@ -249,9 +249,8 @@ void StartBrakeProcessTask(void *argument) {
 
 		//kick wathcdog to make sure this doesn't hang
 //		wd_criticalTaskKick(wd_BRAKE_CTASK);
-        HAL_IWDG_Refresh(&hiwdg);
 
-		vTaskDelay(pdMS_TO_TICKS(1000/BRAKE_REQ_FREQ));             //TODO Revise task delay
+//		vTaskDelay(pdMS_TO_TICKS(1000/BRAKE_REQ_FREQ));             //TODO Revise task delay
 	}
 }
 

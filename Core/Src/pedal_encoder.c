@@ -199,137 +199,56 @@ bool throttleAgreement_936(uint16_t throttle_1, uint16_t throttle_2,
 
 
 /*
- * This function checks for implausiblity of the apps and brake pedal for
- * BEI 990 Series. This function expects two offset slopes for sensor ranges.
- * one from 0.5 - 4.5V the other from 0.25 - 2.25V.
+ * This function checks for implausibility of the apps and brake pedal.
+ * This function expects two offset slopes for sensor ranges. It checks that these two slopes agree within 10%.
+ * Rule T.4.2.4 in 2024 FSAE Rules v1
+ *
  * Note these ranges are scaled by a factor of 3.3/5
  *
  * throttle_2: 0.25 - 2.25
  * throttle_1: 0.5 - 4.5
  * returns true if the throttle sensors agree otherwise false
  */
-bool sensAgreement_990(uint16_t sens_1, uint16_t sens_2, pedal_state_t * state)
+bool rule_10percent_pedal_travel_apps_agreement(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state)
 {
+    uint16_t sens_high_zero_offset = state->high_zero;
+    uint16_t sens_low_zero_offset = state->low_zero;
 
-	bool agrees = false;
-	int32_t normalized_sens_1;
-	int32_t normalized_sens_2;
-	uint16_t sens_agree_range_max;
-	uint16_t sens_agree_range_min;
-	int32_t agreement_range_size = (state->gain) * (state->high_max - state->high_zero) * (state->low_max - state->low_zero) * PEDAL_AGREEMENT_PERCENT; //(state->high_max - state->high_min) * PEDAL_AGREEMENT_PERCENT;
+    uint16_t sens_high_range = state->high_max - sens_high_zero_offset;
+    uint16_t sens_low_range = state->low_max - sens_low_zero_offset;
 
-	// get normalized ranges
-	normalized_sens_1 = (sens_1 - state->high_zero) * (state->low_max - state->low_zero);//sens_2 * 2;//state->gain; //(sens_2 - state->low_zero) * state->gain;
-	normalized_sens_2 = (state->gain) * (sens_2 - state->low_zero) * (state->high_max - state->high_zero);//sens_1 - state->high_zero;
+    int32_t normalized_sens_1 = (sens_high - sens_high_zero_offset) * sens_low_range;
+    int32_t normalized_sens_2 = (int32_t) ((state->gain) * ((float) ((sens_low - sens_low_zero_offset) * sens_high_range)));
+    int32_t agreement_range_size = (int32_t) ((state->gain) * ((float) (sens_high_range * sens_low_range)) * PEDAL_AGREEMENT_PERCENT);
 
-//	if(normalized_sens_2 > 0xfff){
-//		normalized_sens_2 = 0;
-//	}
-//
-//	if(normalized_sens_1 > 0xfff){
-//		normalized_sens_1 = 0;
-//	}
+    bool within_range = abs(normalized_sens_1 - normalized_sens_2) < agreement_range_size;
 
+    if (state->possibility == PEDAL_POSSIBLE)
+    {
+        state->impos_count = within_range ? 0 : state->impos_count + 1;
+        if(state->impos_count >= state->impos_limit){
+            state->possibility = PEDAL_IMPOSSIBLE;
+            logMessage("APPS: Sensor Disagreement", false);
+        }
+        else {
+            within_range = true;
+        }
+    }
+    else
+    {
+        state->possible_count = within_range ? state->possible_count + 1 : 0;
+        if (state->possible_count >= state->impos_limit) {
+            state->impos_count = 0;
+            state->possible_count = 0;
+            state->possibility = PEDAL_POSSIBLE;
+            logMessage("APPS: Sensors have reached an agreement", false);
+        }
+        else {
+            within_range = false;
+        }
+    }
 
-//	if (normalized_sens_1 < agreement_range_size)
-//	{
-//		sens_agree_range_min = 0;
-//	}
-//	else {
-//		sens_agree_range_min = normalized_sens_1 - agreement_range_size;
-//		//sens_agree_range_min = normalized_sens_1 - agreement_range_size;
-//	}
-//	//double check underflow
-//
-//	if(sens_agree_range_min > normalized_sens_1){
-//		//TODO: handle proper
-//		//throttle underflow
-//		configASSERT(0);
-//	}
-//	//no overflows here unless TR_MAX_ERROR >> max throttle value, impossisble
-//	sens_agree_range_max = normalized_sens_1 + agreement_range_size;
-//	//sens_agree_range_max = normalized_sens_1 + agreement_range_size;
-//
-//	//check overflow anyway	//cant overflow on high end because only using 12 bits of 16bit int, watch lowend
-//
-//	if (sens_agree_range_max < normalized_sens_1) {
-//		//TODO: handle proper
-//		//throttle overflow
-//		configASSERT(0);
-//	}
-	if (state->possibility == PEDAL_POSSIBLE)
-	{
-		if ((normalized_sens_1 - normalized_sens_2) < agreement_range_size
-			&& (normalized_sens_2 - normalized_sens_1) < agreement_range_size){
-
-			state->impos_count = 0;
-			agrees = true;
-		}
-		else{
-			state->impos_count++;
-
-			if(state->impos_count < state->impos_limit){
-				agrees = true;
-			}
-			else{
-				state->possibility = PEDAL_IMPOSSIBLE;
-				agrees = false;
-
-				logMessage("APPS/BRAKE: Sensor Disagreement", false);
-			}
-		}
-//		if (normalized_sens_2 >= sens_agree_range_min
-//				&& normalized_sens_2 < sens_agree_range_max) {
-//			state->impos_count = 0;
-//		}
-//		else {
-//			state->impos_count++;
-//		}
-//		if (state->impos_count < state->impos_limit) {
-//			agrees = true;
-//		}
-//		else {
-//			agrees = false;
-//			//state->impos_count = 0;
-//			state->possible_count = 0;
-//			state->possibility = PEDAL_IMPOSSIBLE;
-//			//handleImpossiblilty();
-//			logMessage("APPS/BRAKE: Sensor Disagreement", false);
-//		}
-	}
-	else {
-		agrees = false;
-
-		if ((normalized_sens_1 - normalized_sens_2) < agreement_range_size
-			&& (normalized_sens_2 - normalized_sens_1) < agreement_range_size){
-
-			state->possible_count++;
-		}
-		else{
-			state->possible_count = 0;
-		}
-
-		//try to recover from impossible state, ambiguous in rules
-//		if (normalized_sens_2 >= sens_agree_range_min
-//				&& normalized_sens_2 < sens_agree_range_max) {
-//			state->possible_count++;
-//		}
-//		else {
-//			state->possible_count = 0;
-//		}
-		if (state->possible_count < (state->impos_limit )) {
-			agrees = false;
-		}
-		else {
-			agrees = true;
-			state->impos_count = 0;
-			state->possible_count = 0;
-			state->possibility = PEDAL_POSSIBLE;
-			logMessage("APPS/BRAKE: Sensors have reached an agreement", false);
-		}
-
-	}
-	return agrees;
+    return within_range;
 }
 
 /*

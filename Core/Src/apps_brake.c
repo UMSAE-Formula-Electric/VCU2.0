@@ -124,7 +124,7 @@ void StartAppsProcessTask(void *argument) {
 				if (BYPASS_SAFETY) {
 					sendTorqueWithFaultFixing(mc_apps_val);
 				} else {
-					if (!sensAgreement_990(apps1, apps2, &apps)) {
+					if (!rule_10percent_pedal_travel_apps_agreement(apps1, apps2, &apps)) {
 						handleImpossiblilty();
                         btLogIndicator(true, THROTTLE_ERROR);
 					} else {

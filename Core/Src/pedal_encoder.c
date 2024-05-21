@@ -205,9 +205,10 @@ bool throttleAgreement_936(uint16_t throttle_1, uint16_t throttle_2,
  *
  * Note these ranges are scaled by a factor of 3.3/5
  *
- * throttle_2: 0.25 - 2.25
- * throttle_1: 0.5 - 4.5
- * returns true if the throttle sensors agree otherwise false
+ * sens_high: 	high gain petal sensor ADC reading
+ * sens_low: 	low gain petal sensor ADC reading
+ *
+ * RETURN true if the throttle sensors agree within 10% otherwise false
  */
 bool rule_10percent_pedal_travel_apps_agreement(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state)
 {

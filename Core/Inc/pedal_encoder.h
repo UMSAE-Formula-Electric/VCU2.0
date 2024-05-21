@@ -60,7 +60,7 @@ typedef struct{
 	uint16_t low_max;	//max val of low sensor
 	uint16_t high_min;	//min val of high sensor
 	uint16_t high_max;	//max val of high sensor
-	uint16_t low_zero;	//offset of zero of low sensor [should be zero *according* to datasheet
+	uint16_t low_zero;	//offset of zero of low sensor [should be zero *according* to datasheet]
 	uint16_t high_zero;	//offset of high sensor
 	uint16_t twoFootCount;
 	float gain; //gain of sensor

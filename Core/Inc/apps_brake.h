@@ -22,6 +22,17 @@
 #define TR_MAX_TORQUE_OUTPUT 240 // Nm]
 #define TR_MAX_POWER 80000 //kWatts
 
+// APPS characteristics
+#define APPS_GAIN		1.85
+
+#define APPS_LOW_ZERO	2
+#define APPS_LOW_MIN	2
+#define APPS_LOW_MAX	1196
+
+#define APPS_HIGH_ZERO	4
+#define APPS_HIGH_MIN	4
+#define APPS_HIGH_MAX	2208
+
 //#define TR_BREAK_PRESSED_LIMIT 1350 //was 2000
 //*******************
 #define LOW_TORQUE_DIV 4

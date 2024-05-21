@@ -28,19 +28,21 @@
 #define APPS_REQ_FREQ 200 //[Hz] frequency of polling loop for APPS
 #define BRAKE_REQ_FREQ 100 //[Hz] frequency of polling loop for BRAKE PEDAL
 #define MAX_TORQUE_REQUESTABLE 2000
-#define BYPASS_SAFETY 0
-#define BYPASS_BRAKE 0
 
-#define APPS_LOW_END 300
-#define APPS_HIGH_END 600
+#define BYPASS_SAFETY	0
+#define BYPASS_BRAKE	0
+#define BYPASS_RTD		0
 
-#define APPS_TWO_FOOT_VAL 400
-#define APPS_TWO_FOOT_RELEASE 310
+#define APPS_LOW_END 	300
+#define APPS_HIGH_END 	600
 
-#define PEDAL_TWO_FOOT_PERCENT 0.25// EV2.4.1 amount you can press apps while brake is depressed before stopping current [rule about two foot driving]
-#define PEDAL_TWO_FOOT_RELEASE_PERCENT 0.05//0.1// Amount to get out of two foot pressed state
-#define BRAKE_PRESS_PERCENT 0.1 //amount to press the brake before it is considered actuated
-#define BRAKE_PRESS_TWOFOOT_PERCENT 0.20 //amount to press brake before it is considered pressed for
+#define APPS_TWO_FOOT_VAL 		400
+#define APPS_TWO_FOOT_RELEASE 	310
+
+#define PEDAL_TWO_FOOT_PERCENT 			0.25	// EV2.4.1 amount you can press apps while brake is depressed before stopping current [rule about two foot driving]
+#define PEDAL_TWO_FOOT_RELEASE_PERCENT 	0.05	// Amount to get out of two foot pressed state
+#define BRAKE_PRESS_PERCENT 			0.1 	//amount to press the brake before it is considered actuated
+#define BRAKE_PRESS_TWOFOOT_PERCENT 	0.20 	//amount to press brake before it is considered pressed for
 //THROTTLE VAL 2 IS INVERTED
 //static uint32_t Sensor_DMABase[4]; // dereferencing Mem0BasePtr1 will give the value stored at its address at time of dereference!(Shit uses DMA! Whew!)
 
@@ -71,6 +73,49 @@ uint16_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uin
 	return outVal;
 }
 
+void InitalizeApps(float gain, uint16_t low_zero, uint16_t low_min, uint16_t low_max,
+		uint16_t high_zero, uint16_t high_min, uint16_t high_max){
+
+	//setup apps state
+	strcpy(apps.name, "Apps");
+	apps.possibility = PEDAL_POSSIBLE;
+
+	apps.gone_count = 0;
+	apps.found_Count = 0;
+	apps.impos_count = 0;
+	apps.possible_count = 0;
+
+	apps.impos_limit = (APPS_REQ_FREQ / 10); //100ms limit max (T.6.2.4) //TODO check
+
+	apps.low_zero 	= low_zero;
+	apps.low_min 	= low_min;//2;//180; //133;//
+	apps.low_max 	= low_max;//1196;//839; //
+
+	apps.high_zero	= high_zero;
+	apps.high_min 	= high_min;//4;//130; //34;//
+	apps.high_max 	= high_max;//2208;//1049; //
+
+	apps.gain = gain;//1.85;
+}
+
+void InitializeBrake(){
+	//setup brake state
+	strcpy(brake.name, "Brake");
+	brake.possibility = PEDAL_POSSIBLE;
+	brake.gone_count = 0;
+	brake.found_Count = 0;
+	brake.impos_count = 0;
+	brake.possible_count = 0;
+	brake.impos_limit = (APPS_REQ_FREQ / 10); //100ms limit max (T.6.3.3)
+	brake.low_min = 125;
+	brake.low_max = 330;
+	brake.high_min = 259;
+	brake.high_max = 574;
+	brake.high_zero = brake.high_min;
+	brake.low_zero = brake.low_min;
+	brake.gain = 1.74;
+}
+
 /*
  * updateAPPSVals
  *
@@ -90,20 +135,8 @@ void StartAppsProcessTask(void *argument) {
 	uint16_t brake2 = 0;
 
 	//setup apps state
-	strcpy(apps.name, "Apps");
-	apps.possibility = PEDAL_POSSIBLE;
-	apps.gone_count = 0;
-	apps.found_Count = 0;
-	apps.impos_count = 0;
-	apps.possible_count = 0;
-	apps.impos_limit = (APPS_REQ_FREQ / 10); //100ms limit max (T.6.2.4) //TODO check
-	apps.low_min = 2;//180; //133;//
-	apps.low_max = 1196;//839; //
-	apps.high_min = 4;//130; //34;//
-	apps.high_max = 2208;//1049; //
-	apps.gain = 1.85;
-	apps.low_zero = apps.low_min;
-	apps.high_zero = apps.high_min;
+	InitalizeApps(APPS_GAIN, APPS_LOW_ZERO, APPS_LOW_MIN, APPS_LOW_MAX,
+					APPS_HIGH_ZERO, APPS_HIGH_MIN, APPS_HIGH_MAX);
 
 	for (;;) {
         kickWatchdogBit(osThreadGetId());
@@ -119,7 +152,7 @@ void StartAppsProcessTask(void *argument) {
 				handleImpossiblilty();
 			}
 		} else {
-			if (get_car_state() == READY_TO_DRIVE) {
+			if (get_car_state() == READY_TO_DRIVE || BYPASS_RTD) {
 				mc_apps_val = map(apps1, 310, 600, 0, MAX_TORQUE_REQUESTABLE);
 				if (BYPASS_SAFETY) {
 					sendTorqueWithFaultFixing(mc_apps_val);
@@ -221,21 +254,8 @@ void StartBrakeProcessTask(void *argument) {
 	uint16_t brake1 = 0;
 	uint16_t brake2 = 0;
 
-	//setup apps state
-	strcpy(brake.name, "Brake");
-	brake.possibility = PEDAL_POSSIBLE;
-	brake.gone_count = 0;
-	brake.found_Count = 0;
-	brake.impos_count = 0;
-	brake.possible_count = 0;
-	brake.impos_limit = (APPS_REQ_FREQ / 10); //100ms limit max (T.6.3.3)
-	brake.low_min = 125;
-	brake.low_max = 330;
-	brake.high_min = 259;
-	brake.high_max = 574;
-	brake.high_zero = brake.high_min;
-	brake.low_zero = brake.low_min;
-	brake.gain = 1.74;
+	//setup brake state
+	InitializeBrake();
 
 	//task infinite loop
 	for (;;) {

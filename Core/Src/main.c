@@ -115,7 +115,7 @@ int main(void)
     dash_clear_all_leds();
 
     vcu_debug_led(GREENLED, true);
-    logMessage("INIT: Starting Scheduler\r\n", true);
+    sendToUsart("INIT: Starting Scheduler\r\n", true);
 
   /* USER CODE END 2 */
 
@@ -219,7 +219,7 @@ void Error_Handler(void)
   //TODO LEDs
   //TODO Error Handling
     //__disable_irq();
-    logMessage("ERROR\r\n", true);
+    sendToUsart("ERROR\r\n", true);
     //__enable_irq();
   /* USER CODE END Error_Handler_Debug */
 }

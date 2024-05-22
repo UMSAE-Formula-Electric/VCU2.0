@@ -55,7 +55,7 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 //	created = TaskManagerCreate(&VCU_startup_Task, &xTask_VCU_Startup);
 //
 //	if(!created){
-//		logMessage("Failed to create startup task", true);
+//		sendToUsart("Failed to create startup task", true);
 //	}
 //
 //	return created;
@@ -85,7 +85,7 @@ void StartVcuStateTask(void *argument){
 			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
 			if(retRTOS == pdTRUE){
 				sprintf(strBuff, "Received ACU notification: %lu", ulNotifiedValue);
-				logMessage(strBuff,false);
+                sendToUsart(strBuff, false);
 			}
 
 			//Go TSA procedure
@@ -103,10 +103,10 @@ void StartVcuStateTask(void *argument){
 							if(ulNotifiedValue != ACU_TSA_ACK){
 								//ACU did not ACK
 								go_idle();
-								logMessage("ACU failed to ack TSA Request", true);
+                                sendToUsart("ACU failed to ack TSA Request", true);
 								fail_pulse();
 							} else {
-								logMessage("Went TSA!", false);
+                                sendToUsart("Went TSA!", false);
 								dash_set_tsa_green();
 							}
 						} //Heartbeats not valid
@@ -129,14 +129,14 @@ void StartVcuStateTask(void *argument){
 							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, RTD_ACK_TIMEOUT);
 							EnableMC();
 							if(retRTOS != pdPASS || ulNotifiedValue != ACU_RTD_ACK){
-								logMessage("ACU failed to ack RTD Request", false);
+                                sendToUsart("ACU failed to ack RTD Request", false);
 								go_idle();
 								fail_pulse();
 							}
 							else{
 								dash_set_rtd_green();
 								mc_set_inverter_enable(1);
-								logMessage("Went RTD!", false);
+                                sendToUsart("Went RTD!", false);
 							}
 						} 	//Brake not pressed
 					} 		//Heartbeats not valid
@@ -151,7 +151,7 @@ void StartVcuStateTask(void *argument){
 
 			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
 			if(retRTOS == pdTRUE && ulNotifiedValue == GO_IDLE_REQ_FROM_ACU){
-				logMessage("ACU request IDLE state change", true);
+                sendToUsart("ACU request IDLE state change", true);
 				go_idle();
 			}
 
@@ -161,18 +161,18 @@ void StartVcuStateTask(void *argument){
 			if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin) || isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)){
                 set_ACU_State(IDLE);
 				go_idle();
-				logMessage("RTD or VCU Button Pressed, going IDLE", false);
+                sendToUsart("RTD or VCU Button Pressed, going IDLE", false);
 			}
 
 			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
 			if(retRTOS == pdTRUE && ulNotifiedValue == GO_IDLE_REQ_FROM_ACU){
-				logMessage("ACU request IDLE state change", true);
+                sendToUsart("ACU request IDLE state change", true);
 				go_idle();
 			}
 
 			if(!DISABLE_HEARTBEAT_CHECK) {
 				if(checkHeartbeat()){//make sure we have ACU heartbeat
-					logMessage("Going Idle due to lack of ACU", true);
+                    sendToUsart("Going Idle due to lack of ACU", true);
 					go_idle();
 				}
 			}
@@ -182,7 +182,7 @@ void StartVcuStateTask(void *argument){
 		}
 		vTaskDelay(pdMS_TO_TICKS(STARTUP_TASK_DELAY));                  //TODO Revise task delay
 	}
-	logMessage("Error exiting from startup task", true);
+    sendToUsart("Error exiting from startup task", true);
 	vTaskDelete( NULL );
 }
 

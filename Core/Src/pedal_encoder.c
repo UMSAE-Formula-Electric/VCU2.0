@@ -83,7 +83,7 @@ bool detectPedal(uint16_t petal_1, uint16_t petal_2, pedal_state_t * state) {
 //				} else {
 //					sprintf(buff, "PEDAL: Not Detected");
 //				}
-//				logMessage(buff, false);
+//				sendToUsart(buff, false);
 			}
 		}
 		else
@@ -107,7 +107,7 @@ bool detectPedal(uint16_t petal_1, uint16_t petal_2, pedal_state_t * state) {
 				} else {
 					sprintf(buff, "PETAL: Re-detected");
 				}
-				logMessage(buff, false);
+                sendToUsart(buff, false);
 			}
 		}
 	}
@@ -188,7 +188,7 @@ bool throttleAgreement_936(uint16_t throttle_1, uint16_t throttle_2,
 			state->possible_count = 0;
 
 			state->possibility = PEDAL_POSSIBLE;
-			logMessage("THROTTLE: Throttle Sensors have reached an agreement", false);
+			sendToUsart("THROTTLE: Throttle Sensors have reached an agreement", false);
 		}
 		*/
 	}
@@ -274,7 +274,7 @@ bool sensAgreement_990(uint16_t sens_1, uint16_t sens_2, pedal_state_t * state)
 			state->possible_count = 0;
 			state->possibility = PEDAL_IMPOSSIBLE;
 			//handleImpossiblilty();
-			logMessage("APPS/BRAKE: Sensor Disagreement", false);
+            sendToUsart("APPS/BRAKE: Sensor Disagreement", false);
 		}
 	}
 	else {
@@ -296,7 +296,7 @@ bool sensAgreement_990(uint16_t sens_1, uint16_t sens_2, pedal_state_t * state)
 			state->impos_count = 0;
 			state->possible_count = 0;
 			state->possibility = PEDAL_POSSIBLE;
-			logMessage("APPS/BRAKE: Sensors have reached an agreement", false);
+            sendToUsart("APPS/BRAKE: Sensors have reached an agreement", false);
 		}
 
 	}

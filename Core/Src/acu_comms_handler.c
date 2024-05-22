@@ -47,7 +47,7 @@ void processAcuToVcuCanIdRxData(const uint8_t *RxData) {
     } else {
         //build up string for marking unexpected can message
         sprintf(strBuff, "Unexpected ACU can notification: %s\r\n", RxData);
-        logMessage(strBuff, false);
+        sendToUsart(strBuff, false);
     }
 }
 

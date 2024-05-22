@@ -50,7 +50,7 @@ void StartAcuHeartbeatTask(void *argument){
 
 		//send heartbeat message to ACU
         send_ACU_mesg(CAN_HEARTBEAT_REQUEST);
-        logMessage("Heartbeat: Sent heartbeat request to ACU\r\n", true);
+        sendToUsart("Heartbeat: Sent heartbeat request to ACU\r\n", true);
 
 		//Check if ACU has sent a message
 		retRTOS = xTaskNotifyWait(0x00, 0x00, (uint32_t*) &acuNotification, pdMS_TO_TICKS(HEARTBEAT_TASK_DELAY_MS));
@@ -59,14 +59,14 @@ void StartAcuHeartbeatTask(void *argument){
 		if(retRTOS == pdTRUE && acuNotification == HEARTBEAT_RESPONSE_NOTIFY){
             // Received notification from ACU
             misses = 0; // Reset misses counter
-            logMessage(acu_connection_state == HEARTBEAT_LOST ? "Heartbeat: ACU re-connection\r\n" : "Heartbeat: Heartbeat received from the ACU\r\n", true);
+            sendToUsart(acu_connection_state == HEARTBEAT_LOST ? "Heartbeat: ACU re-connection\r\n" : "Heartbeat: Heartbeat received from the ACU\r\n", true);
             acu_connection_state = HEARTBEAT_PRESENT; // Set state
 		}
 		else{
             // Did not receive notification from ACU
             if(++misses > HEARTBEAT_MAX_MISSES){
                 // Lost ACU
-                logMessage(acu_connection_state == HEARTBEAT_PRESENT ? "Heartbeat: Lost Connection with ACU\r\n" : "Heartbeat: Could not connect with ACU\r\n", true);
+                sendToUsart(acu_connection_state == HEARTBEAT_PRESENT ? "Heartbeat: Lost Connection with ACU\r\n" : "Heartbeat: Could not connect with ACU\r\n", true);
                 acu_connection_state = HEARTBEAT_LOST;
             }
 		}
@@ -102,14 +102,14 @@ void StartMcHeartbeatTask(void *argument){
     if(retRTOS == pdPASS){
         // Received notification from MC
         misses = 0; // Reset misses counter
-        logMessage(mc_connection_state == HEARTBEAT_LOST ? "Heartbeat: MC re-connection\r\n" : "Heartbeat: Heartbeat received from the MC\r\n", true);
+        sendToUsart(mc_connection_state == HEARTBEAT_LOST ? "Heartbeat: MC re-connection\r\n" : "Heartbeat: Heartbeat received from the MC\r\n", true);
         mc_connection_state = HEARTBEAT_PRESENT; // Set state
     }
     else{
         // Did not receive notification from MC
         if(++misses > HEARTBEAT_MAX_MISSES){
             // Lost MC
-            logMessage(mc_connection_state == HEARTBEAT_PRESENT ? "Heartbeat: Lost Connection with MC\r\n" : "Heartbeat: Could not connect with MC\r\n", true);
+            sendToUsart(mc_connection_state == HEARTBEAT_PRESENT ? "Heartbeat: Lost Connection with MC\r\n" : "Heartbeat: Could not connect with MC\r\n", true);
             mc_connection_state = HEARTBEAT_LOST;
         }
     }

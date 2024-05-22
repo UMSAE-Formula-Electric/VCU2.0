@@ -107,7 +107,7 @@ void vcu_debug_led(enum debugLed led, bool on){
             pin = VCU_LED_BLUE_Pin;
             break;
         default:
-            logMessage("Bad argument to debug led", false);
+            sendToUsart("Bad argument to debug led", false);
             return;
     }
 

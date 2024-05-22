@@ -278,14 +278,14 @@ static void handleImpossiblilty() {
 //	created = TaskManagerCreate(&update_apps_vals, &xTask_APPS_PROCESS);
 //	if (!created) {
 //		//log failed to start task
-//		logMessage("APPS: Failed to create APPS_PROC task", false);
+//		sendToUsart("APPS: Failed to create APPS_PROC task", false);
 //	}
 //
 //	//create brake polling task
 //	created = TaskManagerCreate(&update_brake_vals, &xTask_BRAKE_PROCESS);
 //	if (!created) {
 //		//log failed to start task
-//		logMessage("BRAKE: Failed to create BRAKE_PROC task", false);
+//		sendToUsart("BRAKE: Failed to create BRAKE_PROC task", false);
 //	}
 //}
 

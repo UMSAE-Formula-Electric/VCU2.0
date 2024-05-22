@@ -158,10 +158,10 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         uint32_t maxQueueCapacity = osMessageQueueGetCapacity(canRxPacketQueueHandle);
 
         if (currQueueSize == maxQueueCapacity) {  /* Queue is full */
-            logMessage("Error adding received message to the CAN Rx queue because the queue is full.\r\n", true);
+            sendToUsart("Error adding received message to the CAN Rx queue because the queue is full.\r\n", true);
         }
         else {  /* Error receiving message from CAN */
-            logMessage("Error receiving message from the CAN Bus and adding it to the Rx queue.\r\n", true);
+            sendToUsart("Error receiving message from the CAN Bus and adding it to the Rx queue.\r\n", true);
         }
         Error_Handler();
     }
@@ -169,14 +169,14 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 
 void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *hcan)
 {
-    logMessage("CAN Rx FIFO0 is full.\r\n", true);
+    sendToUsart("CAN Rx FIFO0 is full.\r\n", true);
 }
 
 void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
 {
     uint32_t canError = HAL_CAN_GetError(hcan);
     if (canError != HAL_CAN_ERROR_NONE) {
-        logMessage("CAN ERROR CAN ERROR CAN ERROR!!\r\n", true);
+        sendToUsart("CAN ERROR CAN ERROR CAN ERROR!!\r\n", true);
     }
 }
 
@@ -185,7 +185,7 @@ void messageReceivedFromControlUnit(const char *unitType) {
     if (strcmp(unitType, "VCU") == 0) strncpy(canMsg, "VCU received a CAN message from the VCU.\r\n", sizeof(canMsg) - 1);
     else if (strcmp(unitType, "ACU") == 0) strncpy(canMsg, "VCU received a CAN message from the ACU.\r\n", sizeof(canMsg) - 1);
     else if (strcmp(unitType, "SCU") == 0) strncpy(canMsg, "VCU received a CAN message from the SCU.\r\n", sizeof(canMsg) - 1);
-    logMessage(canMsg, true);
+    sendToUsart(canMsg, true);
 }
 
 void StartCanRxTask(void *argument)
@@ -322,10 +322,10 @@ void StartCanTxTask(void *argument){
         isMsgTakenFromQueue = osMessageQueueGet(canTxPacketQueueHandle, &txPacket, 0, 0);
         if (isMsgTakenFromQueue == osOK) {
             if (HAL_CAN_AddTxMessage(&hcan1, &(txPacket.txPacketHeader), txPacket.txPacketData, &TxMailbox) != HAL_OK) {
-                logMessage("VCU couldn't send a message to the CAN Bus.\r\n", true);
+                sendToUsart("VCU couldn't send a message to the CAN Bus.\r\n", true);
             }
             else {
-                logMessage("VCU sent a message to the CAN Bus.\r\n", true);
+                sendToUsart("VCU sent a message to the CAN Bus.\r\n", true);
             }
         }
     }

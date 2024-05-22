@@ -9,9 +9,4 @@
 #define INC_VCU_ERRORS_H_
 
 
-void StartErrorLogTask(void *argument);
-
-
-
-
 #endif /* INC_VCU_ERRORS_H_ */

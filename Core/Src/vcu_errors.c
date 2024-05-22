@@ -11,23 +11,27 @@
 #include "vcu_errors.h"
 #include "errors.h"
 #include "can.h"
+#include "logger.h"
 
 void StartErrorLogTask(void *argument)
 {
   for(;;)
   {
-    uint8_t queue_data[8];
+    LogPacket logPacket[8];
 
     osStatus_t result = osMessageQueueGet(
-    		errorLogQueueHandle,
-			queue_data,
-			0,
-			0
+            errorLogQueueHandle,
+            logPacket,
+            0,
+            0
     );
 
-    // Ignore the message if there was an issue
-    if (result != osOK) {
-    	continue;
+    if (result == osOK && CAN_TX_TASK_ENABLED) {
+        sendCan(&hcan1, (uint8_t*) logPacket, 8, CAN_VCU_TO_SCU_LOG_ID, CAN_NO_RTR, CAN_NO_EXT);
+    }
+    else {
+        /* TODO write a function that creates a string from LogPacket
+         * and then use sendToUsart() */
     }
   }
 }

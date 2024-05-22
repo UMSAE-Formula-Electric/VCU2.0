@@ -27,6 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include "iwdg.h"
 #include "can_utils.h"
+#include "errors.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -203,7 +204,7 @@ void MX_FREERTOS_Init(void) {
   canTxPacketQueueHandle = osMessageQueueNew (32, sizeof(CAN_TxPacketTypeDef), &canTxPacketQueue_attributes);
 
   /* creation of errorLogQueue */
-  errorLogQueueHandle = osMessageQueueNew (256, sizeof(uint16_t), &errorLogQueue_attributes);
+  errorLogQueueHandle = osMessageQueueNew (256, sizeof(LogPacket), &errorLogQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */

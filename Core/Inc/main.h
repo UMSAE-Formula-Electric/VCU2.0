@@ -98,8 +98,10 @@ void Error_Handler(void);
 #define TRACTION_BTN_GPIO_Port GPIOC
 #define TSA_BTN_Pin GPIO_PIN_0
 #define TSA_BTN_GPIO_Port GPIOB
+#define TSA_BTN_EXTI_IRQn EXTI0_IRQn
 #define RTD_BTN_Pin GPIO_PIN_1
 #define RTD_BTN_GPIO_Port GPIOB
+#define RTD_BTN_EXTI_IRQn EXTI1_IRQn
 #define LAUNCH_BTN_Pin GPIO_PIN_2
 #define LAUNCH_BTN_GPIO_Port GPIOB
 #define VCU_LED_BLUE_Pin GPIO_PIN_8

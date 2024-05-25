@@ -51,7 +51,7 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
  */
 //bool startup_Task_start(){
 //	bool created = false;
-//  //TODO VCU#32 VCU start up task begin
+//
 //	created = TaskManagerCreate(&VCU_startup_Task, &xTask_VCU_Startup);
 //
 //	if(!created){
@@ -91,7 +91,7 @@ void StartVcuStateTask(void *argument){
 			}
 
 			//Go TSA procedure
-			if(read_saftey_loop()) {
+			if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
 				//Safety loop closed
 				if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)) {
 					//Dash button pressed
@@ -120,7 +120,7 @@ void StartVcuStateTask(void *argument){
 			break;
 		case TRACTIVE_SYSTEM_ACTIVE:
             //TODO VCU#32 INFO Tractive system active Ready to drive procedure begun
-			if(read_saftey_loop) {
+			if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
 				if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin)){
 					if(checkHeartbeat()){
 						dash_set_rtd_teal();
@@ -232,7 +232,7 @@ bool read_saftey_loop(){
 		state = false;
 	}
 
-	return (state || DISABLE_SAFETY_LOOP_CHECK);
+	return state;
 }
 
 /**

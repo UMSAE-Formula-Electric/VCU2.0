@@ -81,7 +81,7 @@ void StartVcuStateTask(void *argument){
 					dash_set_tsa_teal();
 					if(brakePressed() || DISABLE_BRAKE_CHECK) {
 						//Brake pressed
-						if(checkHeartbeat()) {
+						if(checkHeartbeat() || DISABLE_HEARTBEAT_CHECK) {
 							//Heartbeats are valid
 							goTSA();
 							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, TSA_ACK_TIMEOUT + MC_STARTUP_DELAY);
@@ -109,7 +109,7 @@ void StartVcuStateTask(void *argument){
             //TODO VCU#32 INFO Tractive system active Ready to drive procedure begun
 			if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
 				if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin)){
-					if(checkHeartbeat()){
+					if(checkHeartbeat() || DISABLE_HEARTBEAT_CHECK){
 						dash_set_rtd_teal();
 						if(brakePressed() || DISABLE_BRAKE_CHECK){
                             goRTD();
@@ -158,13 +158,11 @@ void StartVcuStateTask(void *argument){
 				go_idle();
 			}
 
-			if(!DISABLE_HEARTBEAT_CHECK) {
-				if(checkHeartbeat()){//make sure we have ACU heartbeat
-                    //TODO VCU#32 ERROR Going idle because ACB hasn't sent a heart beat
-					logMessage("Going Idle due to lack of ACU", true);
-					go_idle();
-				}
-			}
+            if(!DISABLE_HEARTBEAT_CHECK || checkHeartbeat()){//make sure we have ACU heartbeat
+                //TODO VCU#32 ERROR Going idle because ACB hasn't sent a heart beat
+                logMessage("Going Idle due to lack of ACU", true);
+                go_idle();
+            }
 			break;
 		default:
 			break;
@@ -186,8 +184,6 @@ void set_safety_loop_state(enum safetyLoopState state){
 }
 
 int checkHeartbeat() {
-	if(DISABLE_HEARTBEAT_CHECK) return true;
-
 	if(get_acu_heartbeat_state() == HEARTBEAT_PRESENT){
 		if(get_mc_heartbeat_state() == HEARTBEAT_PRESENT) {
 			return true;

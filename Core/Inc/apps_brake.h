@@ -25,12 +25,12 @@
 // APPS characteristics
 #define APPS_GAIN		1.85
 
-#define APPS_LOW_ZERO	2
-#define APPS_LOW_MIN	2
+#define APPS_LOW_ZERO	4
+#define APPS_LOW_MIN	4
 #define APPS_LOW_MAX	1196
 
-#define APPS_HIGH_ZERO	4
-#define APPS_HIGH_MIN	4
+#define APPS_HIGH_ZERO	8
+#define APPS_HIGH_MIN	8
 #define APPS_HIGH_MAX	2208
 
 // Brake characteristics

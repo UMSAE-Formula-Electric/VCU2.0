@@ -141,8 +141,8 @@ void StartAppsProcessTask(void *argument) {
 
 	int16_t mc_apps_val;
 
-	uint16_t apps1 = 0;
-	uint16_t apps2 = 0;
+	uint16_t apps_low = 0;
+	uint16_t apps_high = 0;
 	uint16_t brake1 = 0;
 	uint16_t brake2 = 0;
 
@@ -154,13 +154,13 @@ void StartAppsProcessTask(void *argument) {
         kickWatchdogBit(osThreadGetId());
 
 		//low pass filters to increase noise rejection
-		apps1 = 0.5 * ADC_get_val(ADC_APPS1) + 0.5 * apps1;
-		apps2 = 0.5 * ADC_get_val(ADC_APPS2) + 0.5 * apps2;
+		apps_low = 0.5 * ADC_get_val(ADC_APPS1) + 0.5 * apps_low;
+        apps_high = 0.5 * ADC_get_val(ADC_APPS2) + 0.5 * apps_high;
 		brake1 = ADC_get_val(ADC_BPS);
 
-		mc_apps_val = map(apps1, 310, 600, 0, MAX_TORQUE_REQUESTABLE);
+		mc_apps_val = map(apps_low, 310, 600, 0, MAX_TORQUE_REQUESTABLE);
 
-		if(detectImpossibilty(apps1, apps2, brake1)){
+		if(detectImpossibilty(apps_high, apps_low, brake1)){
 			handleImpossiblilty();
 		}
 		else{

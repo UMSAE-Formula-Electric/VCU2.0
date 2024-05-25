@@ -136,8 +136,10 @@ void Error_Handler(void);
 #define SENSOR_CAN_TX_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-#define SAFETY_LOOP_Pin	SHUTDOWN_TAP_Pin
-#define SAFETY_LOOP_GPIO_Port SHUTDOWN_TAP_GPIO_Port
+#define SAFETY_LOOP_TAP_Pin	SHUTDOWN_TAP_Pin
+#define SAFETY_LOOP_TAP_GPIO_Port SHUTDOWN_TAP_GPIO_Port
+#define SAFETY_LOOP_CTL_Pin SHUTDOWN_CTL_Pin
+#define SAFETY_LOOP_CTL_GPIO_Port SHUTDOWN_CTL_GPIO_Port
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

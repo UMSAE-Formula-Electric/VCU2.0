@@ -188,16 +188,17 @@ void StartVcuStateTask(void *argument){
 	vTaskDelete( NULL );
 }
 
-/*
- * set_saftey_loop_state
+/**
+ * set_safety_loop_state
  *
- * @Brief: This function is used for setting the VCU control of the safety loop.
- * @Param: state should be one of LOOP_CLOSE or LOOP_OPEN
- * Software control of shutdown circuit has been removed for 2020 vehicle
+ * @brief This function is used for setting the VCU control of the safety loop.
+ * @param state should be one of LOOP_CLOSE or LOOP_OPEN
+ * @return void
  */
-//void set_saftey_loop_state(uint8_t state){
-//	GPIO_WriteBit(VCU_SHUTDOWN_CTRL_PORT, VCU_SHUTDOWN_CTRL_PIN , state);
-//}
+void set_safety_loop_state(enum safetyLoopState state){
+    GPIO_PinState pinState = (state == SAFETY_LOOP_CLOSED) ? GPIO_PIN_SET : GPIO_PIN_RESET;
+	HAL_GPIO_WritePin(SAFETY_LOOP_CTL_GPIO_Port, SAFETY_LOOP_CTL_Pin , pinState);
+}
 
 int checkHeartbeat() {
 	if(DISABLE_HEARTBEAT_CHECK) return true;
@@ -222,7 +223,7 @@ bool read_saftey_loop(){
 	int state;
 
 
-	if(HAL_GPIO_ReadPin(SAFETY_LOOP_GPIO_Port, SAFETY_LOOP_Pin) == GPIO_PIN_SET){
+	if(HAL_GPIO_ReadPin(SAFETY_LOOP_TAP_GPIO_Port, SAFETY_LOOP_TAP_Pin) == GPIO_PIN_SET){
 		led_mgmt_clear_error(DASH_SAFETY_LOOP_OPEN_VCU);
 		state = true;
 	}

@@ -44,23 +44,6 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 #define DISABLE_BRAKE_CHECK 0
 #define DISABLE_ACU_ACK 0
 
-//TODO CleanUp
-/**
- * @brief  Starts the can message recieve and processing task
- * @retval 0 on success, 1 if failed to start tasks(probably out of rtos heap mem.)
- */
-//bool startup_Task_start(){
-//	bool created = false;
-//
-//	created = TaskManagerCreate(&VCU_startup_Task, &xTask_VCU_Startup);
-//
-//	if(!created){
-//		logMessage("Failed to create startup task", true);
-//	}
-//
-//	return created;
-//}
-
 /**
  * @brief  handle the startup routine
  * @retval never return from a freeRTOS task, kills task if infinite task ends
@@ -102,6 +85,10 @@ void StartVcuStateTask(void *argument){
 							//Heartbeats are valid
 							goTSA();
 							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, TSA_ACK_TIMEOUT + MC_STARTUP_DELAY);
+                            if(retRTOS == pdTRUE){
+                                sprintf(strBuff, "Received ACU notification: %lu", ulNotifiedValue);
+                                logMessage(strBuff,false);
+                            }
 							if(ulNotifiedValue != ACU_TSA_ACK){
 								//ACU did not ACK
 								go_idle();
@@ -184,8 +171,6 @@ void StartVcuStateTask(void *argument){
 		}
 		vTaskDelay(pdMS_TO_TICKS(STARTUP_TASK_DELAY));                  //TODO Revise task delay
 	}
-	logMessage("Error exiting from startup task", true);
-	vTaskDelete( NULL );
 }
 
 /**

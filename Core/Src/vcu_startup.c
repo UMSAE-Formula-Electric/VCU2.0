@@ -44,9 +44,6 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 #define DISABLE_BRAKE_CHECK 0
 #define DISABLE_ACU_ACK 0
 
-_Bool isTSAButtonPressed = 0;
-_Bool isRTDButtonPressed = 0;
-
 /**
  * @brief  handle the startup routine
  * @retval never return from a freeRTOS task, kills task if infinite task ends
@@ -65,10 +62,7 @@ void StartVcuStateTask(void *argument){
 
 	for(;;){
         kickWatchdogBit(osThreadGetId());
-
 		state = get_car_state();
-        set_ACU_State(state);
-
         //TODO VCU#32 Car state changed
 		switch(state){
 		case IDLE:
@@ -280,27 +274,5 @@ static void fail_pulse(){
  * @Return: returns true if the button is pressed, otherwise returns false
  */
 bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin){
-    _Bool isPressed = 0;
-
-    if (port == TSA_BTN_GPIO_Port && pin == TSA_BTN_Pin){
-        isPressed = isTSAButtonPressed;
-        isTSAButtonPressed = 0;
-    }
-    else if (port == RTD_BTN_GPIO_Port && pin == RTD_BTN_Pin){
-        isPressed = isRTDButtonPressed;
-        isRTDButtonPressed = 0;
-    }
-
-    return isPressed;
-}
-
-//use a timer to fix debounce
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
-    if(GPIO_Pin == TSA_BTN_Pin){
-        isTSAButtonPressed = 1;
-    }
-    else if(GPIO_Pin == RTD_BTN_Pin){
-        isRTDButtonPressed = 1;
-    }
-    // add kill switch button check
+    return (HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_RESET);
 }

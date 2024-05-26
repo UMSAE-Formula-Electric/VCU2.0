@@ -62,8 +62,11 @@ void StartVcuStateTask(void *argument){
 
 	for(;;){
         kickWatchdogBit(osThreadGetId());
-		state = get_car_state();
+
         //TODO VCU#32 Car state changed
+		state = get_car_state();
+        set_ACU_State(state);
+
 		switch(state){
 		case IDLE:
             dash_clear_all_leds();

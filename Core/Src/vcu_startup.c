@@ -34,13 +34,10 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 #define TSA_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACU when going TSA
 #define RTD_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACU when going RTD
 #define FAIL_FLASH_LEN 1000		//[ms] length of warning flash on failed arm
-#define STARTUP_TASK_DELAY 100	//[ms] how often the startup task is executed
 #define MC_STARTUP_DELAY 1000	//[ms] delay used to wait for the motor controller
 
-#define HOON_MODE 0
-
 #define DISABLE_HEARTBEAT_CHECK 0
-#define DISABLE_SAFETY_LOOP_CHECK 1
+#define DISABLE_SAFETY_LOOP_CHECK 0
 #define DISABLE_BRAKE_CHECK 0
 #define DISABLE_ACU_ACK 0
 

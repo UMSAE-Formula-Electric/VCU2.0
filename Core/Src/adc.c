@@ -206,10 +206,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
  * @Return: returns the most recent conversion of the given value. on failure returns 0
  */
 uint16_t ADC_get_val(uint8_t item){
-    assert(item < NUM_ADC_CHANNELS);
-
     uint32_t retVal = 0;
-
     if(item < NUM_ADC_CHANNELS){
         retVal = Sensor_DMABase[item];
     }

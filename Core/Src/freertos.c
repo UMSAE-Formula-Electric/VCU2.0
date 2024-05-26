@@ -60,7 +60,7 @@ osThreadId_t dashLedTaskHandle;
 const osThreadAttr_t dashLedTask_attributes = {
   .name = "dashLedTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for watchDogTask */
 osThreadId_t watchDogTaskHandle;
@@ -74,14 +74,14 @@ osThreadId_t canTxTaskHandle;
 const osThreadAttr_t canTxTask_attributes = {
   .name = "canTxTask",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for canRxTask */
 osThreadId_t canRxTaskHandle;
 const osThreadAttr_t canRxTask_attributes = {
   .name = "canRxTask",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for btDumpTask */
 osThreadId_t btDumpTaskHandle;
@@ -95,35 +95,35 @@ osThreadId_t vcuStateTaskHandle;
 const osThreadAttr_t vcuStateTask_attributes = {
   .name = "vcuStateTask",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for mcHrtbeatTask */
 osThreadId_t mcHrtbeatTaskHandle;
 const osThreadAttr_t mcHrtbeatTask_attributes = {
   .name = "mcHrtbeatTask",
   .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for acuHrtbeatTask */
 osThreadId_t acuHrtbeatTaskHandle;
 const osThreadAttr_t acuHrtbeatTask_attributes = {
   .name = "acuHrtbeatTask",
   .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for brakeProcTask */
 osThreadId_t brakeProcTaskHandle;
 const osThreadAttr_t brakeProcTask_attributes = {
   .name = "brakeProcTask",
   .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for appsProcTask */
 osThreadId_t appsProcTaskHandle;
 const osThreadAttr_t appsProcTask_attributes = {
   .name = "appsProcTask",
   .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for canRxPacketQueue */
 osMessageQueueId_t canRxPacketQueueHandle;

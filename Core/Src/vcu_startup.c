@@ -167,7 +167,7 @@ void StartVcuStateTask(void *argument){
 		default:
 			break;
 		}
-		vTaskDelay(pdMS_TO_TICKS(STARTUP_TASK_DELAY));                  //TODO Revise task delay
+		osThreadYield();                  //TODO Revise task delay
 	}
 }
 

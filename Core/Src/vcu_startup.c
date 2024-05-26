@@ -87,7 +87,7 @@ void StartVcuStateTask(void *argument){
 						if(checkHeartbeat() || DISABLE_HEARTBEAT_CHECK) {
 							//Heartbeats are valid
 							goTSA();
-							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, TSA_ACK_TIMEOUT + MC_STARTUP_DELAY);
+							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, pdMS_TO_TICKS(TSA_ACK_TIMEOUT + MC_STARTUP_DELAY));
                             if(retRTOS == pdTRUE){
                                 sprintf(strBuff, "Received ACU notification: %lu", ulNotifiedValue);
                                 logMessage(strBuff,false);
@@ -106,7 +106,7 @@ void StartVcuStateTask(void *argument){
 					} //Brake not pressed //TODO VCU#32 ERROR Brake check failed [software/hardware fault]
 				} //Dash button not pressed
 			} //Safety loop open
-
+            kickWatchdogBit(osThreadGetId());
 			break;
 		case TRACTIVE_SYSTEM_ACTIVE:
             //TODO VCU#32 INFO Tractive system active Ready to drive procedure begun
@@ -115,8 +115,8 @@ void StartVcuStateTask(void *argument){
 					if(checkHeartbeat() || DISABLE_HEARTBEAT_CHECK){
 						dash_set_rtd_teal();
 						if(brakePressed() || DISABLE_BRAKE_CHECK){
-                            goRTD();
-							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, RTD_ACK_TIMEOUT);
+							goRTD();
+							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, pdMS_TO_TICKS(RTD_ACK_TIMEOUT));
 							EnableMC();
 							if(retRTOS != pdPASS || ulNotifiedValue != ACU_RTD_ACK){
 								logMessage("ACU failed to ack RTD Request", false);
@@ -145,7 +145,7 @@ void StartVcuStateTask(void *argument){
 				logMessage("ACU request IDLE state change", true);
 				go_idle();
 			}
-
+            kickWatchdogBit(osThreadGetId());
 			break;
 		case READY_TO_DRIVE:
 			EnableMC();
@@ -166,6 +166,7 @@ void StartVcuStateTask(void *argument){
                 logMessage("Going Idle due to lack of ACU", true);
                 go_idle();
             }
+            kickWatchdogBit(osThreadGetId());
 			break;
 		default:
 			break;

@@ -180,7 +180,7 @@ void StartVcuStateTask(void *argument){
  * @return void
  */
 void set_safety_loop_state(enum safetyLoopState state){
-    GPIO_PinState pinState = (state == SAFETY_LOOP_CLOSED) ? GPIO_PIN_SET : GPIO_PIN_RESET;
+    GPIO_PinState pinState = (state == SAFETY_LOOP_CLOSED) ? GPIO_PIN_RESET : GPIO_PIN_SET;
 	HAL_GPIO_WritePin(SAFETY_LOOP_CTL_GPIO_Port, SAFETY_LOOP_CTL_Pin , pinState);
 }
 

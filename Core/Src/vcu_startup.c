@@ -124,48 +124,6 @@ void rtdStateProcedure(uint32_t *vcuStateTaskNotification) {
 }
 
 /**
- * @brief  handle the startup routine
- * @retval never return from a freeRTOS task, kills task if infinite task ends
- */
-void StartVcuStateTask(void *argument){
-    uint8_t isTaskActivated = (int)argument;
-    if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
-    }
-
-	uint32_t ulNotifiedValue;
-	enum CAR_STATE state;
-
-	for(;;){
-        kickWatchdogBit(osThreadGetId());
-
-        //TODO VCU#32 Car state changed
-		state = get_car_state();
-        set_ACU_State(state);
-
-		switch(state){
-		case IDLE:
-            dash_clear_all_leds();
-            goTsaProcedure(&ulNotifiedValue);
-            kickWatchdogBit(osThreadGetId());
-			break;
-		case TRACTIVE_SYSTEM_ACTIVE:
-            //TODO VCU#32 INFO Tractive system active Ready to drive procedure begun
-            goRtdProcedure(&ulNotifiedValue);
-            kickWatchdogBit(osThreadGetId());
-			break;
-		case READY_TO_DRIVE:
-            rtdStateProcedure(&ulNotifiedValue);
-            kickWatchdogBit(osThreadGetId());
-			break;
-		default:
-			break;
-		}
-		osThreadYield();
-	}
-}
-
-/**
  * set_safety_loop_state
  *
  * @brief This function is used for setting the VCU control of the safety loop.
@@ -269,4 +227,46 @@ static void fail_pulse(){
  */
 bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin){
     return (HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_RESET);
+}
+
+/**
+ * @brief  handle the startup routine
+ * @retval never return from a freeRTOS task, kills task if infinite task ends
+ */
+void StartVcuStateTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
+    uint32_t ulNotifiedValue;
+    enum CAR_STATE state;
+
+    for(;;){
+        kickWatchdogBit(osThreadGetId());
+
+        //TODO VCU#32 Car state changed
+        state = get_car_state();
+        set_ACU_State(state);
+
+        switch(state){
+            case IDLE:
+                dash_clear_all_leds();
+                goTsaProcedure(&ulNotifiedValue);
+                kickWatchdogBit(osThreadGetId());
+                break;
+            case TRACTIVE_SYSTEM_ACTIVE:
+                //TODO VCU#32 INFO Tractive system active Ready to drive procedure begun
+                goRtdProcedure(&ulNotifiedValue);
+                kickWatchdogBit(osThreadGetId());
+                break;
+            case READY_TO_DRIVE:
+                rtdStateProcedure(&ulNotifiedValue);
+                kickWatchdogBit(osThreadGetId());
+                break;
+            default:
+                break;
+        }
+        osThreadYield();
+    }
 }

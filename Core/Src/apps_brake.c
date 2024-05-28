@@ -30,8 +30,8 @@
 #define MAX_TORQUE_REQUESTABLE 2000
 
 #define BYPASS_SAFETY	0
-#define BYPASS_BRAKE	0
-#define BYPASS_RTD		0
+#define BYPASS_BRAKE	1
+#define BYPASS_RTD		1
 
 #define APPS_LOW_END 	300
 #define APPS_HIGH_END 	600
@@ -72,7 +72,7 @@ uint16_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uin
 	}
 
 	else{
-		outVal = (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+		outVal = (uint16_t) ((float) ((x - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min;
 	}
 
 	return outVal;
@@ -146,6 +146,9 @@ void StartAppsProcessTask(void *argument) {
 	uint16_t brake1 = 0;
 	uint16_t brake2 = 0;
 
+	uint16_t pedal_min = apps.low_min;
+	uint16_t pedal_max = apps.low_max;
+
 	//setup apps state
 	InitalizeApps(APPS_GAIN, APPS_LOW_ZERO, APPS_LOW_MIN, APPS_LOW_MAX,
 					APPS_HIGH_ZERO, APPS_HIGH_MIN, APPS_HIGH_MAX);
@@ -158,7 +161,7 @@ void StartAppsProcessTask(void *argument) {
         apps_high = 0.5 * ADC_get_val(ADC_APPS2) + 0.5 * apps_high;
 		brake1 = ADC_get_val(ADC_BPS);
 
-		mc_apps_val = map(apps_low, 310, 600, 0, MAX_TORQUE_REQUESTABLE);
+		mc_apps_val = map(apps_low, pedal_min, pedal_max, 0, MAX_TORQUE_REQUESTABLE);
 
 		if(detectImpossibilty(apps_high, apps_low, brake1)){
 			handleImpossiblilty();
@@ -174,7 +177,7 @@ void StartAppsProcessTask(void *argument) {
 bool detectImpossibilty(uint16_t high_val, uint16_t low_val, uint16_t brake_val){
 	bool res = true;
 
-	if (!detectPedal(high_val, low_val, &apps)) {
+	if (!detectPedal(high_val, low_val, &apps) && false) {
 		led_mgmt_set_error(DASH_NO_THROTTLE);
 	    btLogIndicator(true, THROTTLE_ERROR);
 	} else {
@@ -227,7 +230,7 @@ void sendTorqueWithFaultFixing(int16_t torque) {
 		sendTorque(0);
 		fixFaults();
 	} else {
-		EnableMC();
+//		EnableMC();
 		sendTorque(torque);
 	}
 }

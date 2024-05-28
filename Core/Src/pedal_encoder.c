@@ -29,7 +29,7 @@ void bad_pedal_struct_err_handler();
  *
  *	throttle_1
  */
-bool detectPedal(uint16_t petal_1, uint16_t petal_2, pedal_state_t * state) {
+bool detectPedal(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state) {
 
 	bool hasPetal = false; 	//true if we etect a pedal
 	const uint8_t BUFFLEN = 40; //length of buffer
@@ -41,11 +41,11 @@ bool detectPedal(uint16_t petal_1, uint16_t petal_2, pedal_state_t * state) {
 	}
 	else {
 
-		if(petal_1 < 100 && petal_2 < 100) {
+		if(sens_high < 100 && sens_low < 100) {
 			return true;
 		}
 
-		if(abs((2 * petal_1) - petal_2) <= (1.2 * petal_1)) {
+		if(abs((2 * sens_high) - sens_low) <= (1.2 * sens_high)) {
 			state->gone_count = 0;
 		} else {
 			state->gone_count++;
@@ -65,7 +65,7 @@ bool detectPedal(uint16_t petal_1, uint16_t petal_2, pedal_state_t * state) {
 		//no longer accurate
 		if (state->possibility == PEDAL_POSSIBLE) {
 			//checking for impossible state
-			if (petal_1 < HIGH_SENSE_OFFSET || petal_2 < LOW_SENSE_OFFSET) {
+			if (sens_high < HIGH_SENSE_OFFSET || sens_low < LOW_SENSE_OFFSET) {
 				state->gone_count++;
 			} else {
 				state->gone_count = 0;
@@ -90,7 +90,7 @@ bool detectPedal(uint16_t petal_1, uint16_t petal_2, pedal_state_t * state) {
 		{
 			//trying to recover from impossible state
 			hasPetal = false;
-			if (petal_1 >= HIGH_SENSE_OFFSET && petal_2 >= LOW_SENSE_OFFSET) {
+			if (sens_high >= HIGH_SENSE_OFFSET && sens_low >= LOW_SENSE_OFFSET) {
 				state->found_Count++;
 			} else {
 				state->found_Count = 0;
@@ -212,15 +212,15 @@ bool throttleAgreement_936(uint16_t throttle_1, uint16_t throttle_2,
  */
 bool rule_10percent_pedal_travel_apps_agreement(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state)
 {
-    uint16_t sens_high_zero_offset = state->high_zero;
-    uint16_t sens_low_zero_offset = state->low_zero;
+    uint16_t sens_high_min = state->high_min;
+    uint16_t sens_low_min = state->low_min;
 
-    uint16_t sens_high_range = state->high_max - sens_high_zero_offset;
-    uint16_t sens_low_range = state->low_max - sens_low_zero_offset;
+    uint16_t sens_high_range = state->high_max - sens_high_min;
+    uint16_t sens_low_range = state->low_max - sens_low_min;
 
-    int32_t normalized_sens_1 = (sens_high - sens_high_zero_offset) * sens_low_range;
-    int32_t normalized_sens_2 = (int32_t) ((state->gain) * ((float) ((sens_low - sens_low_zero_offset) * sens_high_range)));
-    int32_t agreement_range_size = (int32_t) ((state->gain) * ((float) (sens_high_range * sens_low_range)) * PEDAL_AGREEMENT_PERCENT);
+    int32_t normalized_sens_1 = (sens_high - sens_high_min);
+    int32_t normalized_sens_2 = (int32_t) (state->gain) * ((float) ((sens_low - sens_low_min)));
+    int32_t agreement_range_size = (int32_t) ((float) (sens_high_range * sens_low_range) * PEDAL_AGREEMENT_PERCENT);
 
     bool within_range = abs(normalized_sens_1 - normalized_sens_2) < agreement_range_size;
 

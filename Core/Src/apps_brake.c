@@ -27,6 +27,7 @@
 
 #define APPS_REQ_FREQ 200 //[Hz] frequency of polling loop for APPS
 #define BRAKE_REQ_FREQ 100 //[Hz] frequency of polling loop for BRAKE PEDAL
+#define MIN_TORQUE_REQUESTABLE 0
 #define MAX_TORQUE_REQUESTABLE 2000
 
 #define BYPASS_SAFETY	0
@@ -59,23 +60,15 @@ static uint32_t current_max_power = TR_MAX_POWER; //update based on data from AM
 static pedal_state_t brake; //Brake pedal position sensor / brake sensor
 static pedal_state_t apps; //Accelerator pedal position sensor / throttle sensor
 
-uint16_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max) {
+int16_t mapPedalPressToMotorTorque(uint16_t lowPedalPress) {
+    if (lowPedalPress <= APPS_LOW_MIN) {
+        return MIN_TORQUE_REQUESTABLE;
+    } else if (lowPedalPress >= APPS_LOW_MAX) {
+        return MAX_TORQUE_REQUESTABLE;
+    }
+    double torque = ((double)(lowPedalPress - APPS_LOW_MIN) * (MAX_TORQUE_REQUESTABLE - MIN_TORQUE_REQUESTABLE)) / (APPS_LOW_MAX - APPS_LOW_MIN) + MIN_TORQUE_REQUESTABLE;
 
-	uint16_t outVal = 0;
-
-	if (x < in_min) {
-		outVal = out_min;
-	}
-
-	else if (x > in_max) {
-		outVal = out_max;
-	}
-
-	else{
-		outVal = (uint16_t) ((float) ((x - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min;
-	}
-
-	return outVal;
+    return (int16_t)(torque + 0.5);
 }
 
 void InitalizeApps(float gain, uint16_t low_zero, uint16_t low_min, uint16_t low_max,
@@ -146,9 +139,6 @@ void StartAppsProcessTask(void *argument) {
 	uint16_t brake1 = 0;
 	uint16_t brake2 = 0;
 
-	uint16_t pedal_min = apps.low_min;
-	uint16_t pedal_max = apps.low_max;
-
 	//setup apps state
 	InitalizeApps(APPS_GAIN, APPS_LOW_ZERO, APPS_LOW_MIN, APPS_LOW_MAX,
 					APPS_HIGH_ZERO, APPS_HIGH_MIN, APPS_HIGH_MAX);
@@ -161,7 +151,7 @@ void StartAppsProcessTask(void *argument) {
         apps_high = 0.5 * ADC_get_val(ADC_APPS2) + 0.5 * apps_high;
 		brake1 = ADC_get_val(ADC_BPS);
 
-		mc_apps_val = map(apps_low, pedal_min, pedal_max, 0, MAX_TORQUE_REQUESTABLE);
+		mc_apps_val = mapPedalPressToMotorTorque(apps_low);
 
 		if(detectImpossibilty(apps_high, apps_low, brake1)){
 			handleImpossiblilty();

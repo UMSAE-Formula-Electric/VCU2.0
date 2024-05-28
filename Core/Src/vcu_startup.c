@@ -34,177 +34,108 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 #define TSA_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACU when going TSA
 #define RTD_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACU when going RTD
 #define FAIL_FLASH_LEN 1000		//[ms] length of warning flash on failed arm
-#define STARTUP_TASK_DELAY 100	//[ms] how often the startup task is executed
 #define MC_STARTUP_DELAY 1000	//[ms] delay used to wait for the motor controller
 
-#define HOON_MODE 0
-
 #define DISABLE_HEARTBEAT_CHECK 0
-#define DISABLE_SAFETY_LOOP_CHECK 1
+#define DISABLE_SAFETY_LOOP_CHECK 0
 #define DISABLE_BRAKE_CHECK 0
 #define DISABLE_ACU_ACK 0
 
-//TODO CleanUp
-/**
- * @brief  Starts the can message recieve and processing task
- * @retval 0 on success, 1 if failed to start tasks(probably out of rtos heap mem.)
- */
-//bool startup_Task_start(){
-//	bool created = false;
-//  //TODO VCU#32 VCU start up task begin
-//	created = TaskManagerCreate(&VCU_startup_Task, &xTask_VCU_Startup);
-//
-//	if(!created){
-//		logMessage("Failed to create startup task", true);
-//	}
-//
-//	return created;
-//}
+void goTsaProcedure(uint32_t *vcuStateTaskNotification) {
+    BaseType_t retRTOS = 0;
+    char strBuff[40]; //buffer for making 'nice' logs
 
-/**
- * @brief  handle the startup routine
- * @retval never return from a freeRTOS task, kills task if infinite task ends
- */
-void StartVcuStateTask(void *argument){
-    uint8_t isTaskActivated = (int)argument;
-    if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+    if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
+        if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin) && (brakePressed() || DISABLE_BRAKE_CHECK) && (checkHeartbeat() || DISABLE_HEARTBEAT_CHECK)) {
+            dash_set_tsa_teal();
+            goTSA();
+            retRTOS = xTaskNotifyWait(0x00, 0x00, vcuStateTaskNotification, pdMS_TO_TICKS(TSA_ACK_TIMEOUT + MC_STARTUP_DELAY));
+            if(retRTOS == pdTRUE){
+                sprintf(strBuff, "Received ACU notification: %lu", (*vcuStateTaskNotification));
+                logMessage(strBuff,false);
+            }
+            if((*vcuStateTaskNotification) != ACU_TSA_ACK){
+                go_idle();
+                logMessage("ACU failed to ack TSA Request", true);
+                fail_pulse();
+            } else {
+                logMessage("Went TSA!", false);
+                dash_set_tsa_green();
+            }
+        }
     }
-
-	//Keep user led on to simulate LV key is on
-	BaseType_t retRTOS = 0;
-	uint32_t ulNotifiedValue;
-	char strBuff[40]; //buffer for making 'nice' logs
-	enum CAR_STATE state;
-
-	for(;;){
-        kickWatchdogBit(osThreadGetId());
-		state = get_car_state();
-        //TODO VCU#32 Car state changed
-		switch(state){
-		case IDLE:
-			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
-			if(retRTOS == pdTRUE){
-				sprintf(strBuff, "Received ACU notification: %lu", ulNotifiedValue);
-				logMessage(strBuff,false);
-			}
-
-			//Go TSA procedure
-			if(read_saftey_loop()) {
-				//Safety loop closed
-				if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)) {
-					//Dash button pressed
-					dash_set_tsa_teal();
-					if(brakePressed() || DISABLE_BRAKE_CHECK) {
-						//Brake pressed
-						if(checkHeartbeat()) {
-							//Heartbeats are valid
-							goTSA();
-							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, TSA_ACK_TIMEOUT + MC_STARTUP_DELAY);
-							if(ulNotifiedValue != ACU_TSA_ACK){
-								//ACU did not ACK
-								go_idle();
-								logMessage("ACU failed to ack TSA Request", true);
-								fail_pulse();
-							} else {
-                                //TODO VCU#32 INFO ACK check disabled
-								logMessage("Went TSA!", false);
-								dash_set_tsa_green();
-							}
-						} //Heartbeats not valid
-					} //Brake not pressed //TODO VCU#32 ERROR Brake check failed [software/hardware fault]
-				} //Dash button not pressed
-			} //Safety loop open
-
-			if(get_car_state() != IDLE) {
-				fail_pulse();
-				go_idle();
-			}
-
-			break;
-		case TRACTIVE_SYSTEM_ACTIVE:
-            //TODO VCU#32 INFO Tractive system active Ready to drive procedure begun
-			if(read_saftey_loop) {
-				if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin)){
-					if(checkHeartbeat()){
-						dash_set_rtd_teal();
-						if(brakePressed() || DISABLE_BRAKE_CHECK){
-							retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, RTD_ACK_TIMEOUT);
-							EnableMC();
-							if(retRTOS != pdPASS || ulNotifiedValue != ACU_RTD_ACK){
-								logMessage("ACU failed to ack RTD Request", false);
-								go_idle();
-								fail_pulse();
-							}
-							else{
-                                //TODO VCU#32 INFO ASU acknowledge ignored going RDT
-								dash_set_rtd_green();
-								mc_set_inverter_enable(1);
-								logMessage("Went RTD!", false);
-							}
-						} 	//Brake not pressed
-					} 		//Heartbeats not valid
-				} 			//Button not pressed
-			} else {		//Safety loop open
-				go_idle();
-			}
-
-			if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)) {
-				go_idle();
-			}
-
-			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
-			if(retRTOS == pdTRUE && ulNotifiedValue == GO_IDLE_REQ_FROM_ACU){
-				logMessage("ACU request IDLE state change", true);
-				go_idle();
-			}
-
-			break;
-		case READY_TO_DRIVE:
-			EnableMC();
-			if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin) || isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)){
-                set_ACU_State(IDLE);
-				go_idle();
-				logMessage("RTD or VCU Button Pressed, going IDLE", false);
-			}
-
-			retRTOS = xTaskNotifyWait(0x00,0x00, &ulNotifiedValue, 0);
-			if(retRTOS == pdTRUE && ulNotifiedValue == GO_IDLE_REQ_FROM_ACU){
-				logMessage("ACU request IDLE state change", true);
-				go_idle();
-			}
-
-			if(!DISABLE_HEARTBEAT_CHECK) {
-				if(checkHeartbeat()){//make sure we have ACU heartbeat
-                    //TODO VCU#32 ERROR Going idle because ACB hasn't sent a heart beat
-					logMessage("Going Idle due to lack of ACU", true);
-					go_idle();
-				}
-			}
-			break;
-		default:
-			break;
-		}
-		vTaskDelay(pdMS_TO_TICKS(STARTUP_TASK_DELAY));                  //TODO Revise task delay
-	}
-	logMessage("Error exiting from startup task", true);
-	vTaskDelete( NULL );
 }
 
-/*
- * set_saftey_loop_state
+void goRtdProcedure(uint32_t *vcuStateTaskNotification) {
+    BaseType_t retRTOS = 0;
+
+    if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
+        if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin) && (checkHeartbeat() || DISABLE_HEARTBEAT_CHECK) && (brakePressed() || DISABLE_BRAKE_CHECK)) {
+            dash_set_rtd_teal();
+            goRTD();
+            retRTOS = xTaskNotifyWait(0x00, 0x00, vcuStateTaskNotification, pdMS_TO_TICKS(RTD_ACK_TIMEOUT));
+            if(retRTOS != pdPASS || (*vcuStateTaskNotification) != ACU_RTD_ACK){
+                logMessage("ACU failed to ack RTD Request", false);
+                go_idle();
+                fail_pulse();
+            } else {
+                EnableMC();
+                dash_set_rtd_green();
+                mc_set_inverter_enable(1);
+                logMessage("Went RTD!", false);
+            }
+        }
+    } else {
+        go_idle();
+    }
+
+    if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)) {
+        go_idle();
+    }
+
+    retRTOS = xTaskNotifyWait(0x00, 0x00, vcuStateTaskNotification, 0);
+    if(retRTOS == pdTRUE && (*vcuStateTaskNotification) == GO_IDLE_REQ_FROM_ACU){
+        logMessage("ACU request IDLE state change", true);
+        go_idle();
+    }
+}
+
+void rtdStateProcedure(uint32_t *vcuStateTaskNotification) {
+    BaseType_t retRTOS = 0;
+
+    EnableMC();
+    if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin) || isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)){
+        set_ACU_State(IDLE);
+        go_idle();
+        logMessage("RTD or VCU Button Pressed, going IDLE", false);
+    }
+
+    retRTOS = xTaskNotifyWait(0x00,0x00, vcuStateTaskNotification, 0);
+    if(retRTOS == pdTRUE && (*vcuStateTaskNotification) == GO_IDLE_REQ_FROM_ACU){
+        logMessage("ACU request IDLE state change", true);
+        go_idle();
+    }
+
+    if(!DISABLE_HEARTBEAT_CHECK || checkHeartbeat()){//make sure we have ACU heartbeat
+        //TODO VCU#32 ERROR Going idle because ACB hasn't sent a heart beat
+        logMessage("Going Idle due to lack of ACU", true);
+        go_idle();
+    }
+}
+
+/**
+ * set_safety_loop_state
  *
- * @Brief: This function is used for setting the VCU control of the safety loop.
- * @Param: state should be one of LOOP_CLOSE or LOOP_OPEN
- * Software control of shutdown circuit has been removed for 2020 vehicle
+ * @brief This function is used for setting the VCU control of the safety loop.
+ * @param state should be one of LOOP_CLOSE or LOOP_OPEN
+ * @return void
  */
-//void set_saftey_loop_state(uint8_t state){
-//	GPIO_WriteBit(VCU_SHUTDOWN_CTRL_PORT, VCU_SHUTDOWN_CTRL_PIN , state);
-//}
+void set_safety_loop_state(enum safetyLoopState state){
+    GPIO_PinState pinState = (state == SAFETY_LOOP_CLOSED) ? GPIO_PIN_RESET : GPIO_PIN_SET;
+	HAL_GPIO_WritePin(SAFETY_LOOP_CTL_GPIO_Port, SAFETY_LOOP_CTL_Pin , pinState);
+}
 
 int checkHeartbeat() {
-	if(DISABLE_HEARTBEAT_CHECK) return true;
-
 	if(get_acu_heartbeat_state() == HEARTBEAT_PRESENT){
 		if(get_mc_heartbeat_state() == HEARTBEAT_PRESENT) {
 			return true;
@@ -225,7 +156,7 @@ bool read_saftey_loop(){
 	int state;
 
 
-	if(HAL_GPIO_ReadPin(SAFETY_LOOP_GPIO_Port, SAFETY_LOOP_Pin) == GPIO_PIN_SET){
+	if(HAL_GPIO_ReadPin(SAFETY_LOOP_TAP_GPIO_Port, SAFETY_LOOP_TAP_Pin) == GPIO_PIN_SET){
 		led_mgmt_clear_error(DASH_SAFETY_LOOP_OPEN_VCU);
 		state = true;
 	}
@@ -235,7 +166,7 @@ bool read_saftey_loop(){
 		state = false;
 	}
 
-	return (state || DISABLE_SAFETY_LOOP_CHECK);
+	return state;
 }
 
 /**
@@ -296,4 +227,46 @@ static void fail_pulse(){
  */
 bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin){
     return (HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_RESET);
+}
+
+/**
+ * @brief  handle the startup routine
+ * @retval never return from a freeRTOS task, kills task if infinite task ends
+ */
+void StartVcuStateTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
+    uint32_t ulNotifiedValue;
+    enum CAR_STATE state;
+
+    for(;;){
+        kickWatchdogBit(osThreadGetId());
+
+        //TODO VCU#32 Car state changed
+        state = get_car_state();
+        set_ACU_State(state);
+
+        switch(state){
+            case IDLE:
+                dash_clear_all_leds();
+                goTsaProcedure(&ulNotifiedValue);
+                kickWatchdogBit(osThreadGetId());
+                break;
+            case TRACTIVE_SYSTEM_ACTIVE:
+                //TODO VCU#32 INFO Tractive system active Ready to drive procedure begun
+                goRtdProcedure(&ulNotifiedValue);
+                kickWatchdogBit(osThreadGetId());
+                break;
+            case READY_TO_DRIVE:
+                rtdStateProcedure(&ulNotifiedValue);
+                kickWatchdogBit(osThreadGetId());
+                break;
+            default:
+                break;
+        }
+        osThreadYield();
+    }
 }

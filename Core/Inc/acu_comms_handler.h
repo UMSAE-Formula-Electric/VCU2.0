@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "car_state.h"
 #include "can.h"
+#include "can_utils.h"
 
 void processAcuToVcuCanIdRxData(const uint8_t *RxData);
 void set_ACU_State(enum CAR_STATE new_state);

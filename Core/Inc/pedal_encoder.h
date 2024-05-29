@@ -71,7 +71,7 @@ typedef struct{
 
 bool rule_10percent_pedal_travel_apps_agreement(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state);
 bool sensAgreement_936(uint16_t throttle_1, uint16_t throttle_2, pedal_state_t * state);
-bool detectPedal(uint16_t petal_1, uint16_t petal_2, pedal_state_t * state);
+bool pedalValid(uint16_t petal_1, uint16_t petal_2, pedal_state_t * state);
 
 
 #endif /* PEDAL_ENCODER_H_ */

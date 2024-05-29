@@ -167,7 +167,7 @@ void StartAppsProcessTask(void *argument) {
 bool detectImpossibilty(uint16_t high_val, uint16_t low_val, uint16_t brake_val){
 	bool res = true;
 
-	if (!detectPedal(high_val, low_val, &apps) && false) {
+	if (!pedalValid(high_val, low_val, &apps) && false) {
 		led_mgmt_set_error(DASH_NO_THROTTLE);
 	    btLogIndicator(true, THROTTLE_ERROR);
 	} else {
@@ -198,7 +198,7 @@ bool detectImpossibilty(uint16_t high_val, uint16_t low_val, uint16_t brake_val)
 }
 
 void determineError(uint16_t high_val, uint16_t low_val, uint16_t brake_val){
-	if (detectPedal(high_val, low_val, &apps)) {
+	if (pedalValid(high_val, low_val, &apps)) {
 		if (detectBrake()) {
 			if(twoFootRulePassed(high_val, &apps)) {
 				btLogIndicator(false, THROTTLE_ERROR); //all good, just not rtd

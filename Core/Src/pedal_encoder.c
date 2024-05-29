@@ -23,92 +23,32 @@ void bad_pedal_struct_err_handler();
 #define PEDAL_AGREEMENT_PERCENT 0.10
 
 /*
- * This function looks to see if the throttle is there. This function
- * only makes sense with the Throttles that have inverted gains and not
- * the half gain style
+ * pedalValid
  *
- *	throttle_1
+ * PURPOSE: determine if the pedal is in a valid range
+ *
+ * INPUTS:
+ * 		sens_high:	Pedal sensor high gain output
+ * 		sens_low:	Pedal sensor low gain output
+ * 		state:		APPS pedal state struct
+ *
+ * 	RETURNS:
+ * 		boolean value indicating whether the pedal is in a valid state
  */
-bool detectPedal(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state) {
+bool pedalValid(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state) {
 
 	bool hasPetal = false; 	//true if we etect a pedal
-	const uint8_t BUFFLEN = 40; //length of buffer
-	char buff[BUFFLEN];			//string buffer
 
 	//check that we dont get a bad pointer
 	if (state == NULL || state->name == NULL) {
 		log_and_handle_error(BAD_PEDAL_STRUCT, &bad_pedal_struct_err_handler);
 	}
 	else {
-
-		if(sens_high < 100 && sens_low < 100) {
-			return true;
-		}
-
-		if(abs((2 * sens_high) - sens_low) <= (1.2 * sens_high)) {
-			state->gone_count = 0;
-		} else {
-			state->gone_count++;
-		}
-
-		if(state->gone_count > 20) {
-			return false;
-		} else {
-			return true;
-		}
-
-
-
-
-		hasPetal = true;
-
-		//no longer accurate
-		if (state->possibility == PEDAL_POSSIBLE) {
-			//checking for impossible state
-			if (sens_high < HIGH_SENSE_OFFSET || sens_low < LOW_SENSE_OFFSET) {
-				state->gone_count++;
-			} else {
-				state->gone_count = 0;
-			}
-			if (state->gone_count >= state->impos_limit) {
-				hasPetal = false;
-				state->gone_count = 0;
-				state->found_Count = 0;
-				state->possibility = PEDAL_IMPOSSIBLE;
-				//handleImpossiblilty(); this should be called somewhere else
-
-//				//check that name exists and no buffer overflow will happen
-//				if (state->name != NULL && strlen(state->name) < BUFFLEN - strlen("PEDAL:  Not Detected")) {
-//					sprintf(buff, "PEDAL: %s Not Detected", state->name);
-//				} else {
-//					sprintf(buff, "PEDAL: Not Detected");
-//				}
-//				logMessage(buff, false);
-			}
-		}
-		else
+		//
+		if((sens_high >= state->high_min && sens_low >= state->low_min)
+			&& (sens_high <= state->high_max && sens_low <= state->low_max))
 		{
-			//trying to recover from impossible state
-			hasPetal = false;
-			if (sens_high >= HIGH_SENSE_OFFSET && sens_low >= LOW_SENSE_OFFSET) {
-				state->found_Count++;
-			} else {
-				state->found_Count = 0;
-			}
-			if (state->found_Count >= state->impos_limit) {
-				hasPetal = false;
-				state->gone_count = 0;
-				state->found_Count = 0;
-				state->possibility = PEDAL_POSSIBLE;
-
-				//check that name exists and no buffer overflow will happen
-				if (state->name != NULL && strlen(state->name) < BUFFLEN - strlen("PETAL:  Not Detected")) {
-					sprintf(buff, "PETAL: %s Re-detected", state->name);
-				} else {
-					sprintf(buff, "PETAL: Re-detected");
-				}
-				logMessage(buff, false);
-			}
+			hasPetal = true;
 		}
 	}
 

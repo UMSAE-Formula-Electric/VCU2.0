@@ -111,6 +111,10 @@ int main(void)
 
     btInitialize();
     checkStartupCondition();
+<<<<<<< Updated upstream
+=======
+//    enableVCULogging();
+>>>>>>> Stashed changes
 
     dash_clear_all_leds();
 

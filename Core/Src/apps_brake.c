@@ -137,7 +137,6 @@ void StartAppsProcessTask(void *argument) {
 	uint16_t apps_low = 0;
 	uint16_t apps_high = 0;
 	uint16_t brake1 = 0;
-	uint16_t brake2 = 0;
 
 	//setup apps state
 	InitalizeApps(APPS_GAIN, APPS_LOW_ZERO, APPS_LOW_MIN, APPS_LOW_MAX,
@@ -220,7 +219,8 @@ void sendTorqueWithFaultFixing(int16_t torque) {
 		sendTorque(0);
 		fixFaults();
 	} else {
-//		EnableMC();
+		EnableMC();
+		mc_send_command_msg(TORQUE_MODE);
 		sendTorque(torque);
 	}
 }

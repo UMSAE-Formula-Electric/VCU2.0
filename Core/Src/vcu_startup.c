@@ -41,20 +41,23 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 #define DISABLE_BRAKE_CHECK 0
 #define DISABLE_ACU_ACK 0
 
-void goTsaProcedure(uint32_t *vcuStateTaskNotification) {
-    BaseType_t retRTOS = 0;
-    char strBuff[40]; //buffer for making 'nice' logs
+void goTsaProcedure(uint8_t *vcuStateTaskNotification) {
+    osStatus_t retRTOS = 0;
 
+    osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(2));
     if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
         if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin) && (brakePressed() || DISABLE_BRAKE_CHECK) && (checkHeartbeat() || DISABLE_HEARTBEAT_CHECK)) {
             dash_set_tsa_teal();
             goTSA();
-            retRTOS = xTaskNotifyWait(0x00, 0x00, vcuStateTaskNotification, pdMS_TO_TICKS(TSA_ACK_TIMEOUT + MC_STARTUP_DELAY));
-            if(retRTOS == pdTRUE){
-                sprintf(strBuff, "Received ACU notification: %lu", (*vcuStateTaskNotification));
-                logMessage(strBuff,false);
+            retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(1000));
+            if(retRTOS != osOK || (*vcuStateTaskNotification) != ACU_TSA_ACK){
+            	go_idle();
+            	logMessage("ACU failed to ack TSA Request", true);
+            	fail_pulse();
+            	return;
             }
-            if((*vcuStateTaskNotification) != ACU_TSA_ACK){
+            retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(TSA_ACK_TIMEOUT + MC_STARTUP_DELAY));
+            if(retRTOS != osOK || (*vcuStateTaskNotification) != ACU_TSA_ACK){
                 go_idle();
                 logMessage("ACU failed to ack TSA Request", true);
                 fail_pulse();
@@ -66,15 +69,15 @@ void goTsaProcedure(uint32_t *vcuStateTaskNotification) {
     }
 }
 
-void goRtdProcedure(uint32_t *vcuStateTaskNotification) {
-    BaseType_t retRTOS = 0;
+void goRtdProcedure(uint8_t *vcuStateTaskNotification) {
+    osStatus_t retRTOS = 0;
 
     if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
         if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin) && (checkHeartbeat() || DISABLE_HEARTBEAT_CHECK) && (brakePressed() || DISABLE_BRAKE_CHECK)) {
             dash_set_rtd_teal();
             goRTD();
-            retRTOS = xTaskNotifyWait(0x00, 0x00, vcuStateTaskNotification, pdMS_TO_TICKS(RTD_ACK_TIMEOUT));
-            if(retRTOS != pdPASS || (*vcuStateTaskNotification) != ACU_RTD_ACK){
+            retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(RTD_ACK_TIMEOUT));
+            if(retRTOS != osOK || (*vcuStateTaskNotification) != ACU_RTD_ACK){
                 logMessage("ACU failed to ack RTD Request", false);
                 go_idle();
                 fail_pulse();
@@ -90,18 +93,18 @@ void goRtdProcedure(uint32_t *vcuStateTaskNotification) {
     }
 
     if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)) {
-        go_idle();
+        //go_idle();
     }
 
-    retRTOS = xTaskNotifyWait(0x00, 0x00, vcuStateTaskNotification, 0);
-    if(retRTOS == pdTRUE && (*vcuStateTaskNotification) == GO_IDLE_REQ_FROM_ACU){
+    retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, 0);
+    if(retRTOS == osOK && (*vcuStateTaskNotification) == GO_IDLE_REQ_FROM_ACU){
         logMessage("ACU request IDLE state change", true);
         go_idle();
     }
 }
 
-void rtdStateProcedure(uint32_t *vcuStateTaskNotification) {
-    BaseType_t retRTOS = 0;
+void rtdStateProcedure(uint8_t *vcuStateTaskNotification) {
+    osStatus_t retRTOS = 0;
 
     EnableMC();
     if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin) || isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)){
@@ -110,8 +113,8 @@ void rtdStateProcedure(uint32_t *vcuStateTaskNotification) {
         logMessage("RTD or VCU Button Pressed, going IDLE", false);
     }
 
-    retRTOS = xTaskNotifyWait(0x00,0x00, vcuStateTaskNotification, 0);
-    if(retRTOS == pdTRUE && (*vcuStateTaskNotification) == GO_IDLE_REQ_FROM_ACU){
+    retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, 0);
+    if(retRTOS == osOK && (*vcuStateTaskNotification) == GO_IDLE_REQ_FROM_ACU){
         logMessage("ACU request IDLE state change", true);
         go_idle();
     }
@@ -239,7 +242,7 @@ void StartVcuStateTask(void *argument){
         osThreadTerminate(osThreadGetId());
     }
 
-    uint32_t ulNotifiedValue;
+    uint8_t ulNotifiedValue;
     enum CAR_STATE state;
 
     for(;;){
@@ -247,7 +250,7 @@ void StartVcuStateTask(void *argument){
 
         //TODO VCU#32 Car state changed
         state = get_car_state();
-        set_ACU_State(state);
+//        set_ACU_State(state);
 
         switch(state){
             case IDLE:
@@ -262,7 +265,7 @@ void StartVcuStateTask(void *argument){
                 break;
             case READY_TO_DRIVE:
                 rtdStateProcedure(&ulNotifiedValue);
-                kickWatchdogBit(osThreadGetId());
+                 kickWatchdogBit(osThreadGetId());
                 break;
             default:
                 break;

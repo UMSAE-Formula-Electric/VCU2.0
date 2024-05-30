@@ -57,7 +57,6 @@ void processAcuToVcuCanIdRxData(const uint8_t *RxData) {
 void set_ACU_State(enum CAR_STATE new_state){
 	uint8_t data = (uint8_t) new_state;
 	sendCan(&hcan1, &data, 1, CAN_VCU_SET_ACB_STATE_ID, CAN_RTR_DATA, CAN_NO_EXT);
-	//wait for acknowledge?
 }
 
 void send_ACU_mesg(enum STARTUP_STATUS_NOTIFY_MSG msg){
@@ -73,11 +72,7 @@ void send_ACU_mesg_data(enum STARTUP_STATUS_NOTIFY_MSG msg_id, uint8_t data_len,
 }
 
 void notify_startup_task(enum startup_notify_value notify_val){
-	TaskHandle_t startupTask = NULL;
-	startupTask = get_startup_task();
-	if(startupTask != NULL){
-		xTaskNotify( startupTask, notify_val, eSetValueWithOverwrite);
-	}
+    osMessageQueuePut(ackCarStateQueueHandle, &notify_val, 0, 0);
 }
 
 void notify_acu_heartbeat_task(HeartbeatNotify_t notify_val){

@@ -135,6 +135,11 @@ osMessageQueueId_t canTxPacketQueueHandle;
 const osMessageQueueAttr_t canTxPacketQueue_attributes = {
   .name = "canTxPacketQueue"
 };
+/* Definitions for ackCarStateQueue */
+osMessageQueueId_t ackCarStateQueueHandle;
+const osMessageQueueAttr_t ackCarStateQueue_attributes = {
+  .name = "ackCarStateQueue"
+};
 /* Definitions for iwdgEventGroup */
 osEventFlagsId_t iwdgEventGroupHandle;
 const osEventFlagsAttr_t iwdgEventGroup_attributes = {
@@ -184,10 +189,13 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the queue(s) */
   /* creation of canRxPacketQueue */
-  canRxPacketQueueHandle = osMessageQueueNew (32, sizeof(CAN_RxPacketTypeDef), &canRxPacketQueue_attributes);
+  canRxPacketQueueHandle = osMessageQueueNew (64, sizeof(CAN_RxPacketTypeDef), &canRxPacketQueue_attributes);
 
   /* creation of canTxPacketQueue */
-  canTxPacketQueueHandle = osMessageQueueNew (32, sizeof(CAN_TxPacketTypeDef), &canTxPacketQueue_attributes);
+  canTxPacketQueueHandle = osMessageQueueNew (64, sizeof(CAN_TxPacketTypeDef), &canTxPacketQueue_attributes);
+
+  /* creation of ackCarStateQueue */
+  ackCarStateQueueHandle = osMessageQueueNew (32, sizeof(uint8_t), &ackCarStateQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */

@@ -94,7 +94,7 @@ void goRtdProcedure(uint8_t *vcuStateTaskNotification) {
     }
 
     if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)) {
-//        go_idle();
+        go_idle();
     }
 
     retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, 0);

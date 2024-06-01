@@ -3,6 +3,7 @@
 #include "gpio.h"
 #include "logger.h"
 
+#define DASH_LED_FLASH_DELAY 250
 
 /*
  * ALL GPIO toggle stuff. Every human should be able to understand this
@@ -59,7 +60,7 @@ void dash_toggle_tsa_teal() {
 
 void dash_flash_tsa_teal() {
     dash_toggle_tsa_teal();
-    HAL_Delay(250);
+    HAL_Delay(DASH_LED_FLASH_DELAY);
 }
 
 /*
@@ -95,7 +96,7 @@ void dash_toggle_rtd_teal() {
 
 void dash_flash_rtd_teal() {
     dash_toggle_rtd_teal();
-    HAL_Delay(250);
+    HAL_Delay(DASH_LED_FLASH_DELAY);
 }
 
 void vcu_debug_led(enum debugLed led, bool on){

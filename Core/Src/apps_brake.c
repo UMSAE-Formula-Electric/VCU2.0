@@ -224,15 +224,15 @@ void determineError(uint16_t high_val, uint16_t low_val, uint16_t brake_val){
 
 
 void sendTorqueWithFaultFixing(int16_t torque) {
-	if (torque < 10) {
-		DisableMC();
-		sendTorque(0);
-		fixFaults();
-	} else {
-		EnableMC();
-		mc_send_command_msg(TORQUE_MODE);
-		sendTorque(torque);
-	}
+    if ((get_car_state() != READY_TO_DRIVE) || torque < 10) {
+        DisableMC();
+        sendTorque(0);
+        fixFaults();
+    } else {
+        EnableMC();
+        mc_send_command_msg(TORQUE_MODE);
+        sendTorque(torque);
+    }
 }
 
 bool twoFootRulePassed(long appsVal, pedal_state_t * pedalState) {

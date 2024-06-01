@@ -167,7 +167,6 @@ bool detectImpossibilty(uint16_t high_val, uint16_t low_val, uint16_t brake_val)
 	bool res = true;
 
 	if (!pedalValid(high_val, low_val, &apps) && false) {
-		led_mgmt_set_error(DASH_NO_THROTTLE);
 	    btLogIndicator(true, THROTTLE_ERROR);
 	} else {
 		if (get_car_state() == READY_TO_DRIVE || BYPASS_RTD) {
@@ -182,7 +181,6 @@ bool detectImpossibilty(uint16_t high_val, uint16_t low_val, uint16_t brake_val)
 					} else {
 						if (detectBrake() && twoFootRulePassed(high_val, &apps)) {
 							btLogIndicator(false, THROTTLE_ERROR);
-							led_mgmt_clear_error(DASH_NO_THROTTLE);
 							res = false;
 						}
 					}

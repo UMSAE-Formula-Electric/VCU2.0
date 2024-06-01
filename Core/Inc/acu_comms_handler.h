@@ -6,6 +6,8 @@
 #include "can.h"
 #include "can_utils.h"
 
+extern osMessageQueueId_t ackCarStateQueueHandle;
+
 void processAcuToVcuCanIdRxData(const uint8_t *RxData);
 void set_ACU_State(enum CAR_STATE new_state);
 void send_ACU_mesg(enum STARTUP_STATUS_NOTIFY_MSG msg);

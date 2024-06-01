@@ -14,22 +14,15 @@
 #include "stm32f4xx.h"
 
 typedef enum {
-    DASH_NO_ERROR = 0,
-    DASH_SAFETY_LOOP_OPEN_ACU,
-    DASH_SAFETY_LOOP_OPEN_VCU,
-    DASH_NO_BRAKE,
-    DASH_NO_THROTTLE,
-    DASH_NO_ACU,
-    DASH_AIR_WELD,
-    DASH_NUM_LED_STATES
+    DASH_NO_STATE = 0,
+    DASH_VCU_IDLE_ACU_IDLE,
+    DASH_VCU_TSA_ACU_IDLE,
+    DASH_VCU_TSA_ACU_TSA,
+    DASH_VCU_RTD_ACU_TSA,
+    DASH_VCU_RTD_ACU_RTD,
 } dash_led_state_t;
 
-
-bool hmi_mgmt_init();
-
-void led_mgmt_set_error(dash_led_state_t state);
-void led_mgmt_clear_error(dash_led_state_t state);
-bool led_mgmt_check_error(dash_led_state_t state);
-bool led_mgmt_init();
+void dash_set_state(dash_led_state_t state);
+dash_led_state_t dash_get_state();
 
 #endif /* INC_DASHBOARD_MGMT_H_ */

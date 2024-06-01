@@ -34,12 +34,9 @@ void processAcuToVcuCanIdRxData(const uint8_t *RxData) {
         notify_startup_task(GO_IDLE_REQ_FROM_ACU);
     } else if (RxData[0] == CAN_NO_SAFETY_LOOP_SET) {
         btLogIndicator(true, SAFETY_LOOP);
-        led_mgmt_set_error(DASH_SAFETY_LOOP_OPEN_ACU);
     } else if (RxData[0] == CAN_NO_SAFETY_LOOP_CLEAR) {
         btLogIndicator(false, SAFETY_LOOP);
-        led_mgmt_clear_error(DASH_SAFETY_LOOP_OPEN_ACU);
     } else if (RxData[0] == CAN_AIR_WELD_SET) {
-        led_mgmt_set_error(DASH_AIR_WELD);
     } else if (RxData[0] == CAN_HEARTBEAT_REQUEST) {
         // Do nothing
     } else if (RxData[0] == CAN_HEARTBEAT_RESPONSE) {
@@ -57,7 +54,6 @@ void processAcuToVcuCanIdRxData(const uint8_t *RxData) {
 void set_ACU_State(enum CAR_STATE new_state){
 	uint8_t data = (uint8_t) new_state;
 	sendCan(&hcan1, &data, 1, CAN_VCU_SET_ACB_STATE_ID, CAN_RTR_DATA, CAN_NO_EXT);
-	//wait for acknowledge?
 }
 
 void send_ACU_mesg(enum STARTUP_STATUS_NOTIFY_MSG msg){
@@ -73,11 +69,7 @@ void send_ACU_mesg_data(enum STARTUP_STATUS_NOTIFY_MSG msg_id, uint8_t data_len,
 }
 
 void notify_startup_task(enum startup_notify_value notify_val){
-	TaskHandle_t startupTask = NULL;
-	startupTask = get_startup_task();
-	if(startupTask != NULL){
-		xTaskNotify( startupTask, notify_val, eSetValueWithOverwrite);
-	}
+    osMessageQueuePut(ackCarStateQueueHandle, &notify_val, 0, 0);
 }
 
 void notify_acu_heartbeat_task(HeartbeatNotify_t notify_val){

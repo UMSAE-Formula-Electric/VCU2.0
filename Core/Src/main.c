@@ -111,7 +111,6 @@ int main(void)
 
     btInitialize();
     checkStartupCondition();
-    enableVCULogging();
 
     dash_clear_all_leds();
 

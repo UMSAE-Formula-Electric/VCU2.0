@@ -8,7 +8,8 @@
 #include "iwdg.h"
 #include "bt_protocol.h"
 
-#define HEARTBEAT_TASK_DELAY_MS     100
+#define HEARTBEAT_TASK_TIMEOUT_MS   100
+#define HEARTBEAT_TASK_DELAY_MS     25
 #define HEARTBEAT_MAX_MISSES		50
 //Max number of times we can miss a heartbeat notification
 
@@ -20,12 +21,10 @@ void updateAcuStateLedsAndIndicators() {
     if(acu_connection_state == HEARTBEAT_PRESENT){
       //heartbeat all good
         btLogIndicator(false, NO_ACB);
-        led_mgmt_clear_error(DASH_NO_ACU);
     }
     else{
       //heartbeat sadness
         btLogIndicator(true, NO_ACB);
-        led_mgmt_set_error(DASH_NO_ACU);
     }
 }
 
@@ -53,7 +52,7 @@ void StartAcuHeartbeatTask(void *argument){
         logMessage("Heartbeat: Sent heartbeat request to ACU\r\n", true);
 
 		//Check if ACU has sent a message
-		retRTOS = xTaskNotifyWait(0x00, 0x00, (uint32_t*) &acuNotification, pdMS_TO_TICKS(HEARTBEAT_TASK_DELAY_MS));
+		retRTOS = xTaskNotifyWait(0x00, 0x00, (uint32_t*) &acuNotification, pdMS_TO_TICKS(HEARTBEAT_TASK_TIMEOUT_MS));
 
 		//check if the ACU responded
 		if(retRTOS == pdTRUE && acuNotification == HEARTBEAT_RESPONSE_NOTIFY){
@@ -74,7 +73,7 @@ void StartAcuHeartbeatTask(void *argument){
 		//do dash leds and indicators
         updateAcuStateLedsAndIndicators();
 
-        osThreadYield();
+        osDelay(pdMS_TO_TICKS(HEARTBEAT_TASK_DELAY_MS));
 	}
 }
 
@@ -98,7 +97,7 @@ void StartMcHeartbeatTask(void *argument){
       kickWatchdogBit(osThreadGetId());
 
     //Check if MC has sent a message
-    retRTOS = xTaskNotifyWait(0x00, 0x00, (uint32_t*) &mcNotification, pdMS_TO_TICKS(HEARTBEAT_TASK_DELAY_MS));
+    retRTOS = xTaskNotifyWait(0x00, 0x00, (uint32_t*) &mcNotification, pdMS_TO_TICKS(HEARTBEAT_TASK_TIMEOUT_MS));
     if(retRTOS == pdPASS){
         // Received notification from MC
         misses = 0; // Reset misses counter
@@ -113,7 +112,7 @@ void StartMcHeartbeatTask(void *argument){
             mc_connection_state = HEARTBEAT_LOST;
         }
     }
-      osThreadYield();
+    osDelay(pdMS_TO_TICKS(HEARTBEAT_TASK_DELAY_MS));
   }
 }
 

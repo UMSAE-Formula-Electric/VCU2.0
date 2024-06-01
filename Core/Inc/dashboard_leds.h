@@ -26,10 +26,12 @@ void dash_set_rtd_teal();
 void dash_toggle_tsa_blue();
 void dash_toggle_tsa_green();
 void dash_toggle_tsa_teal();
+void dash_flash_tsa_teal();
 
 void dash_toggle_rtd_green();
 void dash_toggle_rtd_blue();
 void dash_toggle_rtd_teal();
+void dash_flash_rtd_teal();
 
 void vcu_debug_led_init();
 void vcu_debug_led(enum debugLed led, bool on);

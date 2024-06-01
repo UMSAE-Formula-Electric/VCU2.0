@@ -18,9 +18,7 @@ static bool dash_state_flags[DASH_NUM_LED_STATES] = {false};
 
 void hmi_mgmt_task(void * pvParameters);
 
-void led_mgmt_set_error(dash_led_state_t state){
-	dash_state_flags[state] = true;
-}
+#define DASH_LED_TASK_DELAY_MS 100
 
 void led_mgmt_clear_error(dash_led_state_t state){
 	dash_state_flags[state] = false;
@@ -119,5 +117,6 @@ void StartDashboardLedTask(void *argument){
 //		else{
 //			btLogIndicator(false, GENERAL_ERROR);
 //		}
+        osDelay(pdMS_TO_TICKS(DASH_LED_TASK_DELAY_MS));
     }
 }

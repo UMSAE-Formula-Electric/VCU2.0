@@ -35,6 +35,7 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 #define RTD_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACU when going RTD
 #define FAIL_FLASH_LEN 1000		//[ms] length of warning flash on failed arm
 #define MC_STARTUP_DELAY 1000	//[ms] delay used to wait for the motor controller
+#define STARTUP_TASK_DELAY_MS 25
 
 #define DISABLE_HEARTBEAT_CHECK 0
 #define DISABLE_SAFETY_LOOP_CHECK 0
@@ -270,6 +271,6 @@ void StartVcuStateTask(void *argument){
             default:
                 break;
         }
-        osThreadYield();
+        osDelay(pdMS_TO_TICKS(STARTUP_TASK_DELAY_MS));
     }
 }

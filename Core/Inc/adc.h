@@ -36,20 +36,13 @@ extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */
 
-// Use an enum instead?
-#define ADC_APPS1 	0
-#define ADC_APPS2	1
-#define ADC_BPS	    2
-#define ADC_VBATT	3
-//#define ADC_BRK1
-//#define ADC_BRK2
-#define ADC_STRG	5
-#define ADC_BRKTL	6
-#define ADC_BRKTR	7
-//#define ADC_BRAKE	8
-#define ADC_TIC		9
-
-#define NUM_ADC_CHANNELS 4
+enum ADC_CHANNEL{
+    ADC_APPS1 = 0,
+    ADC_APPS2,
+    ADC_VBATT,
+    ADC_BPS,
+    NUM_ADC_CHANNELS
+};
 
 /* USER CODE END Private defines */
 

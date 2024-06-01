@@ -47,6 +47,8 @@
 //THROTTLE VAL 2 IS INVERTED
 //static uint32_t Sensor_DMABase[4]; // dereferencing Mem0BasePtr1 will give the value stored at its address at time of dereference!(Shit uses DMA! Whew!)
 
+enum BRAKE_STATE readDigitalBrakeState() { return HAL_GPIO_ReadPin(BPS_GPIO_Port, BPS_Pin); }
+
 //int16_t convertThrottleforMC(uint16_t value, pedal_state_t * state);
 void adjust_for_power_limit(uint16_t * throttleRequest);
 static void handleImpossiblilty();
@@ -136,7 +138,7 @@ void StartAppsProcessTask(void *argument) {
 
 	uint16_t apps_low = 0;
 	uint16_t apps_high = 0;
-	uint16_t brake1 = 0;
+    enum BRAKE_STATE brake1;
 
 	//setup apps state
 	InitalizeApps(APPS_GAIN, APPS_LOW_ZERO, APPS_LOW_MIN, APPS_LOW_MAX,
@@ -149,6 +151,7 @@ void StartAppsProcessTask(void *argument) {
 		apps_low = 0.5 * ADC_get_val(ADC_APPS1) + 0.5 * apps_low;
         apps_high = 0.5 * ADC_get_val(ADC_APPS2) + 0.5 * apps_high;
 		brake1 = ADC_get_val(ADC_BPS);
+        brake1 = readDigitalBrakeState();
 
 		mc_apps_val = mapPedalPressToMotorTorque(apps_low);
 

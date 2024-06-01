@@ -44,6 +44,11 @@
 #define BRAKE_HIGH_MIN	259
 #define BRAKE_HIGH_MAX	574
 
+enum BRAKE_STATE{
+    BRAKE_RELEASED = GPIO_PIN_SET,
+    BRAKE_PRESSED = GPIO_PIN_RESET,
+};
+
 //#define TR_BREAK_PRESSED_LIMIT 1350 //was 2000
 //*******************
 #define LOW_TORQUE_DIV 4

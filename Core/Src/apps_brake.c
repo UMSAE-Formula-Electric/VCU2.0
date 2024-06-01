@@ -27,15 +27,13 @@
 
 #define APPS_REQ_FREQ_HZ 100 //[Hz] frequency of polling loop for APPS
 #define BRAKE_REQ_FREQ_HZ 100 //[Hz] frequency of polling loop for BRAKE PEDAL
+
 #define MIN_TORQUE_REQUESTABLE 0
 #define MAX_TORQUE_REQUESTABLE 2000
 
 #define BYPASS_SAFETY	0
 #define BYPASS_BRAKE	1
 #define BYPASS_RTD		1
-
-#define APPS_LOW_END 	300
-#define APPS_HIGH_END 	600
 
 #define APPS_TWO_FOOT_VAL 		400
 #define APPS_TWO_FOOT_RELEASE 	310
@@ -134,47 +132,6 @@ void readAccelPedals(uint16_t *apps_low, uint16_t *apps_high) {
     }
 }
 
-/*
- * updateAPPSVals
- *
- * This is the main task for updating and handling the throttle. This task checks for impossibility of the apps and if the apps is present
- */
-void StartAppsProcessTask(void *argument) {
-    uint8_t isTaskActivated = (int)argument;
-    if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
-    }
-
-	int16_t mc_apps_val;
-
-	uint16_t apps_low = 0;
-	uint16_t apps_high = 0;
-    enum BRAKE_STATE brake1;
-
-	//setup apps state
-	InitalizeApps(APPS_GAIN, APPS_LOW_ZERO, APPS_LOW_MIN, APPS_LOW_MAX,
-					APPS_HIGH_ZERO, APPS_HIGH_MIN, APPS_HIGH_MAX);
-
-	for (;;) {
-        kickWatchdogBit(osThreadGetId());
-
-		//low pass filters to increase noise rejection
-        readAccelPedals(&apps_low, &apps_high);
-        brake1 = readDigitalBrakeState();
-
-		mc_apps_val = mapPedalPressToMotorTorque(apps_low);
-
-		if(detectImpossibilty(apps_high, apps_low, brake1)){
-			handleImpossiblilty();
-		}
-		else{
-			sendTorqueWithFaultFixing(mc_apps_val);
-		}
-
-        osDelay(pdMS_TO_TICKS(1000 / APPS_REQ_FREQ_HZ));
-	}
-}
-
 bool detectImpossibilty(uint16_t high_val, uint16_t low_val, uint16_t brake_val){
 	bool res = true;
 
@@ -261,42 +218,6 @@ bool twoFootRulePassed(long appsVal, pedal_state_t * pedalState) {
 		return true;
 	} else {
 		return false;
-	}
-}
-
-/*
- * updateBrakeVals
- *
- * This task is used for detecting the plausibility of the brake sensor
- */
-void StartBrakeProcessTask(void *argument) {
-    uint8_t isTaskActivated = (int)argument;
-    if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
-    }
-
-	uint16_t brake1 = 0;
-	uint16_t brake2 = 0;
-
-	//setup brake state
-	InitializeBrake(BRAKE_GAIN, BRAKE_LOW_ZERO, BRAKE_LOW_MIN, BRAKE_LOW_MAX, BRAKE_HIGH_ZERO, BRAKE_HIGH_MIN, BRAKE_HIGH_MAX);
-
-	//task infinite loop
-	for (;;) {
-        kickWatchdogBit(osThreadGetId());
-
-		//log brake sensors
-        btLogSensor(ADC_get_val(ADC_BPS), BRAKE_1);
-//		btLogSensor(ADC_get_val(ADC_BRK2), BRAKE_2);
-
-		brake1 = ADC_get_val(ADC_BPS);
-//		brake2 = ADC_get_val(ADC_BRK2);
-
-		//kick wathcdog to make sure this doesn't hang
-//		wd_criticalTaskKick(wd_BRAKE_CTASK);
-
-        osDelay(pdMS_TO_TICKS(1000 / BRAKE_REQ_FREQ_HZ));
-//		vTaskDelay(pdMS_TO_TICKS(1000/BRAKE_REQ_FREQ));             //TODO Revise task delay
 	}
 }
 
@@ -455,5 +376,71 @@ bool EV2_4_check(uint16_t apps1, uint16_t brake1, pedal_state_t * apps_state,
 		}
 	}
 	return check_pass;
+}
+
+/*
+ * StartAppsProcessTask
+ *
+ * This is the main task for updating and handling the throttle. This task checks for impossibility of the apps and if the apps is present
+ */
+void StartAppsProcessTask(void *argument) {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
+    int16_t mc_apps_val;
+
+    uint16_t apps_low = 0;
+    uint16_t apps_high = 0;
+    enum BRAKE_STATE brake1;
+
+    //setup apps state
+    InitalizeApps(APPS_GAIN, APPS_LOW_ZERO, APPS_LOW_MIN, APPS_LOW_MAX,
+                  APPS_HIGH_ZERO, APPS_HIGH_MIN, APPS_HIGH_MAX);
+
+    for (;;) {
+        kickWatchdogBit(osThreadGetId());
+
+        //low pass filters to increase noise rejection
+        readAccelPedals(&apps_low, &apps_high);
+        brake1 = readDigitalBrakeState();
+
+        mc_apps_val = mapPedalPressToMotorTorque(apps_low);
+
+        if(detectImpossibilty(apps_high, apps_low, brake1)){
+            handleImpossiblilty();
+        }
+        else{
+            sendTorqueWithFaultFixing(mc_apps_val);
+        }
+
+        osDelay(pdMS_TO_TICKS(1000 / APPS_REQ_FREQ_HZ));
+    }
+}
+
+/*
+ * StartBrakeProcessTask
+ *
+ * This task is used for detecting the plausibility of the brake sensor
+ */
+void StartBrakeProcessTask(void *argument) {
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadTerminate(osThreadGetId());
+    }
+
+    enum BRAKE_STATE brake1;
+
+    InitializeBrake(BRAKE_GAIN, BRAKE_LOW_ZERO, BRAKE_LOW_MIN, BRAKE_LOW_MAX, BRAKE_HIGH_ZERO, BRAKE_HIGH_MIN, BRAKE_HIGH_MAX);
+
+    for (;;) {
+        kickWatchdogBit(osThreadGetId());
+
+        brake1 = readDigitalBrakeState();
+        btLogSensor(brake1, BRAKE_1);
+
+        osDelay(pdMS_TO_TICKS(1000 / BRAKE_REQ_FREQ_HZ));
+    }
 }
 

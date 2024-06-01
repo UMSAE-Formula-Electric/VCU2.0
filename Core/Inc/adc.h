@@ -35,6 +35,7 @@ extern "C" {
 extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */
+#define INVALID_ADC_READING 65535U
 
 enum ADC_CHANNEL{
     ADC_APPS1 = 0,
@@ -49,11 +50,7 @@ enum ADC_CHANNEL{
 void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
-uint8_t ADC_init();
 uint32_t ADC_get_val(uint8_t item);
-uint32_t adc_convert();
-
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

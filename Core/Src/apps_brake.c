@@ -25,8 +25,8 @@
 #include "global_board_config.h"
 #include "bt_protocol.h"
 
-#define APPS_REQ_FREQ 200 //[Hz] frequency of polling loop for APPS
-#define BRAKE_REQ_FREQ 100 //[Hz] frequency of polling loop for BRAKE PEDAL
+#define APPS_REQ_FREQ_HZ 100 //[Hz] frequency of polling loop for APPS
+#define BRAKE_REQ_FREQ_HZ 100 //[Hz] frequency of polling loop for BRAKE PEDAL
 #define MIN_TORQUE_REQUESTABLE 0
 #define MAX_TORQUE_REQUESTABLE 2000
 
@@ -47,7 +47,7 @@
 //THROTTLE VAL 2 IS INVERTED
 //static uint32_t Sensor_DMABase[4]; // dereferencing Mem0BasePtr1 will give the value stored at its address at time of dereference!(Shit uses DMA! Whew!)
 
-enum BRAKE_STATE readDigitalBrakeState() { return HAL_GPIO_ReadPin(BPS_GPIO_Port, BPS_Pin); }
+enum BRAKE_STATE readDigitalBrakeState() { return (enum BRAKE_STATE) HAL_GPIO_ReadPin(BPS_GPIO_Port, BPS_Pin); }
 
 //int16_t convertThrottleforMC(uint16_t value, pedal_state_t * state);
 void adjust_for_power_limit(uint16_t * throttleRequest);
@@ -85,7 +85,7 @@ void InitalizeApps(float gain, uint16_t low_zero, uint16_t low_min, uint16_t low
 	apps.impos_count = 0;
 	apps.possible_count = 0;
 
-	apps.impos_limit = (APPS_REQ_FREQ / 10); //100ms limit max (T.6.2.4) //TODO check
+	apps.impos_limit = (APPS_REQ_FREQ_HZ / 10); //100ms limit max (T.6.2.4) //TODO check
 
 	apps.low_zero 	= low_zero;
 	apps.low_min 	= low_min;
@@ -110,7 +110,7 @@ void InitializeBrake(float gain, uint16_t low_zero, uint16_t low_min, uint16_t l
 	apps.impos_count = 0;
 	apps.possible_count = 0;
 
-	apps.impos_limit = (BRAKE_REQ_FREQ / 10); //100ms limit max (T.6.2.4) //TODO check
+	apps.impos_limit = (BRAKE_REQ_FREQ_HZ / 10); //100ms limit max (T.6.2.4) //TODO check
 
 	apps.low_zero 	= low_zero;
 	apps.low_min 	= low_min;
@@ -121,6 +121,17 @@ void InitializeBrake(float gain, uint16_t low_zero, uint16_t low_min, uint16_t l
 	apps.high_max 	= high_max;
 
 	apps.gain = gain;
+}
+
+void readAccelPedals(uint16_t *apps_low, uint16_t *apps_high) {
+    uint16_t temp_apps_low = ADC_get_val(ADC_APPS1);
+    uint16_t temp_apps_high = ADC_get_val(ADC_APPS2);
+    if (temp_apps_low != INVALID_ADC_READING) {
+        (*apps_low) = (0.5 * temp_apps_low) + (0.5 * (*apps_low));
+    }
+    if (temp_apps_high != INVALID_ADC_READING) {
+        (*apps_high) = (0.5 * temp_apps_high) + (0.5 * (*apps_high));
+    }
 }
 
 /*
@@ -148,9 +159,7 @@ void StartAppsProcessTask(void *argument) {
         kickWatchdogBit(osThreadGetId());
 
 		//low pass filters to increase noise rejection
-		apps_low = 0.5 * ADC_get_val(ADC_APPS1) + 0.5 * apps_low;
-        apps_high = 0.5 * ADC_get_val(ADC_APPS2) + 0.5 * apps_high;
-		brake1 = ADC_get_val(ADC_BPS);
+        readAccelPedals(&apps_low, &apps_high);
         brake1 = readDigitalBrakeState();
 
 		mc_apps_val = mapPedalPressToMotorTorque(apps_low);
@@ -162,7 +171,7 @@ void StartAppsProcessTask(void *argument) {
 			sendTorqueWithFaultFixing(mc_apps_val);
 		}
 
-		osThreadYield();
+        osDelay(pdMS_TO_TICKS(1000 / APPS_REQ_FREQ_HZ));
 	}
 }
 
@@ -286,7 +295,7 @@ void StartBrakeProcessTask(void *argument) {
 		//kick wathcdog to make sure this doesn't hang
 //		wd_criticalTaskKick(wd_BRAKE_CTASK);
 
-		osThreadYield();
+        osDelay(pdMS_TO_TICKS(1000 / BRAKE_REQ_FREQ_HZ));
 //		vTaskDelay(pdMS_TO_TICKS(1000/BRAKE_REQ_FREQ));             //TODO Revise task delay
 	}
 }

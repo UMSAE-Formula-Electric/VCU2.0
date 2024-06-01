@@ -21,12 +21,10 @@ void updateAcuStateLedsAndIndicators() {
     if(acu_connection_state == HEARTBEAT_PRESENT){
       //heartbeat all good
         btLogIndicator(false, NO_ACB);
-        led_mgmt_clear_error(DASH_NO_ACU);
     }
     else{
       //heartbeat sadness
         btLogIndicator(true, NO_ACB);
-        led_mgmt_set_error(DASH_NO_ACU);
     }
 }
 

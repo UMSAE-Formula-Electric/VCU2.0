@@ -114,7 +114,6 @@ void StartAppsProcessTask(void *argument) {
 		brake1 = ADC_get_val(ADC_BPS);
 
 		if (!detectPedal(apps1, apps2, &apps)) {
-			led_mgmt_set_error(DASH_NO_THROTTLE);
             btLogIndicator(true, THROTTLE_ERROR);
 			if (get_car_state() == READY_TO_DRIVE) {
 				handleImpossiblilty();
@@ -135,7 +134,6 @@ void StartAppsProcessTask(void *argument) {
 							if (detectBrake()) {
 								if (twoFootRulePassed(apps1, &apps)) {
                                     btLogIndicator(false, THROTTLE_ERROR);
-									led_mgmt_clear_error(DASH_NO_THROTTLE);
 									sendTorqueWithFaultFixing(mc_apps_val);
 								} else {
 									sendTorqueWithFaultFixing(0);

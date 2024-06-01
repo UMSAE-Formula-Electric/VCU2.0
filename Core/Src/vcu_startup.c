@@ -48,7 +48,6 @@ void goTsaProcedure(uint8_t *vcuStateTaskNotification) {
     osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(2));
     if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
         if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin) && (brakePressed() || DISABLE_BRAKE_CHECK) && (checkHeartbeat() || DISABLE_HEARTBEAT_CHECK)) {
-            dash_set_tsa_teal();
             goTSA();
             retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(1000));
             if(retRTOS != osOK || (*vcuStateTaskNotification) != ACU_TSA_ACK){
@@ -57,14 +56,15 @@ void goTsaProcedure(uint8_t *vcuStateTaskNotification) {
             	fail_pulse();
             	return;
             }
+            dash_set_state(DASH_VCU_TSA_ACU_IDLE);
             retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(TSA_ACK_TIMEOUT + MC_STARTUP_DELAY));
             if(retRTOS != osOK || (*vcuStateTaskNotification) != ACU_TSA_ACK){
                 go_idle();
                 logMessage("ACU failed to ack TSA Request", true);
                 fail_pulse();
             } else {
+                dash_set_state(DASH_VCU_TSA_ACU_TSA);
                 logMessage("Went TSA!", false);
-                dash_set_tsa_green();
             }
         }
     }
@@ -75,16 +75,16 @@ void goRtdProcedure(uint8_t *vcuStateTaskNotification) {
 
     if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
         if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin) && (checkHeartbeat() || DISABLE_HEARTBEAT_CHECK) && (brakePressed() || DISABLE_BRAKE_CHECK)) {
-            dash_set_rtd_teal();
             goRTD();
+            dash_set_state(DASH_VCU_RTD_ACU_TSA);
             retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(RTD_ACK_TIMEOUT));
             if(retRTOS != osOK || (*vcuStateTaskNotification) != ACU_RTD_ACK){
                 logMessage("ACU failed to ack RTD Request", false);
                 go_idle();
                 fail_pulse();
             } else {
+                dash_set_state(DASH_VCU_RTD_ACU_RTD);
                 EnableMC();
-                dash_set_rtd_green();
                 mc_set_inverter_enable(1);
                 logMessage("Went RTD!", false);
             }
@@ -94,7 +94,7 @@ void goRtdProcedure(uint8_t *vcuStateTaskNotification) {
     }
 
     if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)) {
-        //go_idle();
+//        go_idle();
     }
 
     retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, 0);
@@ -161,12 +161,10 @@ bool read_saftey_loop(){
 
 
 	if(HAL_GPIO_ReadPin(SAFETY_LOOP_TAP_GPIO_Port, SAFETY_LOOP_TAP_Pin) == GPIO_PIN_SET){
-		led_mgmt_clear_error(DASH_SAFETY_LOOP_OPEN_VCU);
 		state = true;
 	}
 	else{
         //TODO VCU#32 ERROR Safety loop open [hardware fault]A
-		led_mgmt_set_error(DASH_SAFETY_LOOP_OPEN_VCU);
 		state = false;
 	}
 
@@ -186,7 +184,7 @@ TaskHandle_t get_startup_task(){
  */
 void go_idle(){
     //TODO VCU#32 INFO Going idle
-	dash_clear_all_leds();
+    dash_set_state(DASH_VCU_IDLE_ACU_IDLE);
 	DisableMC();
 	mc_set_inverter_enable(0);
 	set_car_state(IDLE);
@@ -251,22 +249,19 @@ void StartVcuStateTask(void *argument){
 
         //TODO VCU#32 Car state changed
         state = get_car_state();
-//        set_ACU_State(state);
+        set_ACU_State(state);
 
         switch(state){
             case IDLE:
-                dash_clear_all_leds();
+                dash_set_state(DASH_VCU_IDLE_ACU_IDLE);
                 goTsaProcedure(&ulNotifiedValue);
-                kickWatchdogBit(osThreadGetId());
                 break;
             case TRACTIVE_SYSTEM_ACTIVE:
                 //TODO VCU#32 INFO Tractive system active Ready to drive procedure begun
                 goRtdProcedure(&ulNotifiedValue);
-                kickWatchdogBit(osThreadGetId());
                 break;
             case READY_TO_DRIVE:
                 rtdStateProcedure(&ulNotifiedValue);
-                 kickWatchdogBit(osThreadGetId());
                 break;
             default:
                 break;

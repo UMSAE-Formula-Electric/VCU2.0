@@ -4,15 +4,10 @@
 #include "task.h"
 #include "cmsis_os2.h"
 
-#define LOOP_CLOSE 1
-#define LOOP_OPEN 0
-
-void startup_Init();
 void go_idle();
 int checkHeartbeat();
 void goTSA();
 void goRTD();
-bool startup_Task_start();
 TaskHandle_t get_startup_task();
 
 enum startup_notify_value{

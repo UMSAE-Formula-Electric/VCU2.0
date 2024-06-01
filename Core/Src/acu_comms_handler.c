@@ -34,12 +34,9 @@ void processAcuToVcuCanIdRxData(const uint8_t *RxData) {
         notify_startup_task(GO_IDLE_REQ_FROM_ACU);
     } else if (RxData[0] == CAN_NO_SAFETY_LOOP_SET) {
         btLogIndicator(true, SAFETY_LOOP);
-        led_mgmt_set_error(DASH_SAFETY_LOOP_OPEN_ACU);
     } else if (RxData[0] == CAN_NO_SAFETY_LOOP_CLEAR) {
         btLogIndicator(false, SAFETY_LOOP);
-        led_mgmt_clear_error(DASH_SAFETY_LOOP_OPEN_ACU);
     } else if (RxData[0] == CAN_AIR_WELD_SET) {
-        led_mgmt_set_error(DASH_AIR_WELD);
     } else if (RxData[0] == CAN_HEARTBEAT_REQUEST) {
         // Do nothing
     } else if (RxData[0] == CAN_HEARTBEAT_RESPONSE) {

@@ -48,7 +48,7 @@ void StartDashboardLedTask(void *argument){
 
         switch(dashLedsState){
             case DASH_VCU_IDLE_ACU_IDLE:
-                // VCU and ACU idle: TSA LED flashing cyan
+                // VCU and ACU idle: TSA LED flashing Teal
                 dash_flash_tsa_teal();
                 break;
             case DASH_VCU_TSA_ACU_IDLE:
@@ -56,7 +56,7 @@ void StartDashboardLedTask(void *argument){
                 dash_set_tsa_teal();
                 break;
             case DASH_VCU_TSA_ACU_TSA:
-                // VCU and ACU tsa: TSA LED solid green and RTD LED flashing cyan
+                // VCU and ACU tsa: TSA LED solid green and RTD LED flashing teal
                 dash_set_tsa_green();
                 dash_flash_rtd_teal();
                 break;
@@ -69,6 +69,9 @@ void StartDashboardLedTask(void *argument){
                 // VCU and ACU rta: Both LEDs green
                 dash_set_tsa_green();
                 dash_set_rtd_green();
+                break;
+            case DASH_FAIL_PULSE:
+                dash_fail_pulse();
                 break;
             default:
                 break;

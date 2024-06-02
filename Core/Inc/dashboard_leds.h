@@ -33,6 +33,8 @@ void dash_toggle_rtd_blue();
 void dash_toggle_rtd_teal();
 void dash_flash_rtd_teal();
 
+void dash_fail_pulse();
+
 void vcu_debug_led_init();
 void vcu_debug_led(enum debugLed led, bool on);
 

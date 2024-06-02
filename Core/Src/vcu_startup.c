@@ -33,8 +33,8 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 //timing
 #define TSA_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACU when going TSA
 #define RTD_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACU when going RTD
-#define FAIL_FLASH_LEN 1000		//[ms] length of warning flash on failed arm
 #define MC_STARTUP_DELAY 1000	//[ms] delay used to wait for the motor controller
+
 #define STARTUP_TASK_DELAY_MS 25
 
 #define DISABLE_HEARTBEAT_CHECK 0
@@ -212,11 +212,8 @@ void goRTD() {
  */
 static void fail_pulse(){
     //TODO VCU#32 ERROR pulse failed
-	go_idle();
-	dash_set_rtd_blue();
-	dash_set_tsa_blue();
-	vTaskDelay(pdMS_TO_TICKS(FAIL_FLASH_LEN));
-	dash_clear_all_leds();
+    dash_set_state(DASH_FAIL_PULSE);
+    go_idle();
 	DisableMC();
 }
 

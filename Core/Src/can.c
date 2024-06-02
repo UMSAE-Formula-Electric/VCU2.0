@@ -304,7 +304,7 @@ void StartCanRxTask(void *argument)
                 }
             }
         }
-        osDelay(0);
+        osThreadYield();
     }
 }
 
@@ -329,7 +329,7 @@ void StartCanTxTask(void *argument){
                 logMessage("VCU sent a message to the CAN Bus.\r\n", true);
             }
         }
-        osDelay(0);
+        osThreadYield();
     }
 }
 /* USER CODE END 1 */

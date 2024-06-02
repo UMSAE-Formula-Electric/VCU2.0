@@ -38,10 +38,9 @@ extern ADC_HandleTypeDef hadc1;
 #define INVALID_ADC_READING 65535U
 
 enum ADC_CHANNEL{
-    ADC_APPS1 = 0,
-    ADC_APPS2,
+    ADC_APPS_LOW = 0,
+    ADC_APPS_HIGH,
     ADC_VBATT,
-    ADC_BPS,
     NUM_ADC_CHANNELS
 };
 

@@ -23,7 +23,7 @@
 /* USER CODE BEGIN 0 */
 #include <assert.h>
 
-static volatile uint32_t Sensor_DMABase[NUM_ADC_CHANNELS] = {0};
+volatile uint32_t Sensor_DMABase[NUM_ADC_CHANNELS] = {0};
 
 
 /* USER CODE END 0 */
@@ -93,7 +93,7 @@ void MX_ADC1_Init(void)
   }
   /* USER CODE BEGIN ADC1_Init 2 */
   HAL_ADC_MspInit(&hadc1);
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*) Sensor_DMABase, sizeof(uint32_t));
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*) Sensor_DMABase, NUM_ADC_CHANNELS);
   /* USER CODE END ADC1_Init 2 */
 
 }
@@ -114,17 +114,15 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     __HAL_RCC_GPIOA_CLK_ENABLE();
     /**ADC1 GPIO Configuration
     PC0     ------> ADC1_IN10
-    PC1     ------> ADC1_IN11
     PA5     ------> ADC1_IN5
-    PA6     ------> ADC1_IN6
     PA7     ------> ADC1_IN7
     */
-    GPIO_InitStruct.Pin = APPS1_Pin|BRAKE1_Pin;
+    GPIO_InitStruct.Pin = APPS1_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+    HAL_GPIO_Init(APPS1_GPIO_Port, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = APPS2_Pin|BRAKE2_Pin|VBATT_Pin;
+    GPIO_InitStruct.Pin = APPS2_Pin|VBATT_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -170,14 +168,12 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
     /**ADC1 GPIO Configuration
     PC0     ------> ADC1_IN10
-    PC1     ------> ADC1_IN11
     PA5     ------> ADC1_IN5
-    PA6     ------> ADC1_IN6
     PA7     ------> ADC1_IN7
     */
-    HAL_GPIO_DeInit(GPIOC, APPS1_Pin|BRAKE1_Pin);
+    HAL_GPIO_DeInit(APPS1_GPIO_Port, APPS1_Pin);
 
-    HAL_GPIO_DeInit(GPIOA, APPS2_Pin|BRAKE2_Pin|VBATT_Pin);
+    HAL_GPIO_DeInit(GPIOA, APPS2_Pin|VBATT_Pin);
 
     /* ADC1 DMA DeInit */
     HAL_DMA_DeInit(adcHandle->DMA_Handle);

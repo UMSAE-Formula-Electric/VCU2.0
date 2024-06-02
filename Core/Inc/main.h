@@ -60,7 +60,7 @@ void Error_Handler(void);
 #define CAN_TX_TASK_ENABLED 1
 #define MC_HRTBEAT_TASK_ENABLED 1
 #define IWDG_RELOAD_PERIOD 4094
-#define BT_DUMP_TASK_ENABLED 0
+#define BT_DUMP_TASK_ENABLED 1
 #define APPS_PROC_TASK_ENABLED 1
 #define ACU_HRTBEAT_TASK_ENABLED 1
 #define VCU_STATE_TASK_ENABLED 1
@@ -107,16 +107,8 @@ void Error_Handler(void);
 #define VCU_LED_RED_GPIO_Port GPIOE
 #define SHUTDOWN_CTL_Pin GPIO_PIN_12
 #define SHUTDOWN_CTL_GPIO_Port GPIOE
-#define BT_TX_Pin GPIO_PIN_8
-#define BT_TX_GPIO_Port GPIOD
-#define BT_RX_Pin GPIO_PIN_9
-#define BT_RX_GPIO_Port GPIOD
 #define BT_RESET_Pin GPIO_PIN_10
 #define BT_RESET_GPIO_Port GPIOD
-#define BT_NCTS_Pin GPIO_PIN_11
-#define BT_NCTS_GPIO_Port GPIOD
-#define BT_NRTS_Pin GPIO_PIN_12
-#define BT_NRTS_GPIO_Port GPIOD
 #define BT_SW_BTN_Pin GPIO_PIN_13
 #define BT_SW_BTN_GPIO_Port GPIOD
 #define BT_P2_4_Pin GPIO_PIN_14

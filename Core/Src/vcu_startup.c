@@ -10,7 +10,6 @@
 #include <dashboard_mgmt.h>
 #include "apps_brake.h"
 #include "acu_comms_handler.h"
-#include "can.h"
 #include "car_state.h"
 #include "vcu_startup.h"
 #include "logger.h"
@@ -19,12 +18,8 @@
 #include "iwdg.h"
 #include "heartbeat.h"
 #include "gpio.h"
-
 #include "FreeRTOS.h"
 #include "task.h"
-#include "queue.h"
-
-#include "stdio.h"
 #include "freertos_task_handles.h"
 
 static void fail_pulse();

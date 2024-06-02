@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "gpio.h"
 
 #define TR_MAX_MC_VALUE 0x7FFF
 #define TR_MIN_MC_VALUE 0
@@ -54,15 +55,9 @@ enum BRAKE_STATE{
 #define LOW_TORQUE_DIV 4
 //*******************
 
-
-void start_brake_apps_tasks();
-void apps_brake_init();
 bool detectImpossibilty(uint16_t high_val, uint16_t low_val, uint16_t brake_val);
 void determineError(uint16_t high_val, uint16_t low_val, uint16_t brake_val);
-uint16_t get_apps();
 
-uint16_t get_brake();
-bool get_brake_press();
 bool brakePressed();
 bool detectBrake();
 #endif

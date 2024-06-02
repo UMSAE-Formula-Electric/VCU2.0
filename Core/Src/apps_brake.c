@@ -6,23 +6,17 @@
  *
  */
 
-#include <dashboard_mgmt.h>
 #include "pedal_encoder.h"
 #include "apps_brake.h"
 #include "motor_controller_can_utils.h"
 #include "FreeRTOS.h"
-#include "queue.h"
-#include "task.h"
 #include "adc.h"
-#include "can.h"
 #include "logger.h"
 #include "iwdg.h"
 #include "gpio.h"
 #include "car_state.h"
-#include <stdlib.h>
 #include <string.h>
 #include "vcu_startup.h"
-#include "global_board_config.h"
 #include "bt_protocol.h"
 
 #define APPS_REQ_FREQ_HZ 100 //[Hz] frequency of polling loop for APPS
@@ -32,8 +26,8 @@
 #define MAX_TORQUE_REQUESTABLE 2000
 
 #define BYPASS_SAFETY	0
-#define BYPASS_BRAKE	1
-#define BYPASS_RTD		1
+#define BYPASS_BRAKE	0
+#define BYPASS_RTD		0
 
 #define APPS_TWO_FOOT_VAL 		400
 #define APPS_TWO_FOOT_RELEASE 	310
@@ -42,18 +36,12 @@
 #define PEDAL_TWO_FOOT_RELEASE_PERCENT 	0.05	// Amount to get out of two foot pressed state
 #define BRAKE_PRESS_PERCENT 			0.1 	//amount to press the brake before it is considered actuated
 #define BRAKE_PRESS_TWOFOOT_PERCENT 	0.20 	//amount to press brake before it is considered pressed for
-//THROTTLE VAL 2 IS INVERTED
-//static uint32_t Sensor_DMABase[4]; // dereferencing Mem0BasePtr1 will give the value stored at its address at time of dereference!(Shit uses DMA! Whew!)
 
 enum BRAKE_STATE readDigitalBrakeState() { return (enum BRAKE_STATE) HAL_GPIO_ReadPin(BPS_GPIO_Port, BPS_Pin); }
 
-//int16_t convertThrottleforMC(uint16_t value, pedal_state_t * state);
-void adjust_for_power_limit(uint16_t * throttleRequest);
 static void handleImpossiblilty();
 void sendTorqueWithFaultFixing(int16_t);
 bool twoFootRulePassed(long, pedal_state_t*);
-bool EV2_4_check(uint16_t apps1, uint16_t brake1, pedal_state_t * apps_state,
-		pedal_state_t * brake_state);
 
 static uint32_t current_max_power = TR_MAX_POWER; //update based on data from AMS
 
@@ -122,8 +110,8 @@ void InitializeBrake(float gain, uint16_t low_zero, uint16_t low_min, uint16_t l
 }
 
 void readAccelPedals(uint16_t *apps_low, uint16_t *apps_high) {
-    uint16_t temp_apps_low = ADC_get_val(ADC_APPS1);
-    uint16_t temp_apps_high = ADC_get_val(ADC_APPS2);
+    uint16_t temp_apps_low = ADC_get_val(ADC_APPS_LOW);
+    uint16_t temp_apps_high = ADC_get_val(ADC_APPS_HIGH);
     if (temp_apps_low != INVALID_ADC_READING) {
         (*apps_low) = (0.5 * temp_apps_low) + (0.5 * (*apps_low));
     }
@@ -181,7 +169,7 @@ void determineError(uint16_t high_val, uint16_t low_val, uint16_t brake_val){
 
 
 void sendTorqueWithFaultFixing(int16_t torque) {
-    if ((get_car_state() != READY_TO_DRIVE) || torque < 10) {
+    if ((get_car_state() != READY_TO_DRIVE) || brakePressed() || torque < 10) {
         DisableMC();
         sendTorque(0);
         fixFaults();
@@ -229,30 +217,6 @@ void handleImpossiblilty() {
 	sendTorqueWithFaultFixing(0);
 }
 
-//TODO CleanUp
-/*
- * This function initializes the tasks for polling the APPS rotary encoder and polling
- * the brake rotary encoder.
- *
- */
-//void start_brake_apps_tasks() {
-//	bool created = false;
-//
-//	//create apps polling task
-//	created = TaskManagerCreate(&update_apps_vals, &xTask_APPS_PROCESS);
-//	if (!created) {
-//		//log failed to start task
-//		logMessage("APPS: Failed to create APPS_PROC task", false);
-//	}
-//
-//	//create brake polling task
-//	created = TaskManagerCreate(&update_brake_vals, &xTask_BRAKE_PROCESS);
-//	if (!created) {
-//		//log failed to start task
-//		logMessage("BRAKE: Failed to create BRAKE_PROC task", false);
-//	}
-//}
-
 //TODO MATH Check
 /*
  * adjust_for_power_limit
@@ -279,54 +243,12 @@ void handleImpossiblilty() {
 //			* calculatedMaxTorque/ TR_MAX_TORQUE_OUTPUT;
 //}
 
-/*
- * This function is used to get the current apps value
- *
- */
-uint16_t get_apps() {
-	return ADC_get_val(ADC_APPS1);
-}
-
-/*
- * This function is used to get the current break pedal position value
- *
- */
-uint16_t get_brake() {
-	return ADC_get_val(ADC_BPS);
-}
-
-/*
- * This function determines if the break is pressed and possible
- *
- */
-bool get_brake_press() {
-	bool is_pressed = false;
-	if (brake.possibility == PEDAL_POSSIBLE) {
-		if (brake.high_min
-				+ BRAKE_PRESS_PERCENT * (brake.high_max - brake.high_min)
-				< get_brake()) {
-			is_pressed = true;
-		}
-	}
-	return is_pressed;
-}
-
 bool brakePressed() {
-	if (ADC_get_val(ADC_BPS) > 950) {
-		return true;
-	} else {
-		return false;
-	}
+    return readDigitalBrakeState() == BRAKE_PRESSED;
 }
 
 bool detectBrake() {
-	long brakeVal = ADC_get_val(ADC_BPS);
-
-	if (brakeVal > 1300 || brakeVal < 600) {
-		return false;
-	} else {
-		return true;
-	}
+	return brakePressed();
 }
 
 /*

@@ -8,17 +8,8 @@
  */
 #include "pedal_encoder.h"
 #include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
-#include "FreeRTOS.h"
-#include "FreeRTOSConfig.h"
-#include "task.h"
 
 #include "logger.h"
-#include "error_handler.h"
-
-void bad_pedal_struct_err_handler();
 
 #define PEDAL_AGREEMENT_PERCENT 0.10
 
@@ -36,23 +27,10 @@ void bad_pedal_struct_err_handler();
  * 		boolean value indicating whether the pedal is in a valid state
  */
 bool pedalValid(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state) {
-
-	bool hasPetal = false; 	//true if we etect a pedal
-
-	//check that we dont get a bad pointer
-	if (state == NULL || state->name == NULL) {
-		log_and_handle_error(BAD_PEDAL_STRUCT, &bad_pedal_struct_err_handler);
-	}
-	else {
-		//
-		if((sens_high >= state->high_min && sens_low >= state->low_min)
-			&& (sens_high <= state->high_max && sens_low <= state->low_max))
-		{
-			hasPetal = true;
-		}
-	}
-
-	return hasPetal;
+	bool hasPedals = false; 	//true if we etect a pedal
+    if((sens_high >= state->high_min && sens_low >= state->low_min)
+       && (sens_high <= state->high_max && sens_low <= state->low_max)) { hasPedals = true; }
+	return hasPedals;
 }
 
 #ifdef OLD_PEDAL_SENSOR
@@ -158,11 +136,10 @@ bool rule_10percent_pedal_travel_apps_agreement(uint16_t sens_high, uint16_t sen
     uint16_t sens_high_range = state->high_max - sens_high_min;
     uint16_t sens_low_range = state->low_max - sens_low_min;
 
-    int32_t normalized_sens_1 = (sens_high - sens_high_min);
-    int32_t normalized_sens_2 = (int32_t) (state->gain) * ((float) ((sens_low - sens_low_min)));
+    int32_t normalized_sens_high = (sens_high - sens_high_min);
+    int32_t normalized_sens_low = (int32_t) ((state->gain) * ((float) ((sens_low - sens_low_min))));
     int32_t agreement_range_size = (int32_t) ((float) (sens_high_range * sens_low_range) * PEDAL_AGREEMENT_PERCENT);
-
-    bool within_range = abs(normalized_sens_1 - normalized_sens_2) < agreement_range_size;
+    bool within_range = abs(normalized_sens_high - normalized_sens_low) < agreement_range_size;
 
     if (state->possibility == PEDAL_POSSIBLE)
     {

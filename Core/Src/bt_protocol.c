@@ -10,6 +10,7 @@
 #include "semphr.h"
 #include "main.h"
 #include "iwdg.h"
+#include "usart.h"
 
 //Variables for BT status/errors
 static bool BT_INITIALIZED = false;
@@ -233,7 +234,7 @@ void btSendPacket() {
 		if(xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
 			updateSequence();
             //TODO Bluetooth
-//			usartBTSend((char*)&packet);
+			HAL_USART_Transmit(&huart3, "BRUH", sizeof("BRUH"), 0);
 			xSemaphoreGive(packetMutex);
 		}
 	}

@@ -16,6 +16,7 @@
 #include "car_state.h"
 #include "vcu_startup.h"
 #include "bt_protocol.h"
+#include "heartbeat.h"
 
 #define APPS_REQ_FREQ_HZ 100 //[Hz] frequency of polling loop for APPS
 #define BRAKE_REQ_FREQ_HZ 100 //[Hz] frequency of polling loop for BRAKE PEDAL
@@ -136,7 +137,7 @@ bool checkPedalsImplausibility(uint16_t high_val, uint16_t low_val){
 }
 
 void sendTorqueWithFaultFixing(int16_t torque) {
-    if ((get_car_state() != READY_TO_DRIVE) || brakePressed() || torque < 10) {
+    if ((get_mc_heartbeat_state() != HEARTBEAT_PRESENT) ||  (get_car_state() != READY_TO_DRIVE) || brakePressed() || torque < 10) {
         DisableMC();
         sendTorque(0);
         fixFaults();

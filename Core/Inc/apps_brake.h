@@ -26,12 +26,12 @@
 // APPS characteristics
 #define APPS_GAIN		1.70
 
-#define APPS_LOW_ZERO	3
-#define APPS_LOW_MIN	3
+#define APPS_LOW_ZERO	8
+#define APPS_LOW_MIN	8
 #define APPS_LOW_MAX	288
 
-#define APPS_HIGH_ZERO	6
-#define APPS_HIGH_MIN	6
+#define APPS_HIGH_ZERO	10
+#define APPS_HIGH_MIN	10
 #define APPS_HIGH_MAX	490
 
 // Brake characteristics
@@ -55,7 +55,7 @@ enum BRAKE_STATE{
 #define LOW_TORQUE_DIV 4
 //*******************
 
-bool detectImpossibilty(uint16_t high_val, uint16_t low_val, uint16_t brake_val);
+bool checkPedalsImplausibility(uint16_t high_val, uint16_t low_val);
 void determineError(uint16_t high_val, uint16_t low_val, uint16_t brake_val);
 
 bool brakePressed();

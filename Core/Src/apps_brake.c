@@ -13,9 +13,7 @@
 #include "adc.h"
 #include "logger.h"
 #include "iwdg.h"
-#include "gpio.h"
 #include "car_state.h"
-#include <string.h>
 #include "vcu_startup.h"
 #include "bt_protocol.h"
 
@@ -27,25 +25,20 @@
 
 #define BYPASS_SAFETY	0
 #define BYPASS_BRAKE	0
+#define BYPASS_APPS		0
 #define BYPASS_RTD		0
 
-#define APPS_TWO_FOOT_VAL 		400
-#define APPS_TWO_FOOT_RELEASE 	310
-
-#define PEDAL_TWO_FOOT_PERCENT 			0.25	// EV2.4.1 amount you can press apps while brake is depressed before stopping current [rule about two foot driving]
+#define PEDAL_TWO_FOOT_PRESS_PERCENT    0.25	// EV2.4.1 amount you can press apps while brake is depressed before stopping current [rule about two foot driving]
 #define PEDAL_TWO_FOOT_RELEASE_PERCENT 	0.05	// Amount to get out of two foot pressed state
-#define BRAKE_PRESS_PERCENT 			0.1 	//amount to press the brake before it is considered actuated
-#define BRAKE_PRESS_TWOFOOT_PERCENT 	0.20 	//amount to press brake before it is considered pressed for
+#define APPS_LOW_RELEASE_PEDAL_TRAVEL ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT)
+#define APPS_HIGH_RELEASE_PEDAL_TRAVEL ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT)
+#define APPS_LOW_PRESS_PEDAL_TRAVEL ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT)
+#define APPS_HIGH_PRESS_PEDAL_TRAVEL ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT)
 
 enum BRAKE_STATE readDigitalBrakeState() { return (enum BRAKE_STATE) HAL_GPIO_ReadPin(BPS_GPIO_Port, BPS_Pin); }
 
-static void handleImpossiblilty();
-void sendTorqueWithFaultFixing(int16_t);
-bool twoFootRulePassed(long, pedal_state_t*);
-
 static uint32_t current_max_power = TR_MAX_POWER; //update based on data from AMS
 
-static pedal_state_t brake; //Brake pedal position sensor / brake sensor
 static pedal_state_t apps; //Accelerator pedal position sensor / throttle sensor
 
 int16_t mapPedalPressToMotorTorque(uint16_t lowPedalPress) {
@@ -59,11 +52,9 @@ int16_t mapPedalPressToMotorTorque(uint16_t lowPedalPress) {
     return (int16_t)(torque + 0.5);
 }
 
-void InitalizeApps(float gain, uint16_t low_zero, uint16_t low_min, uint16_t low_max,
-					uint16_t high_zero, uint16_t high_min, uint16_t high_max){
+void InitializeApps(float gain, uint16_t low_zero, uint16_t low_min, uint16_t low_max,
+                    uint16_t high_zero, uint16_t high_min, uint16_t high_max){
 
-	//setup apps state
-	strcpy(apps.name, "Apps");
 	apps.possibility = PEDAL_POSSIBLE;
 
 	apps.gone_count = 0;
@@ -81,92 +72,68 @@ void InitalizeApps(float gain, uint16_t low_zero, uint16_t low_min, uint16_t low
 	apps.high_min 	= high_min;
 	apps.high_max 	= high_max;
 
+    apps.two_foot_high_count = 0;
+    apps.two_foot_low_count = 0;
+    apps.two_foot_high_flag = false;
+    apps.two_foot_low_flag = false;
+
 	apps.gain = gain;
 }
 
-void InitializeBrake(float gain, uint16_t low_zero, uint16_t low_min, uint16_t low_max,
-						uint16_t high_zero, uint16_t high_min, uint16_t high_max){
+bool twoFootRulePassedPerPedal(uint16_t appsVal, uint16_t twoFootPressVal, uint16_t twoFootReleaseVal, uint16_t* twoFootCount, bool* twoFootFlag) {
+    if ((*twoFootFlag) && brakePressed() || appsVal >= twoFootReleaseVal) {
+        *twoFootCount = 10;
+    } else if (appsVal < twoFootReleaseVal) {
+        (*twoFootCount)--;
+    } else if (appsVal > twoFootPressVal && brakePressed()) {
+        (*twoFootCount)++;
+    }
 
-	//setup brake state
-	strcpy(brake.name, "Brake");
-	brake.possibility = PEDAL_POSSIBLE;
+    *twoFootFlag = ((*twoFootCount) >= 10);
+    if ((*twoFootCount) <= 0) {
+        *twoFootFlag = false;
+        *twoFootCount = 0;
+    }
 
-	apps.gone_count = 0;
-	apps.found_Count = 0;
-	apps.impos_count = 0;
-	apps.possible_count = 0;
+    return !(*twoFootFlag);
+}
 
-	apps.impos_limit = (BRAKE_REQ_FREQ_HZ / 10); //100ms limit max (T.6.2.4) //TODO check
-
-	apps.low_zero 	= low_zero;
-	apps.low_min 	= low_min;
-	apps.low_max 	= low_max;
-
-	apps.high_zero	= high_zero;
-	apps.high_min 	= high_min;
-	apps.high_max 	= high_max;
-
-	apps.gain = gain;
+bool twoFootRulePassed(uint16_t high_val, uint16_t low_val) {
+    return twoFootRulePassedPerPedal(high_val, APPS_HIGH_PRESS_PEDAL_TRAVEL, APPS_HIGH_RELEASE_PEDAL_TRAVEL, &(apps.two_foot_high_count), &(apps.two_foot_high_flag)) &&
+           twoFootRulePassedPerPedal(low_val, APPS_LOW_PRESS_PEDAL_TRAVEL, APPS_LOW_RELEASE_PEDAL_TRAVEL, &(apps.two_foot_low_count), &(apps.two_foot_low_flag));
 }
 
 void readAccelPedals(uint16_t *apps_low, uint16_t *apps_high) {
     uint16_t temp_apps_low = ADC_get_val(ADC_APPS_LOW);
     uint16_t temp_apps_high = ADC_get_val(ADC_APPS_HIGH);
     if (temp_apps_low != INVALID_ADC_READING) {
-        (*apps_low) = (0.5 * temp_apps_low) + (0.5 * (*apps_low));
+        (*apps_low) = (uint16_t) ((0.5 * temp_apps_low) + (0.5 * (*apps_low)));
     }
     if (temp_apps_high != INVALID_ADC_READING) {
-        (*apps_high) = (0.5 * temp_apps_high) + (0.5 * (*apps_high));
+        (*apps_high) = (uint16_t) ((0.5 * temp_apps_high) + (0.5 * (*apps_high)));
     }
 }
 
-bool detectImpossibilty(uint16_t high_val, uint16_t low_val, uint16_t brake_val){
+bool checkPedalsImplausibility(uint16_t high_val, uint16_t low_val){
 	bool res = true;
 
-	if (!pedalValid(high_val, low_val, &apps) && false) {
-	    btLogIndicator(true, THROTTLE_ERROR);
-	} else {
-		if (get_car_state() == READY_TO_DRIVE || BYPASS_RTD) {
-			if (BYPASS_SAFETY) {
-				res = false;
-			} else {
-				if (!rule_10percent_pedal_travel_apps_agreement(high_val, low_val, &apps)) {
-	                btLogIndicator(true, THROTTLE_ERROR);
-				} else {
-					if (BYPASS_BRAKE) {
-						res = false;
-					} else {
-						if (detectBrake() && twoFootRulePassed(high_val, &apps)) {
-							btLogIndicator(false, THROTTLE_ERROR);
-							res = false;
-						}
-					}
-				}
-			}
-		} else {
-			determineError(high_val, low_val, brake_val);
-		}
-	}
+    if (BYPASS_RTD || get_car_state() == READY_TO_DRIVE) {
+        if (BYPASS_SAFETY || read_saftey_loop()) {
+            if (BYPASS_APPS || rule_10percent_pedal_travel_apps_agreement(high_val, low_val, &apps)) {
+                if (BYPASS_BRAKE || twoFootRulePassed(high_val, low_val)) {
+                    res = false;
+                }
+                else {
+                    btLogIndicator(false, THROTTLE_ERROR);
+                }
+            } else {
+                btLogIndicator(true, THROTTLE_ERROR);
+            }
+        }
+    }
 
 	return res;
 }
-
-void determineError(uint16_t high_val, uint16_t low_val, uint16_t brake_val){
-	if (pedalValid(high_val, low_val, &apps)) {
-		if (detectBrake()) {
-			if(twoFootRulePassed(high_val, &apps)) {
-				btLogIndicator(false, THROTTLE_ERROR); //all good, just not rtd
-			} else {
-				btLogIndicator(true, THROTTLE_ERROR); //brake offline
-			}
-		} else {
-			btLogIndicator(true, THROTTLE_ERROR); //two foot fail
-		}
-	} else {
-		btLogIndicator(true, THROTTLE_ERROR); //pedal sensor doesnt agree
-	}
-}
-
 
 void sendTorqueWithFaultFixing(int16_t torque) {
     if ((get_car_state() != READY_TO_DRIVE) || brakePressed() || torque < 10) {
@@ -180,40 +147,11 @@ void sendTorqueWithFaultFixing(int16_t torque) {
     }
 }
 
-bool twoFootRulePassed(long appsVal, pedal_state_t * pedalState) {
-	if (pedalState->two_foot_flag == true) {
-		if (brakePressed()) {
-			pedalState->twoFootCount = 10;
-		} else {
-			if (appsVal < APPS_TWO_FOOT_RELEASE) {
-				pedalState->twoFootCount--;
-			} else {
-				pedalState->twoFootCount = 10;
-			}
-		}
-	} else if (appsVal > APPS_TWO_FOOT_VAL && brakePressed()) {
-		pedalState->twoFootCount++;
-	}
-
-	if (pedalState->twoFootCount >= 10) {
-		pedalState->two_foot_flag = true;
-	} else if (pedalState->twoFootCount <= 0) {
-		pedalState->two_foot_flag = false;
-		pedalState->twoFootCount = 0;
-	}
-
-	if (pedalState->two_foot_flag == false) {
-		return true;
-	} else {
-		return false;
-	}
-}
-
 /*
  * This function handles the situation when the throttle is in an impossible state due to be being broken
  *
  */
-void handleImpossiblilty() {
+void handleImplausibility() {
 	sendTorqueWithFaultFixing(0);
 }
 
@@ -247,10 +185,6 @@ bool brakePressed() {
     return readDigitalBrakeState() == BRAKE_PRESSED;
 }
 
-bool detectBrake() {
-	return brakePressed();
-}
-
 /*
  * EV2_4_check
  *
@@ -264,41 +198,41 @@ bool detectBrake() {
  *
  *@return: returns true if the driver is not two foot driving
  */
-bool EV2_4_check(uint16_t apps1, uint16_t brake1, pedal_state_t * apps_state,
-		pedal_state_t * brake_state) {
-	bool check_pass = false;
-
-	if (apps1
-			> (PEDAL_TWO_FOOT_PERCENT
-					* (apps_state->high_max - apps_state->high_min)
-					+ apps_state->high_min)
-			&& brake1
-					> (brake_state->high_min
-							+ BRAKE_PRESS_TWOFOOT_PERCENT
-									* (brake_state->high_max
-											- brake_state->high_min))) {
-		sendTorqueWithFaultFixing(0);	//stop sending torque values braking
-		apps_state->two_foot_flag = true;
-	} else {
-		//check to see if driver needs to back off apps due to two foot driving
-		if (apps_state->two_foot_flag) {
-			//check to see if the apps has been backed off
-			if (apps1
-					< (PEDAL_TWO_FOOT_RELEASE_PERCENT
-							* (apps_state->high_max - apps_state->high_min)
-							+ apps_state->high_min)) {
-				//the pedal has been released sufficiently
-				check_pass = true;
-				apps_state->two_foot_flag = false;
-			} else
-				sendTorqueWithFaultFixing(0);//redundant as the motor controller is already off
-		} else {
-			//no two foot driving and everything is good send value to motor controller
-			check_pass = true;
-		}
-	}
-	return check_pass;
-}
+//bool EV2_4_check(uint16_t apps1, uint16_t brake1, pedal_state_t * apps_state,
+//		pedal_state_t * brake_state) {
+//	bool check_pass = false;
+//
+//	if (apps1
+//			> (PEDAL_TWO_FOOT_PERCENT
+//					* (apps_state->high_max - apps_state->high_min)
+//					+ apps_state->high_min)
+//			&& brake1
+//					> (brake_state->high_min
+//							+ BRAKE_PRESS_TWOFOOT_PERCENT
+//									* (brake_state->high_max
+//											- brake_state->high_min))) {
+//		sendTorqueWithFaultFixing(0);	//stop sending torque values braking
+//		apps_state->two_foot_flag = true;
+//	} else {
+//		//check to see if driver needs to back off apps due to two foot driving
+//		if (apps_state->two_foot_flag) {
+//			//check to see if the apps has been backed off
+//			if (apps1
+//					< (PEDAL_TWO_FOOT_RELEASE_PERCENT
+//							* (apps_state->high_max - apps_state->high_min)
+//							+ apps_state->high_min)) {
+//				//the pedal has been released sufficiently
+//				check_pass = true;
+//				apps_state->two_foot_flag = false;
+//			} else
+//				sendTorqueWithFaultFixing(0);//redundant as the motor controller is already off
+//		} else {
+//			//no two foot driving and everything is good send value to motor controller
+//			check_pass = true;
+//		}
+//	}
+//	return check_pass;
+//}
 
 /*
  * StartAppsProcessTask
@@ -312,26 +246,23 @@ void StartAppsProcessTask(void *argument) {
     }
 
     int16_t mc_apps_val;
-
     uint16_t apps_low = 0;
     uint16_t apps_high = 0;
-    enum BRAKE_STATE brake1;
 
     //setup apps state
-    InitalizeApps(APPS_GAIN, APPS_LOW_ZERO, APPS_LOW_MIN, APPS_LOW_MAX,
-                  APPS_HIGH_ZERO, APPS_HIGH_MIN, APPS_HIGH_MAX);
+    InitializeApps(APPS_GAIN, APPS_LOW_ZERO, APPS_LOW_MIN, APPS_LOW_MAX,
+                   APPS_HIGH_ZERO, APPS_HIGH_MIN, APPS_HIGH_MAX);
 
     for (;;) {
         kickWatchdogBit(osThreadGetId());
 
         //low pass filters to increase noise rejection
         readAccelPedals(&apps_low, &apps_high);
-        brake1 = readDigitalBrakeState();
 
         mc_apps_val = mapPedalPressToMotorTorque(apps_low);
 
-        if(detectImpossibilty(apps_high, apps_low, brake1)){
-            handleImpossiblilty();
+        if(checkPedalsImplausibility(apps_high, apps_low)){
+            handleImplausibility();
         }
         else{
             sendTorqueWithFaultFixing(mc_apps_val);
@@ -353,8 +284,6 @@ void StartBrakeProcessTask(void *argument) {
     }
 
     enum BRAKE_STATE brake1;
-
-    InitializeBrake(BRAKE_GAIN, BRAKE_LOW_ZERO, BRAKE_LOW_MIN, BRAKE_LOW_MAX, BRAKE_HIGH_ZERO, BRAKE_HIGH_MIN, BRAKE_HIGH_MAX);
 
     for (;;) {
         kickWatchdogBit(osThreadGetId());

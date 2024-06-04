@@ -261,7 +261,7 @@ void StartAppsProcessTask(void *argument) {
 
         mc_apps_val = mapPedalPressToMotorTorque(apps_low);
 
-        if(checkPedalsImplausibility(apps_high, apps_low)){
+        if(!pedalValid(apps_high, apps_low, &apps) || checkPedalsImplausibility(apps_high, apps_low)){
             handleImplausibility();
         }
         else{

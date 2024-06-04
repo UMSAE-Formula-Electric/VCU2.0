@@ -35,31 +35,21 @@ extern "C" {
 extern ADC_HandleTypeDef hadc1;
 
 /* USER CODE BEGIN Private defines */
+#define INVALID_ADC_READING 65535U
 
-#define ADC_APPS1 	0
-#define ADC_APPS2	1
-#define ADC_BPS	    2
-#define ADC_VBATT	3
-//#define ADC_BRK1
-//#define ADC_BRK2
-#define ADC_STRG	5
-#define ADC_BRKTL	6
-#define ADC_BRKTR	7
-//#define ADC_BRAKE	8
-#define ADC_TIC		9
-
-#define NUM_ADC_CHANNELS 4
+enum ADC_CHANNEL{
+    ADC_APPS_LOW = 0,
+    ADC_APPS_HIGH,
+    ADC_VBATT,
+    NUM_ADC_CHANNELS
+};
 
 /* USER CODE END Private defines */
 
 void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
-uint8_t ADC_init();
-uint16_t ADC_get_val(uint8_t item);
-uint16_t adc_convert();
-
+uint32_t ADC_get_val(uint8_t item);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

@@ -61,7 +61,7 @@ void Error_Handler(void);
 #define MC_HRTBEAT_TASK_ENABLED 1
 #define IWDG_RELOAD_PERIOD 4094
 #define BT_DUMP_TASK_ENABLED 0
-#define APPS_PROC_TASK_ENABLED 0
+#define APPS_PROC_TASK_ENABLED 1
 #define ACU_HRTBEAT_TASK_ENABLED 1
 #define VCU_STATE_TASK_ENABLED 1
 #define DASH_LED_TASK_ENABLED 1
@@ -80,8 +80,6 @@ void Error_Handler(void);
 #define TSA_LED1_BLUE_GPIO_Port GPIOE
 #define APPS1_Pin GPIO_PIN_0
 #define APPS1_GPIO_Port GPIOC
-#define BRAKE1_Pin GPIO_PIN_1
-#define BRAKE1_GPIO_Port GPIOC
 #define BPS_Pin GPIO_PIN_2
 #define BPS_GPIO_Port GPIOC
 #define LC_LED_Pin GPIO_PIN_0
@@ -90,8 +88,6 @@ void Error_Handler(void);
 #define TC_LED_GPIO_Port GPIOA
 #define APPS2_Pin GPIO_PIN_5
 #define APPS2_GPIO_Port GPIOA
-#define BRAKE2_Pin GPIO_PIN_6
-#define BRAKE2_GPIO_Port GPIOA
 #define VBATT_Pin GPIO_PIN_7
 #define VBATT_GPIO_Port GPIOA
 #define TRACTION_BTN_Pin GPIO_PIN_5

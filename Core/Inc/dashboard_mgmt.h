@@ -20,6 +20,7 @@ typedef enum {
     DASH_VCU_TSA_ACU_TSA,
     DASH_VCU_RTD_ACU_TSA,
     DASH_VCU_RTD_ACU_RTD,
+    DASH_FAIL_PULSE
 } dash_led_state_t;
 
 void dash_set_state(dash_led_state_t state);

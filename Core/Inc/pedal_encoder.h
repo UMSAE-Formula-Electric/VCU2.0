@@ -60,18 +60,19 @@ typedef struct{
 	uint16_t low_max;	//max val of low sensor
 	uint16_t high_min;	//min val of high sensor
 	uint16_t high_max;	//max val of high sensor
-	uint16_t low_zero;	//offset of zero of low sensor [should be zero *according* to datasheet
+	uint16_t low_zero;	//offset of zero of low sensor [should be zero *according* to datasheet]
 	uint16_t high_zero;	//offset of high sensor
-	uint16_t twoFootCount;
+	uint16_t two_foot_high_count;
+    uint16_t two_foot_low_count;
 	float gain; //gain of sensor
-	bool two_foot_flag; //only relevant on apps, indicates if there has been two feet pressed eventS
-	char name[10];
+	bool two_foot_high_flag; //only relevant on apps, indicates if there has been two feet pressed eventS
+    bool two_foot_low_flag;
 }pedal_state_t;
 
 
-bool sensAgreement_990(uint16_t sens_1, uint16_t sens_2, pedal_state_t * state);
+bool rule_10percent_pedal_travel_apps_agreement(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state);
 bool sensAgreement_936(uint16_t throttle_1, uint16_t throttle_2, pedal_state_t * state);
-bool detectPedal(uint16_t petal_1, uint16_t petal_2, pedal_state_t * state);
+bool pedalValid(uint16_t petal_1, uint16_t petal_2, pedal_state_t * state);
 
 
 #endif /* PEDAL_ENCODER_H_ */

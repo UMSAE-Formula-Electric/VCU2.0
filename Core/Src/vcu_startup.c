@@ -10,7 +10,6 @@
 #include <dashboard_mgmt.h>
 #include "apps_brake.h"
 #include "acu_comms_handler.h"
-#include "can.h"
 #include "car_state.h"
 #include "vcu_startup.h"
 #include "logger.h"
@@ -19,22 +18,19 @@
 #include "iwdg.h"
 #include "heartbeat.h"
 #include "gpio.h"
-
 #include "FreeRTOS.h"
 #include "task.h"
-#include "queue.h"
-
-#include "stdio.h"
 #include "freertos_task_handles.h"
 
 static void fail_pulse();
 bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 
 //timing
-#define TSA_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACU when going TSA
-#define RTD_ACK_TIMEOUT 8000 	//[ms] timeout for receiving acknowledgment from ACU when going RTD
-#define FAIL_FLASH_LEN 1000		//[ms] length of warning flash on failed arm
-#define MC_STARTUP_DELAY 1000	//[ms] delay used to wait for the motor controller
+#define FIRST_ACK_TIMEOUT_MS 1500
+#define TSA_ACK_TIMEOUT_MS 8000 	//[ms] timeout for receiving acknowledgment from ACU when going TSA
+#define RTD_ACK_TIMEOUT_MS 8000 	//[ms] timeout for receiving acknowledgment from ACU when going RTD
+
+#define MC_STARTUP_DELAY_MS 1000	//[ms] delay used to wait for the motor controller
 #define STARTUP_TASK_DELAY_MS 25
 
 #define DISABLE_HEARTBEAT_CHECK 0
@@ -49,7 +45,7 @@ void goTsaProcedure(uint8_t *vcuStateTaskNotification) {
     if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
         if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin) && (brakePressed() || DISABLE_BRAKE_CHECK) && (checkHeartbeat() || DISABLE_HEARTBEAT_CHECK)) {
             goTSA();
-            retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(1000));
+            retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(FIRST_ACK_TIMEOUT_MS));
             if(retRTOS != osOK || (*vcuStateTaskNotification) != ACU_TSA_ACK){
             	go_idle();
             	logMessage("ACU failed to ack TSA Request", true);
@@ -57,7 +53,7 @@ void goTsaProcedure(uint8_t *vcuStateTaskNotification) {
             	return;
             }
             dash_set_state(DASH_VCU_TSA_ACU_IDLE);
-            retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(TSA_ACK_TIMEOUT + MC_STARTUP_DELAY));
+            retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(TSA_ACK_TIMEOUT_MS + MC_STARTUP_DELAY_MS));
             if(retRTOS != osOK || (*vcuStateTaskNotification) != ACU_TSA_ACK){
                 go_idle();
                 logMessage("ACU failed to ack TSA Request", true);
@@ -77,7 +73,7 @@ void goRtdProcedure(uint8_t *vcuStateTaskNotification) {
         if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin) && (checkHeartbeat() || DISABLE_HEARTBEAT_CHECK) && (brakePressed() || DISABLE_BRAKE_CHECK)) {
             goRTD();
             dash_set_state(DASH_VCU_RTD_ACU_TSA);
-            retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(RTD_ACK_TIMEOUT));
+            retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(RTD_ACK_TIMEOUT_MS));
             if(retRTOS != osOK || (*vcuStateTaskNotification) != ACU_RTD_ACK){
                 logMessage("ACU failed to ack RTD Request", false);
                 go_idle();
@@ -212,11 +208,8 @@ void goRTD() {
  */
 static void fail_pulse(){
     //TODO VCU#32 ERROR pulse failed
-	go_idle();
-	dash_set_rtd_blue();
-	dash_set_tsa_blue();
-	vTaskDelay(pdMS_TO_TICKS(FAIL_FLASH_LEN));
-	dash_clear_all_leds();
+    dash_set_state(DASH_FAIL_PULSE);
+    go_idle();
 	DisableMC();
 }
 

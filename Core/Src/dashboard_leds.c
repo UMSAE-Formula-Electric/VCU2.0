@@ -63,6 +63,12 @@ void dash_flash_tsa_teal() {
     HAL_Delay(DASH_LED_FLASH_DELAY);
 }
 
+void dash_fail_pulse() {
+    dash_set_tsa_blue();
+    dash_set_rtd_blue();
+    HAL_Delay(DASH_LED_FLASH_DELAY);
+}
+
 /*
  * RTD
  */

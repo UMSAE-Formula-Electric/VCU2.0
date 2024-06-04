@@ -8,111 +8,29 @@
  */
 #include "pedal_encoder.h"
 #include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
-#include "FreeRTOS.h"
-#include "FreeRTOSConfig.h"
-#include "task.h"
 
 #include "logger.h"
-#include "error_handler.h"
-
-void bad_pedal_struct_err_handler();
 
 #define PEDAL_AGREEMENT_PERCENT 0.10
 
 /*
- * This function looks to see if the throttle is there. This function
- * only makes sense with the Throttles that have inverted gains and not
- * the half gain style
+ * pedalValid
  *
- *	throttle_1
+ * PURPOSE: determine if the pedal is in a valid range
+ *
+ * INPUTS:
+ * 		sens_high:	Pedal sensor high gain output
+ * 		sens_low:	Pedal sensor low gain output
+ * 		state:		APPS pedal state struct
+ *
+ * 	RETURNS:
+ * 		boolean value indicating whether the pedal is in a valid state
  */
-bool detectPedal(uint16_t petal_1, uint16_t petal_2, pedal_state_t * state) {
-
-	bool hasPetal = false; 	//true if we etect a pedal
-	const uint8_t BUFFLEN = 40; //length of buffer
-	char buff[BUFFLEN];			//string buffer
-
-	//check that we dont get a bad pointer
-	if (state == NULL || state->name == NULL) {
-		log_and_handle_error(BAD_PEDAL_STRUCT, &bad_pedal_struct_err_handler);
-	}
-	else {
-
-		if(petal_1 < 100 && petal_2 < 100) {
-			return true;
-		}
-
-		if(abs((2 * petal_1) - petal_2) <= (1.2 * petal_1)) {
-			state->gone_count = 0;
-		} else {
-			state->gone_count++;
-		}
-
-		if(state->gone_count > 20) {
-			return false;
-		} else {
-			return true;
-		}
-
-
-
-
-		hasPetal = true;
-
-		//no longer accurate
-		if (state->possibility == PEDAL_POSSIBLE) {
-			//checking for impossible state
-			if (petal_1 < HIGH_SENSE_OFFSET || petal_2 < LOW_SENSE_OFFSET) {
-				state->gone_count++;
-			} else {
-				state->gone_count = 0;
-			}
-			if (state->gone_count >= state->impos_limit) {
-				hasPetal = false;
-				state->gone_count = 0;
-				state->found_Count = 0;
-				state->possibility = PEDAL_IMPOSSIBLE;
-				//handleImpossiblilty(); this should be called somewhere else
-
-//				//check that name exists and no buffer overflow will happen
-//				if (state->name != NULL && strlen(state->name) < BUFFLEN - strlen("PEDAL:  Not Detected")) {
-//					sprintf(buff, "PEDAL: %s Not Detected", state->name);
-//				} else {
-//					sprintf(buff, "PEDAL: Not Detected");
-//				}
-//				logMessage(buff, false);
-			}
-		}
-		else
-		{
-			//trying to recover from impossible state
-			hasPetal = false;
-			if (petal_1 >= HIGH_SENSE_OFFSET && petal_2 >= LOW_SENSE_OFFSET) {
-				state->found_Count++;
-			} else {
-				state->found_Count = 0;
-			}
-			if (state->found_Count >= state->impos_limit) {
-				hasPetal = false;
-				state->gone_count = 0;
-				state->found_Count = 0;
-				state->possibility = PEDAL_POSSIBLE;
-
-				//check that name exists and no buffer overflow will happen
-				if (state->name != NULL && strlen(state->name) < BUFFLEN - strlen("PETAL:  Not Detected")) {
-					sprintf(buff, "PETAL: %s Re-detected", state->name);
-				} else {
-					sprintf(buff, "PETAL: Re-detected");
-				}
-				logMessage(buff, false);
-			}
-		}
-	}
-
-	return hasPetal;
+bool pedalValid(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state) {
+	bool hasPedals = false; 	//true if we etect a pedal
+    if((sens_high >= state->high_min && sens_low >= state->low_min)
+       && (sens_high <= state->high_max && sens_low <= state->low_max)) { hasPedals = true; }
+	return hasPedals;
 }
 
 #ifdef OLD_PEDAL_SENSOR
@@ -199,108 +117,56 @@ bool throttleAgreement_936(uint16_t throttle_1, uint16_t throttle_2,
 
 
 /*
- * This function checks for implausiblity of the apps and brake pedal for
- * BEI 990 Series. This function expects two offset slopes for sensor ranges.
- * one from 0.5 - 4.5V the other from 0.25 - 2.25V.
+ * This function checks for implausibility of the apps and brake pedal.
+ * This function expects two offset slopes for sensor ranges. It checks that these two slopes agree within 10%.
+ * Rule T.4.2.4 in 2024 FSAE Rules v1
+ *
  * Note these ranges are scaled by a factor of 3.3/5
  *
- * throttle_2: 0.25 - 2.25
- * throttle_1: 0.5 - 4.5
- * returns true if the throttle sensors agree otherwise false
+ * sens_high: 	high gain petal sensor ADC reading
+ * sens_low: 	low gain petal sensor ADC reading
+ *
+ * RETURN true if the throttle sensors agree within 10% otherwise false
  */
-bool sensAgreement_990(uint16_t sens_1, uint16_t sens_2, pedal_state_t * state)
+bool rule_10percent_pedal_travel_apps_agreement(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state)
 {
+    uint16_t sens_high_min = state->high_min;
+    uint16_t sens_low_min = state->low_min;
 
-	bool agrees = false;
-	uint16_t normalized_sens_1;
-	uint16_t normalized_sens_2;
-	uint16_t sens_agree_range_max;
-	uint16_t sens_agree_range_min;
-	uint32_t agreement_range_size = (state->high_max) * PEDAL_AGREEMENT_PERCENT; //(state->high_max - state->high_min) * PEDAL_AGREEMENT_PERCENT;
+    uint16_t sens_high_range = state->high_max - sens_high_min;
+    uint16_t sens_low_range = state->low_max - sens_low_min;
 
-	normalized_sens_2 = sens_2 * state->gain; //(sens_2 - state->low_zero) * state->gain;
-	normalized_sens_1 = sens_1; //sens_1 - state->high_zero;
+    int32_t normalized_sens_high = (sens_high - sens_high_min);
+    int32_t normalized_sens_low = (int32_t) ((state->gain) * ((float) ((sens_low - sens_low_min))));
+    int32_t agreement_range_size = (int32_t) ((float) (sens_high_range * sens_low_range) * PEDAL_AGREEMENT_PERCENT);
+    bool within_range = abs(normalized_sens_high - normalized_sens_low) < agreement_range_size;
 
-	if(normalized_sens_2 > 0xfff){
-		normalized_sens_2 = 0;
-	}
+    if (state->possibility == PEDAL_POSSIBLE)
+    {
+        state->impos_count = within_range ? 0 : state->impos_count + 1;
+        if(state->impos_count >= state->impos_limit){
+            state->possibility = PEDAL_IMPOSSIBLE;
+            logMessage("APPS: Sensor Disagreement", false);
+        }
+        else {
+            within_range = true;
+        }
+    }
+    else
+    {
+        state->possible_count = within_range ? state->possible_count + 1 : 0;
+        if (state->possible_count >= state->impos_limit) {
+            state->impos_count = 0;
+            state->possible_count = 0;
+            state->possibility = PEDAL_POSSIBLE;
+            logMessage("APPS: Sensors have reached an agreement", false);
+        }
+        else {
+            within_range = false;
+        }
+    }
 
-	if(normalized_sens_1 > 0xfff){
-		normalized_sens_1 = 0;
-	}
-
-
-	if (normalized_sens_1 < agreement_range_size)
-	{
-		sens_agree_range_min = 0;
-	}
-	else {
-		sens_agree_range_min = normalized_sens_1 - agreement_range_size;
-		//sens_agree_range_min = normalized_sens_1 - agreement_range_size;
-	}
-	//double check underflow
-
-	if(sens_agree_range_min > normalized_sens_1){
-		//TODO: handle proper
-		//throttle underflow
-		configASSERT(0);
-	}
-	//no overflows here unless TR_MAX_ERROR >> max throttle value, impossisble
-	sens_agree_range_max = normalized_sens_1 + agreement_range_size;
-	//sens_agree_range_max = normalized_sens_1 + agreement_range_size;
-
-	//check overflow anyway	//cant overflow on high end because only using 12 bits of 16bit int, watch lowend
-
-	if (sens_agree_range_max < normalized_sens_1) {
-		//TODO: handle proper
-		//throttle overflow
-		configASSERT(0);
-	}
-	if (state->possibility == PEDAL_POSSIBLE)
-	{
-		if (normalized_sens_2 >= sens_agree_range_min
-				&& normalized_sens_2 < sens_agree_range_max) {
-			state->impos_count = 0;
-		}
-		else {
-			state->impos_count++;
-		}
-		if (state->impos_count < state->impos_limit) {
-			agrees = true;
-		}
-		else {
-			agrees = false;
-			//state->impos_count = 0;
-			state->possible_count = 0;
-			state->possibility = PEDAL_IMPOSSIBLE;
-			//handleImpossiblilty();
-			logMessage("APPS/BRAKE: Sensor Disagreement", false);
-		}
-	}
-	else {
-		agrees = false;
-
-		//try to recover from impossible state, ambiguous in rules
-		if (normalized_sens_2 >= sens_agree_range_min
-				&& normalized_sens_2 < sens_agree_range_max) {
-			state->possible_count++;
-		}
-		else {
-			state->possible_count = 0;
-		}
-		if (state->possible_count < (state->impos_limit )) {
-			agrees = false;
-		}
-		else {
-			agrees = true;
-			state->impos_count = 0;
-			state->possible_count = 0;
-			state->possibility = PEDAL_POSSIBLE;
-			logMessage("APPS/BRAKE: Sensors have reached an agreement", false);
-		}
-
-	}
-	return true;
+    return within_range;
 }
 
 /*

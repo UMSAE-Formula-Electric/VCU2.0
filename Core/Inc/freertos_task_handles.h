@@ -19,8 +19,8 @@ extern osThreadId_t btDumpTaskHandle;
 extern osThreadId_t vcuStateTaskHandle;
 extern osThreadId_t mcHrtbeatTaskHandle;
 extern osThreadId_t acuHrtbeatTaskHandle;
-extern osThreadId_t brakeProcTaskHandle;
 extern osThreadId_t appsProcTaskHandle;
+extern osThreadId_t mcCanCommsTaskHandle;
 
 extern const osThreadAttr_t defaultTask_attributes;
 extern const osThreadAttr_t dashLedTask_attributes;
@@ -31,7 +31,7 @@ extern const osThreadAttr_t btDumpTask_attributes;
 extern const osThreadAttr_t vcuStateTask_attributes;
 extern const osThreadAttr_t mcHrtbeatTask_attributes;
 extern const osThreadAttr_t acuHrtbeatTask_attributes;
-extern const osThreadAttr_t brakeProcTask_attributes;
 extern const osThreadAttr_t appsProcTask_attributes;
+extern const osThreadAttr_t mcCanCommsTask_attributes;
 
 #endif /* INC_FREERTOS_TASK_HANDLES_H_ */

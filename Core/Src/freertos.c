@@ -111,18 +111,18 @@ const osThreadAttr_t acuHrtbeatTask_attributes = {
   .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for brakeProcTask */
-osThreadId_t brakeProcTaskHandle;
-const osThreadAttr_t brakeProcTask_attributes = {
-  .name = "brakeProcTask",
-  .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
 /* Definitions for appsProcTask */
 osThreadId_t appsProcTaskHandle;
 const osThreadAttr_t appsProcTask_attributes = {
   .name = "appsProcTask",
   .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for mcCanCommsTask */
+osThreadId_t mcCanCommsTaskHandle;
+const osThreadAttr_t mcCanCommsTask_attributes = {
+  .name = "mcCanCommsTask",
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for canRxPacketQueue */
@@ -139,6 +139,11 @@ const osMessageQueueAttr_t canTxPacketQueue_attributes = {
 osMessageQueueId_t ackCarStateQueueHandle;
 const osMessageQueueAttr_t ackCarStateQueue_attributes = {
   .name = "ackCarStateQueue"
+};
+/* Definitions for mcCanCommsQueue */
+osMessageQueueId_t mcCanCommsQueueHandle;
+const osMessageQueueAttr_t mcCanCommsQueue_attributes = {
+  .name = "mcCanCommsQueue"
 };
 /* Definitions for iwdgEventGroup */
 osEventFlagsId_t iwdgEventGroupHandle;
@@ -160,8 +165,8 @@ extern void StartBluetoothDumpTask(void *argument);
 extern void StartVcuStateTask(void *argument);
 extern void StartMcHeartbeatTask(void *argument);
 extern void StartAcuHeartbeatTask(void *argument);
-extern void StartBrakeProcessTask(void *argument);
 extern void StartAppsProcessTask(void *argument);
+extern void StartMcCanCommsTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -197,6 +202,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of ackCarStateQueue */
   ackCarStateQueueHandle = osMessageQueueNew (32, sizeof(uint8_t), &ackCarStateQueue_attributes);
 
+  /* creation of mcCanCommsQueue */
+  mcCanCommsQueueHandle = osMessageQueueNew (16, sizeof(CAN_RxPacketTypeDef), &mcCanCommsQueue_attributes);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
@@ -229,11 +237,11 @@ void MX_FREERTOS_Init(void) {
   /* creation of acuHrtbeatTask */
   acuHrtbeatTaskHandle = osThreadNew(StartAcuHeartbeatTask, (void*) ACU_HRTBEAT_TASK_ENABLED, &acuHrtbeatTask_attributes);
 
-  /* creation of brakeProcTask */
-  brakeProcTaskHandle = osThreadNew(StartBrakeProcessTask, (void*) BRAKE_PROC_TASK_ENABLED, &brakeProcTask_attributes);
-
   /* creation of appsProcTask */
   appsProcTaskHandle = osThreadNew(StartAppsProcessTask, (void*) APPS_PROC_TASK_ENABLED, &appsProcTask_attributes);
+
+  /* creation of mcCanCommsTask */
+  mcCanCommsTaskHandle = osThreadNew(StartMcCanCommsTask, (void*) MC_CAN_COMMS_TASK_ENABLED, &mcCanCommsTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

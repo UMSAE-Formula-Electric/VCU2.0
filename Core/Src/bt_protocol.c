@@ -229,12 +229,13 @@ bool btTerminate() {
  * 		Builds and sends the packet via USART
  */
 void btSendPacket() {
+	HAL_StatusTypeDef val;
 	if(BT_INITIALIZED && BT_ERROR_STATE == 0x00) {
 		//Try to take the semaphore to update the packet memory location
 		if(xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
 			updateSequence();
             //TODO Bluetooth
-			HAL_USART_Transmit(&huart3, "BRUH", sizeof("BRUH"), 0);
+			val = HAL_UART_Transmit(&huart3, "BRUH", sizeof("BRUH"), 10000);
 			xSemaphoreGive(packetMutex);
 		}
 	}

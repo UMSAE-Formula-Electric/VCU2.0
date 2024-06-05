@@ -111,7 +111,7 @@ int main(void)
     HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_SET);
     HAL_GPIO_WritePin(BT_P2_4_GPIO_Port, BT_P2_4_Pin, GPIO_PIN_SET);
     HAL_Delay(500);
-    HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_RESET);
+//    HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(BT_EAN_GPIO_Port, BT_EAN_Pin, GPIO_PIN_RESET);
 
 

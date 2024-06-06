@@ -29,7 +29,7 @@ void notify_mc_heartbeat_task() {
 void StartMcCanCommsTask(void *argument) {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
     CAN_RxPacketTypeDef rxPacket;

@@ -231,7 +231,7 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin){
 void StartVcuStateTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
     uint8_t ulNotifiedValue;

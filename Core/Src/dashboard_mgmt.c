@@ -32,7 +32,7 @@ dash_led_state_t dash_get_state(){
 void StartDashboardLedTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
     dash_led_state_t previousState = DASH_NO_STATE;

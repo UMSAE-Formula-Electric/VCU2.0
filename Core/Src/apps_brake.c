@@ -243,7 +243,7 @@ bool brakePressed() {
 void StartAppsProcessTask(void *argument) {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
     int16_t mc_apps_val;
@@ -281,7 +281,7 @@ void StartAppsProcessTask(void *argument) {
 void StartBrakeProcessTask(void *argument) {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
     enum BRAKE_STATE brake1;

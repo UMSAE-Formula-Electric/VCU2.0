@@ -191,7 +191,7 @@ void StartCanRxTask(void *argument)
 {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
     if (!(HAL_CAN_Start(&hcan1) == HAL_OK && HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_RX_FIFO0_OVERRUN | CAN_IT_RX_FIFO0_FULL | CAN_IT_ERROR) == HAL_OK))
@@ -230,7 +230,7 @@ void StartCanRxTask(void *argument)
 void StartCanTxTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
     CAN_TxPacketTypeDef txPacket;

@@ -21,6 +21,7 @@ extern osThreadId_t mcHrtbeatTaskHandle;
 extern osThreadId_t acuHrtbeatTaskHandle;
 extern osThreadId_t appsProcTaskHandle;
 extern osThreadId_t mcCanCommsTaskHandle;
+extern osThreadId_t acuCanCommsTaskHandle;
 
 extern const osThreadAttr_t defaultTask_attributes;
 extern const osThreadAttr_t dashLedTask_attributes;
@@ -33,5 +34,6 @@ extern const osThreadAttr_t mcHrtbeatTask_attributes;
 extern const osThreadAttr_t acuHrtbeatTask_attributes;
 extern const osThreadAttr_t appsProcTask_attributes;
 extern const osThreadAttr_t mcCanCommsTask_attributes;
+extern const osThreadAttr_t acuCanCommsTask_attributes;
 
 #endif /* INC_FREERTOS_TASK_HANDLES_H_ */

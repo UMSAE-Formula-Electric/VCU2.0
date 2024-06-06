@@ -79,3 +79,11 @@ void notify_acu_heartbeat_task(HeartbeatNotify_t notify_val){
 		xTaskNotify( task, notify_val, eSetValueWithOverwrite);
 	}
 }
+
+
+void StartAcuCanCommsTask(void *argument){
+    uint8_t isTaskActivated = (int)argument;
+    if (isTaskActivated == 0) {
+        osThreadExit();
+    }
+}

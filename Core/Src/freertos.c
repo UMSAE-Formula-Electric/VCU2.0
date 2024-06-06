@@ -125,6 +125,13 @@ const osThreadAttr_t mcCanCommsTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for acuCanCommsTask */
+osThreadId_t acuCanCommsTaskHandle;
+const osThreadAttr_t acuCanCommsTask_attributes = {
+  .name = "acuCanCommsTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 /* Definitions for canRxPacketQueue */
 osMessageQueueId_t canRxPacketQueueHandle;
 const osMessageQueueAttr_t canRxPacketQueue_attributes = {
@@ -144,6 +151,11 @@ const osMessageQueueAttr_t ackCarStateQueue_attributes = {
 osMessageQueueId_t mcCanCommsQueueHandle;
 const osMessageQueueAttr_t mcCanCommsQueue_attributes = {
   .name = "mcCanCommsQueue"
+};
+/* Definitions for acuCanCommsQueue */
+osMessageQueueId_t acuCanCommsQueueHandle;
+const osMessageQueueAttr_t acuCanCommsQueue_attributes = {
+  .name = "acuCanCommsQueue"
 };
 /* Definitions for iwdgEventGroup */
 osEventFlagsId_t iwdgEventGroupHandle;
@@ -167,6 +179,7 @@ extern void StartMcHeartbeatTask(void *argument);
 extern void StartAcuHeartbeatTask(void *argument);
 extern void StartAppsProcessTask(void *argument);
 extern void StartMcCanCommsTask(void *argument);
+extern void StartAcuCanCommsTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -204,6 +217,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of mcCanCommsQueue */
   mcCanCommsQueueHandle = osMessageQueueNew (16, sizeof(CAN_RxPacketTypeDef), &mcCanCommsQueue_attributes);
+
+  /* creation of acuCanCommsQueue */
+  acuCanCommsQueueHandle = osMessageQueueNew (16, sizeof(CAN_RxPacketTypeDef), &acuCanCommsQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -243,6 +259,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of mcCanCommsTask */
   mcCanCommsTaskHandle = osThreadNew(StartMcCanCommsTask, (void*) MC_CAN_COMMS_TASK_ENABLED, &mcCanCommsTask_attributes);
 
+  /* creation of acuCanCommsTask */
+  acuCanCommsTaskHandle = osThreadNew(StartAcuCanCommsTask, (void*) ACU_CAN_COMMS_TASK_ENABLED, &acuCanCommsTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -269,7 +288,7 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN StartDefaultTask */
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
   /* Infinite loop */

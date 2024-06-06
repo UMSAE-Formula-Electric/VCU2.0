@@ -94,8 +94,9 @@ TaskInfo* getTaskInfos(size_t* count) {
             {&vcuStateTaskHandle, VCU_STATE_TASK_ENABLED},
             {&mcHrtbeatTaskHandle, MC_HRTBEAT_TASK_ENABLED},
             {&acuHrtbeatTaskHandle, ACU_HRTBEAT_TASK_ENABLED},
-            {&brakeProcTaskHandle, BRAKE_PROC_TASK_ENABLED},
-            {&appsProcTaskHandle, APPS_PROC_TASK_ENABLED}
+            {&appsProcTaskHandle, APPS_PROC_TASK_ENABLED},
+            {&mcCanCommsTaskHandle, MC_CAN_COMMS_TASK_ENABLED},
+            {&acuCanCommsTaskHandle, ACU_CAN_COMMS_TASK_ENABLED}
     };
 
     *count = sizeof(taskInfos) / sizeof(TaskInfo);
@@ -190,7 +191,7 @@ bool areAllActiveTasksReady() {
 void StartWatchDogTask(void *argument) {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
     MX_IWDG_Init();

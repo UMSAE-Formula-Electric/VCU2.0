@@ -23,7 +23,6 @@
 /* USER CODE BEGIN 0 */
 #include <string.h>
 #include "usart.h"
-#include "motor_controller_can_utils.h"
 #include "logger.h"
 #include "cmsis_os2.h"
 #include "iwdg.h"
@@ -192,7 +191,7 @@ void StartCanRxTask(void *argument)
 {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
     if (!(HAL_CAN_Start(&hcan1) == HAL_OK && HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_RX_FIFO0_OVERRUN | CAN_IT_RX_FIFO0_FULL | CAN_IT_ERROR) == HAL_OK))
@@ -202,6 +201,7 @@ void StartCanRxTask(void *argument)
 
     CAN_RxPacketTypeDef rxPacket;
     osStatus_t isMsgTakenFromQueue;
+    uint32_t canId;
 
     for (;;)
     {
@@ -212,96 +212,15 @@ void StartCanRxTask(void *argument)
         {
             if (rxPacket.rxPacketHeader.IDE == CAN_ID_EXT)
             {
-                switch (rxPacket.rxPacketHeader.ExtId)
+                canId = rxPacket.rxPacketHeader.ExtId;
+                switch (canId)
                 {}
             }
             if (rxPacket.rxPacketHeader.IDE == CAN_ID_STD)
             {
-                switch (rxPacket.rxPacketHeader.StdId)
-                {
-                    case CAN_ACU_TO_VCU_ID:
-                        processAcuToVcuCanIdRxData(rxPacket.rxPacketData);
-                        break;
-                    case CAN_ACU_CAN_ID:
-                        messageReceivedFromControlUnit("ACU");
-                        break;
-                    case CAN_SCU_CAN_ID:
-                        messageReceivedFromControlUnit("SCU");
-                        break;
-
-                    case CAN_MC_RX_HIGHSPEED: //High speed message, 333Hz
-                        notify_mc_heartbeat_task();
-                        mc_process_fast_can(rxPacket.rxPacketData);
-                        break;
-
-                        //Motor Controller Messages
-                    case CAN_MC_RX_TEMP1_ID: //IGBT temp readings
-                        mc_process_temp1_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_TEMP2_ID:
-                        mc_process_temp2_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_ANALOG_INPUTS_VOLTAGE:
-                        mc_process_analog_inputs_voltage_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_DIGITAL_INPUT_STATUS:
-                        mc_process_digital_input_status_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_MOTOR_ID:
-                        mc_process_motor_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_CURRENT_ID:
-                        mc_process_current_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_VOLT_ID:
-                        mc_process_volt_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_FAULT_ID:
-                        mc_process_fault_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_INTERNAL_VOLTAGES:
-                        mc_process_internal_volt_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_INTERNAL_STATES:
-                        mc_process_internal_states_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_TORQUE_TIMER_INFO:
-                        mc_process_torque_timer_info_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_MODULATION_INDEX:
-                        mc_process_modulation_index_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_FIRMWARE_INFO:
-                        mc_process_firmware_info_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_DIAGNOSTIC_DATA:
-                        mc_process_diagnostic_data_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_TORQUE_CAPABILITY:
-                        mc_process_torque_capability_can(rxPacket.rxPacketData);
-                        break;
-
-                    case CAN_MC_RX_TEMP3_ID: //Motor temp reading
-                        mc_process_temp3_can(rxPacket.rxPacketData);
-                        break;
-
-                    default:
-                        break;
-                }
+                canId = rxPacket.rxPacketHeader.StdId;
+                if (canId == CAN_ACU_TO_VCU_ID) { osMessageQueuePut(acuCanCommsQueueHandle, &rxPacket, 0, 0); }
+                else if (isMcCanId(canId)) { osMessageQueuePut(mcCanCommsQueueHandle, &rxPacket, 0, 0); }
             }
         }
         osThreadYield();
@@ -311,7 +230,7 @@ void StartCanRxTask(void *argument)
 void StartCanTxTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
     CAN_TxPacketTypeDef txPacket;

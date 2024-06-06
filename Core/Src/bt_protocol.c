@@ -412,7 +412,7 @@ static void updateSequence() {
 void StartBluetoothDumpTask(void *argument) {
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
-        osThreadTerminate(osThreadGetId());
+        osThreadExit();
     }
 
 	for(;;) {

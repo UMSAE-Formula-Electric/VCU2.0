@@ -30,12 +30,14 @@ extern "C" {
 
 /* USER CODE BEGIN Includes */
 #include "can_utils.h"
+#include "motor_controller_can_utils.h"
 /* USER CODE END Includes */
 
 extern CAN_HandleTypeDef hcan1;
 
 /* USER CODE BEGIN Private defines */
-
+extern osMessageQueueId_t mcCanCommsQueueHandle;
+extern osMessageQueueId_t acuCanCommsQueueHandle;
 /* USER CODE END Private defines */
 
 void MX_CAN1_Init(void);

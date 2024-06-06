@@ -11,7 +11,7 @@
 #include "iwdg.h"
 #include "can.h"
 
-#define MC_COMMS_DELAY_MS 25
+#define MC_COMMS_DELAY_MS 15
 
 /**
  * @Brief: this function updates the heartbeat task to the presence of the

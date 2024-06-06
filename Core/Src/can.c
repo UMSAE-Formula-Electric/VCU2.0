@@ -219,7 +219,7 @@ void StartCanRxTask(void *argument)
             if (rxPacket.rxPacketHeader.IDE == CAN_ID_STD)
             {
                 canId = rxPacket.rxPacketHeader.StdId;
-                if (canId == CAN_ACU_TO_VCU_ID) { processAcuToVcuCanIdRxData(rxPacket.rxPacketData); }
+                if (canId == CAN_ACU_TO_VCU_ID) { osMessageQueuePut(acuCanCommsQueueHandle, &rxPacket, 0, 0); }
                 else if (isMcCanId(canId)) { osMessageQueuePut(mcCanCommsQueueHandle, &rxPacket, 0, 0); }
             }
         }

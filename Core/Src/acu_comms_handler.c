@@ -1,7 +1,5 @@
-#include <dashboard_mgmt.h>
 #include "FreeRTOS.h"
 #include "task.h"
-#include "queue.h"
 #include "acu_comms_handler.h"
 #include "can.h"
 #include "car_state.h"
@@ -92,6 +90,15 @@ void StartAcuCanCommsTask(void *argument){
 
     for(;;){
         kickWatchdogBit(osThreadGetId());
+
+        isMsgTakenFromQueue = osMessageQueueGet(mcCanCommsQueueHandle, &rxPacket, 0, 0);
+        if (isMsgTakenFromQueue == osOK) {
+            if (rxPacket.rxPacketHeader.IDE == CAN_ID_EXT) {
+                canId = rxPacket.rxPacketHeader.ExtId;
+                if (canId == CAN_ACU_TO_VCU_ID) { processAcuToVcuCanIdRxData(rxPacket.rxPacketData); }
+            }
+        }
+
         osDelay(pdMS_TO_TICKS(ACU_CAN_COMMS_TASK_DELAY_MS));
     }
 }

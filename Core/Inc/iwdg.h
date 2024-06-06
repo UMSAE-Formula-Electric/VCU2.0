@@ -59,6 +59,7 @@ typedef enum {
     ACU_HRTBEAT_TASK,
     APPS_PROC_TASK,
     MC_CAN_COMMS_TASK,
+    ACU_CAN_COMMS_TASK,
     NUM_TASKS
 } TaskBit_t;
 

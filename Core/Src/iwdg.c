@@ -95,7 +95,8 @@ TaskInfo* getTaskInfos(size_t* count) {
             {&mcHrtbeatTaskHandle, MC_HRTBEAT_TASK_ENABLED},
             {&acuHrtbeatTaskHandle, ACU_HRTBEAT_TASK_ENABLED},
             {&appsProcTaskHandle, APPS_PROC_TASK_ENABLED},
-            {&mcCanCommsTaskHandle, MC_CAN_COMMS_TASK_ENABLED}
+            {&mcCanCommsTaskHandle, MC_CAN_COMMS_TASK_ENABLED},
+            {&acuCanCommsTaskHandle, ACU_CAN_COMMS_TASK_ENABLED}
     };
 
     *count = sizeof(taskInfos) / sizeof(TaskInfo);

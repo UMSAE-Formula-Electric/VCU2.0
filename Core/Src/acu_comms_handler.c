@@ -14,13 +14,15 @@
 #include "stdio.h"
 #include "bt_protocol.h"
 #include "can_utils.h"
+#include "iwdg.h"
+
+#define ACU_CAN_COMMS_TASK_DELAY_MS 15
 
 static void notify_startup_task(enum startup_notify_value notify_val);
 static void notify_acu_heartbeat_task(HeartbeatNotify_t notify_val);
 
 void processAcuToVcuCanIdRxData(const uint8_t *RxData) {
     //TODO VCU#32 INFO Processing ACB CAN message
-    char strBuff[50]; //buffer for making 'nice' logs
 
     if (RxData[0] == CAN_ACB_TSA_ACK) {
         notify_startup_task(ACU_TSA_ACK);
@@ -46,8 +48,6 @@ void processAcuToVcuCanIdRxData(const uint8_t *RxData) {
     } else {
         //build up string for marking unexpected can message
         //TODO VCU#32 ERROR/INFO unexpected ACB notification
-        sprintf(strBuff, "Unexpected ACU can notification: %s\r\n", RxData);
-        logMessage(strBuff, false);
     }
 }
 
@@ -80,10 +80,18 @@ void notify_acu_heartbeat_task(HeartbeatNotify_t notify_val){
 	}
 }
 
-
 void StartAcuCanCommsTask(void *argument){
     uint8_t isTaskActivated = (int)argument;
     if (isTaskActivated == 0) {
         osThreadExit();
+    }
+
+    CAN_RxPacketTypeDef rxPacket;
+    osStatus_t isMsgTakenFromQueue;
+    uint32_t canId;
+
+    for(;;){
+        kickWatchdogBit(osThreadGetId());
+        osDelay(pdMS_TO_TICKS(ACU_CAN_COMMS_TASK_DELAY_MS));
     }
 }

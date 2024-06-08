@@ -91,10 +91,11 @@ void StartAcuCanCommsTask(void *argument){
     for(;;){
         kickWatchdogBit(osThreadGetId());
 
-        isMsgTakenFromQueue = osMessageQueueGet(mcCanCommsQueueHandle, &rxPacket, 0, 0);
+        isMsgTakenFromQueue = osMessageQueueGet(acuCanCommsQueueHandle, &rxPacket, 0, 0);
         if (isMsgTakenFromQueue == osOK) {
-            if (rxPacket.rxPacketHeader.IDE == CAN_ID_EXT) {
-                canId = rxPacket.rxPacketHeader.ExtId;
+            if (rxPacket.rxPacketHeader.IDE == CAN_ID_STD)
+            {
+                canId = rxPacket.rxPacketHeader.StdId;
                 if (canId == CAN_ACU_TO_VCU_ID) { processAcuToVcuCanIdRxData(rxPacket.rxPacketData); }
             }
         }

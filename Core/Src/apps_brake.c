@@ -34,10 +34,10 @@
 
 #define PEDAL_TWO_FOOT_PRESS_PERCENT    0.25	// EV2.4.1 amount you can press apps while brake is depressed before stopping current [rule about two foot driving]
 #define PEDAL_TWO_FOOT_RELEASE_PERCENT 	0.05	// Amount to get out of two foot pressed state
-#define APPS_LOW_RELEASE_PEDAL_TRAVEL ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT)
-#define APPS_HIGH_RELEASE_PEDAL_TRAVEL ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT)
-#define APPS_LOW_PRESS_PEDAL_TRAVEL ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT)
-#define APPS_HIGH_PRESS_PEDAL_TRAVEL ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT)
+#define APPS_LOW_RELEASE_PEDAL_TRAVEL APPS_LOW_MIN + ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT)
+#define APPS_HIGH_RELEASE_PEDAL_TRAVEL APPS_HIGH_MIN + ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT)
+#define APPS_LOW_PRESS_PEDAL_TRAVEL APPS_LOW_MIN + ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT)
+#define APPS_HIGH_PRESS_PEDAL_TRAVEL APPS_HIGH_MIN + ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT)
 
 enum BRAKE_STATE readDigitalBrakeState() { return (enum BRAKE_STATE) HAL_GPIO_ReadPin(BPS_GPIO_Port, BPS_Pin); }
 
@@ -109,8 +109,8 @@ bool twoFootRulePassedPerPedal(uint16_t appsVal, uint16_t twoFootPressVal, uint1
 }
 
 bool twoFootRulePassed(uint16_t high_val, uint16_t low_val) {
-    return twoFootRulePassedPerPedal(high_val, APPS_HIGH_PRESS_PEDAL_TRAVEL, APPS_HIGH_RELEASE_PEDAL_TRAVEL, &apps.two_foot_high_count, &apps.two_foot_high_flag) &&
-           twoFootRulePassedPerPedal(low_val, APPS_LOW_PRESS_PEDAL_TRAVEL, APPS_LOW_RELEASE_PEDAL_TRAVEL, &apps.two_foot_low_count, &apps.two_foot_low_flag);
+    return (twoFootRulePassedPerPedal(high_val, APPS_HIGH_PRESS_PEDAL_TRAVEL, APPS_HIGH_RELEASE_PEDAL_TRAVEL, &apps.two_foot_high_count, &apps.two_foot_high_flag) &&
+           twoFootRulePassedPerPedal(low_val, APPS_LOW_PRESS_PEDAL_TRAVEL, APPS_LOW_RELEASE_PEDAL_TRAVEL, &apps.two_foot_low_count, &apps.two_foot_low_flag));
 }
 
 void readAccelPedals(uint16_t *apps_low, uint16_t *apps_high) {

@@ -24,20 +24,17 @@
 #define MIN_TORQUE_REQUESTABLE 0
 #define MAX_TORQUE_REQUESTABLE 2400
 
-#define BYPASS_SAFETY	1
+#define BYPASS_SAFETY	0
 #define BYPASS_BRAKE	0
 #define BYPASS_APPS		0
-#define BYPASS_RTD		1
-
-
-#define APPS_HIGH_SCALING 1.15
+#define BYPASS_RTD		0
 
 #define PEDAL_TWO_FOOT_PRESS_PERCENT    0.25	// EV2.4.1 amount you can press apps while brake is depressed before stopping current [rule about two foot driving]
 #define PEDAL_TWO_FOOT_RELEASE_PERCENT 	0.05	// Amount to get out of two foot pressed state
-#define APPS_LOW_RELEASE_PEDAL_TRAVEL APPS_LOW_MIN + ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT)
-#define APPS_HIGH_RELEASE_PEDAL_TRAVEL APPS_HIGH_MIN + ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT)
-#define APPS_LOW_PRESS_PEDAL_TRAVEL APPS_LOW_MIN + ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT)
-#define APPS_HIGH_PRESS_PEDAL_TRAVEL APPS_HIGH_MIN + ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT)
+#define APPS_LOW_RELEASE_PEDAL_TRAVEL (APPS_LOW_MIN + ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT))
+#define APPS_HIGH_RELEASE_PEDAL_TRAVEL (APPS_HIGH_MIN + ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT))
+#define APPS_LOW_PRESS_PEDAL_TRAVEL (APPS_LOW_MIN + ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT))
+#define APPS_HIGH_PRESS_PEDAL_TRAVEL (APPS_HIGH_MIN + ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT))
 
 enum BRAKE_STATE readDigitalBrakeState() { return (enum BRAKE_STATE) HAL_GPIO_ReadPin(BPS_GPIO_Port, BPS_Pin); }
 
@@ -115,7 +112,7 @@ bool twoFootRulePassed(uint16_t high_val, uint16_t low_val) {
 
 void readAccelPedals(uint16_t *apps_low, uint16_t *apps_high) {
     uint16_t temp_apps_low = ADC_get_val(ADC_APPS_LOW);
-    uint16_t temp_apps_high = ADC_get_val(ADC_APPS_HIGH) * APPS_HIGH_SCALING;
+    uint16_t temp_apps_high = ADC_get_val(ADC_APPS_HIGH);
     if (temp_apps_low != INVALID_ADC_READING) {
         (*apps_low) = (uint16_t) ((0.5 * temp_apps_low) + (0.5 * (*apps_low)));
     }

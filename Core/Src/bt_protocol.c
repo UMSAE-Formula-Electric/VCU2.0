@@ -235,7 +235,7 @@ void btSendPacket() {
 		if(xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
 			updateSequence();
             //TODO Bluetooth
-			val = HAL_USART_Transmit(&husart3, (uint16_t *)&packet, sizeof(PACKET), 10000);
+			val = HAL_USART_Transmit(&husart3, (uint8_t *)&packet, sizeof(PACKET), 10000);
 			xSemaphoreGive(packetMutex);
 		}
 	}

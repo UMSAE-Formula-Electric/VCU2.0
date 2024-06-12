@@ -21,8 +21,9 @@
 #define APPS_REQ_FREQ_HZ 200 //[Hz] frequency of polling loop for APPS
 #define BRAKE_REQ_FREQ_HZ 100 //[Hz] frequency of polling loop for BRAKE PEDAL
 
-#define MIN_TORQUE_REQUESTABLE 0
-#define MAX_TORQUE_REQUESTABLE 2400
+#define MIN_TORQUE_REQUESTABLE_x10 0
+#define MAX_TORQUE_REQUESTABLE_x10 2400
+#define DEADZONE_TORQUE_x10 75
 
 #define BYPASS_SAFETY	0
 #define BYPASS_BRAKE	0
@@ -44,11 +45,11 @@ static pedal_state_t apps; //Accelerator pedal position sensor / throttle sensor
 
 int16_t mapPedalPressToMotorTorque(uint16_t lowPedalPress) {
     if (lowPedalPress <= APPS_LOW_MIN) {
-        return MIN_TORQUE_REQUESTABLE;
+        return MIN_TORQUE_REQUESTABLE_x10;
     } else if (lowPedalPress >= APPS_LOW_MAX) {
-        return MAX_TORQUE_REQUESTABLE;
+        return MAX_TORQUE_REQUESTABLE_x10;
     }
-    double torque = ((double)(lowPedalPress - APPS_LOW_MIN) * (MAX_TORQUE_REQUESTABLE - MIN_TORQUE_REQUESTABLE)) / (APPS_LOW_MAX - APPS_LOW_MIN) + MIN_TORQUE_REQUESTABLE;
+    double torque = ((double)(lowPedalPress - APPS_LOW_MIN) * (MAX_TORQUE_REQUESTABLE_x10 - MIN_TORQUE_REQUESTABLE_x10)) / (APPS_LOW_MAX - APPS_LOW_MIN) + MIN_TORQUE_REQUESTABLE_x10;
 
     return (int16_t)(torque + 0.5);
 }
@@ -143,7 +144,7 @@ bool checkPedalsImplausibility(uint16_t high_val, uint16_t low_val){
 }
 
 void sendTorqueWithFaultFixing(int16_t torque) {
-    if ((get_mc_heartbeat_state() != HEARTBEAT_PRESENT) ||  (get_car_state() != READY_TO_DRIVE) || brakePressed() || torque < 10) {
+    if ((get_mc_heartbeat_state() != HEARTBEAT_PRESENT) ||  (get_car_state() != READY_TO_DRIVE) || brakePressed() || torque < DEADZONE_TORQUE_x10) {
         DisableMC();
         sendTorque(0);
         fixFaults();

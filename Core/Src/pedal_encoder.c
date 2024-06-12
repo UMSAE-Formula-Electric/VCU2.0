@@ -131,7 +131,7 @@ bool throttleAgreement_936(uint16_t throttle_1, uint16_t throttle_2,
 bool rule_10percent_pedal_travel_apps_agreement(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state)
 {
     // Calculate the expected sens_high value from sens_low
-    double expected_sens_high = (1.5125f * (float)sens_low) + 56.153f;
+    double expected_sens_high = (1.8759f * (float)sens_low) - 192.03f;
 
     // Calculate the 10% range for the expected sens_high value
     double agreement_range_min = expected_sens_high * (1.0f - PEDAL_AGREEMENT_PERCENT);

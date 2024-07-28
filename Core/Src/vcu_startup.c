@@ -116,7 +116,7 @@ void rtdStateProcedure(uint8_t *vcuStateTaskNotification) {
         go_idle();
     }
 
-    if(!DISABLE_HEARTBEAT_CHECK || checkHeartbeat()){//make sure we have ACU heartbeat
+    if(!DISABLE_HEARTBEAT_CHECK && !checkHeartbeat()){//make sure we have ACU heartbeat
         //TODO VCU#32 ERROR Going idle because ACB hasn't sent a heart beat
         logMessage("Going Idle due to lack of ACU", true);
         go_idle();

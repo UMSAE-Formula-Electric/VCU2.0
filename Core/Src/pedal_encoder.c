@@ -130,16 +130,15 @@ bool throttleAgreement_936(uint16_t throttle_1, uint16_t throttle_2,
  */
 bool rule_10percent_pedal_travel_apps_agreement(uint16_t sens_high, uint16_t sens_low, pedal_state_t * state)
 {
-    uint16_t sens_high_min = state->high_min;
-    uint16_t sens_low_min = state->low_min;
+    // Calculate the expected sens_high value from sens_low
+    double expected_sens_high = (1.8759f * (float)sens_low) - 192.03f;
 
-    uint16_t sens_high_range = state->high_max - sens_high_min;
-    uint16_t sens_low_range = state->low_max - sens_low_min;
+    // Calculate the 10% range for the expected sens_high value
+    double agreement_range_min = expected_sens_high * (1.0f - PEDAL_AGREEMENT_PERCENT);
+    double agreement_range_max = expected_sens_high * (1.0f + PEDAL_AGREEMENT_PERCENT);
 
-    int32_t normalized_sens_high = (sens_high - sens_high_min);
-    int32_t normalized_sens_low = (int32_t) ((state->gain) * ((float) ((sens_low - sens_low_min))));
-    int32_t agreement_range_size = (int32_t) ((float) (sens_high_range * sens_low_range) * PEDAL_AGREEMENT_PERCENT);
-    bool within_range = abs(normalized_sens_high - normalized_sens_low) < agreement_range_size;
+    // Check if the actual sens_high value falls within this range
+    bool within_range = (sens_high >= agreement_range_min) && (sens_high <= agreement_range_max);
 
     if (state->possibility == PEDAL_POSSIBLE)
     {

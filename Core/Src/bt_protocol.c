@@ -10,6 +10,7 @@
 #include "semphr.h"
 #include "main.h"
 #include "iwdg.h"
+#include "usart.h"
 
 //Variables for BT status/errors
 static bool BT_INITIALIZED = false;
@@ -190,6 +191,18 @@ int data_scalars_bt[NUM_OF_SENSORS+NUM_OF_INDICATORS] = {
 bool btInitialize() {
 	//Check if BT has already been initialized
 	if(!BT_INITIALIZED) {
+
+		// init BT Module
+	    HAL_GPIO_WritePin(BT_SW_BTN_GPIO_Port, BT_SW_BTN_Pin, GPIO_PIN_SET);
+	    HAL_Delay(40);
+	    HAL_GPIO_WritePin(BT_RESET_GPIO_Port, BT_RESET_Pin, GPIO_PIN_SET);
+
+	    HAL_Delay(500);
+
+	    HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_SET);
+	    HAL_GPIO_WritePin(BT_P2_4_GPIO_Port, BT_P2_4_Pin, GPIO_PIN_SET);
+	    HAL_GPIO_WritePin(BT_EAN_GPIO_Port, BT_EAN_Pin, GPIO_PIN_SET);
+
         initPacket();
         //Create the mutex
         packetMutex = xSemaphoreCreateMutex();
@@ -228,12 +241,13 @@ bool btTerminate() {
  * 		Builds and sends the packet via USART
  */
 void btSendPacket() {
+	HAL_StatusTypeDef val;
 	if(BT_INITIALIZED && BT_ERROR_STATE == 0x00) {
 		//Try to take the semaphore to update the packet memory location
 		if(xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
 			updateSequence();
             //TODO Bluetooth
-//			usartBTSend((char*)&packet);
+			val = HAL_USART_Transmit(&husart3, (uint8_t *)&packet, sizeof(PACKET), 10000);
 			xSemaphoreGive(packetMutex);
 		}
 	}

@@ -234,7 +234,7 @@ bool btTerminate() {
 /**
  * btSendPacket()
  *
- * 		Builds and sends the packet via USART
+ * 		Builds and sends the packet via UART
  */
 void btSendPacket() {
 	HAL_StatusTypeDef val;
@@ -243,7 +243,7 @@ void btSendPacket() {
 		if(xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
 			updateSequence();
             //TODO Bluetooth
-			val = HAL_USART_Transmit(&husart3, (uint8_t *)&packet, sizeof(PACKET), 10000);
+			val = HAL_UART_Transmit(&huart3, (uint8_t *)&packet, sizeof(PACKET), 10000);
 			xSemaphoreGive(packetMutex);
 		}
 	}
@@ -257,7 +257,7 @@ void btSendPacket() {
 bool btUpdateData(void *value, SENSOR name) {
 	//Try to take the semaphore to update the packet memory location
 	if( 1){//xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
-		int size = 51; //I thibk //used to be 11
+		int size = 51; //I think //used to be 11
 		//Convert packet type back to an integer
 		int packet_type = packet.data[name].type[0] - '0';
 		//Char array for storing final value

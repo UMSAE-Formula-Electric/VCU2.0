@@ -195,9 +195,7 @@ bool btInitialize() {
 		// init BT Module
 		HAL_GPIO_WritePin(BT_SW_BTN_GPIO_Port, BT_SW_BTN_Pin, GPIO_PIN_SET);// Power on the BT module
 
-	    HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_SET);
-	    HAL_GPIO_WritePin(BT_P2_4_GPIO_Port, BT_P2_4_Pin, GPIO_PIN_SET);
-	    HAL_GPIO_WritePin(BT_EAN_GPIO_Port, BT_EAN_Pin, GPIO_PIN_RESET);
+        btModeConfig(BT_APPLICATION); // Set the BT module to application mode
 
         initPacket();
         //Create the mutex
@@ -486,4 +484,25 @@ void btLogSensor(float value, SENSOR sens) {
 	if(BT_INITIALIZED) {
         btUpdateData((void *)&value, sens);
 	}
+}
+
+/**
+ * btModeConfig()
+ *
+ * 		Configures the Bluetooth module to a specific mode
+ */
+void btModeConfig(BTMODE mode){
+    if(mode == BT_APPLICATION){
+        HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(BT_P2_4_GPIO_Port, BT_P2_4_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(BT_EAN_GPIO_Port, BT_EAN_Pin, GPIO_PIN_RESET);
+    } else if(mode == BT_TEST){
+        HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(BT_P2_4_GPIO_Port, BT_P2_4_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(BT_EAN_GPIO_Port, BT_EAN_Pin, GPIO_PIN_RESET);
+    } else if(mode == BT_WRITE){
+        HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(BT_P2_4_GPIO_Port, BT_P2_4_Pin, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(BT_EAN_GPIO_Port, BT_EAN_Pin, GPIO_PIN_RESET);
+    }
 }

@@ -193,15 +193,11 @@ bool btInitialize() {
 	if(!BT_INITIALIZED) {
 
 		// init BT Module
-	    HAL_GPIO_WritePin(BT_SW_BTN_GPIO_Port, BT_SW_BTN_Pin, GPIO_PIN_SET);
-	    HAL_Delay(40);
-	    HAL_GPIO_WritePin(BT_RESET_GPIO_Port, BT_RESET_Pin, GPIO_PIN_SET);
-
-	    HAL_Delay(500);
+		HAL_GPIO_WritePin(BT_SW_BTN_GPIO_Port, BT_SW_BTN_Pin, GPIO_PIN_SET);// Power on the BT module
 
 	    HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_SET);
 	    HAL_GPIO_WritePin(BT_P2_4_GPIO_Port, BT_P2_4_Pin, GPIO_PIN_SET);
-	    HAL_GPIO_WritePin(BT_EAN_GPIO_Port, BT_EAN_Pin, GPIO_PIN_SET);
+	    HAL_GPIO_WritePin(BT_EAN_GPIO_Port, BT_EAN_Pin, GPIO_PIN_RESET);
 
         initPacket();
         //Create the mutex

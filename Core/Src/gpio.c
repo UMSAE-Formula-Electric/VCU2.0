@@ -139,7 +139,8 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PDPin PDPin PDPin PDPin
                            PDPin */
-  GPIO_InitStruct.Pin = BT_RESET_Pin|BT_SW_BTN_Pin|BT_P2_4_Pin|BT_P2_0_Pin
+  GPIO_InitStruct.Pin = //BT_RESET_Pin|
+                           BT_SW_BTN_Pin|BT_P2_4_Pin|BT_P2_0_Pin
                           |BT_EAN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;

@@ -41,8 +41,8 @@ void StartMcCanCommsTask(void *argument) {
 
         isMsgTakenFromQueue = osMessageQueueGet(mcCanCommsQueueHandle, &rxPacket, 0, 0);
         if (isMsgTakenFromQueue == osOK) {
-            if (rxPacket.rxPacketHeader.IDE == CAN_ID_EXT) {
-                canId = rxPacket.rxPacketHeader.ExtId;
+            if (rxPacket.rxPacketHeader.IDE == CAN_ID_STD) {
+                canId = rxPacket.rxPacketHeader.StdId;
                 switch (canId) {
                     case CAN_MC_RX_HIGHSPEED: //High speed message, 333Hz
                         notify_mc_heartbeat_task();

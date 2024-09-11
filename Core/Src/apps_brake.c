@@ -18,11 +18,12 @@
 #include "bt_protocol.h"
 #include "heartbeat.h"
 
-#define APPS_REQ_FREQ_HZ 100 //[Hz] frequency of polling loop for APPS
+#define APPS_REQ_FREQ_HZ 200 //[Hz] frequency of polling loop for APPS
 #define BRAKE_REQ_FREQ_HZ 100 //[Hz] frequency of polling loop for BRAKE PEDAL
 
-#define MIN_TORQUE_REQUESTABLE 0
-#define MAX_TORQUE_REQUESTABLE 2000
+#define MIN_TORQUE_REQUESTABLE_x10 0
+#define MAX_TORQUE_REQUESTABLE_x10 2400
+#define DEADZONE_TORQUE_x10 75
 
 #define BYPASS_SAFETY	0
 #define BYPASS_BRAKE	0
@@ -31,10 +32,10 @@
 
 #define PEDAL_TWO_FOOT_PRESS_PERCENT    0.25	// EV2.4.1 amount you can press apps while brake is depressed before stopping current [rule about two foot driving]
 #define PEDAL_TWO_FOOT_RELEASE_PERCENT 	0.05	// Amount to get out of two foot pressed state
-#define APPS_LOW_RELEASE_PEDAL_TRAVEL ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT)
-#define APPS_HIGH_RELEASE_PEDAL_TRAVEL ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT)
-#define APPS_LOW_PRESS_PEDAL_TRAVEL ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT)
-#define APPS_HIGH_PRESS_PEDAL_TRAVEL ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT)
+#define APPS_LOW_RELEASE_PEDAL_TRAVEL (APPS_LOW_MIN + ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT))
+#define APPS_HIGH_RELEASE_PEDAL_TRAVEL (APPS_HIGH_MIN + ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_RELEASE_PERCENT))
+#define APPS_LOW_PRESS_PEDAL_TRAVEL (APPS_LOW_MIN + ((APPS_LOW_MAX - APPS_LOW_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT))
+#define APPS_HIGH_PRESS_PEDAL_TRAVEL (APPS_HIGH_MIN + ((APPS_HIGH_MAX - APPS_HIGH_MIN) * PEDAL_TWO_FOOT_PRESS_PERCENT))
 
 enum BRAKE_STATE readDigitalBrakeState() { return (enum BRAKE_STATE) HAL_GPIO_ReadPin(BPS_GPIO_Port, BPS_Pin); }
 
@@ -44,11 +45,11 @@ static pedal_state_t apps; //Accelerator pedal position sensor / throttle sensor
 
 int16_t mapPedalPressToMotorTorque(uint16_t lowPedalPress) {
     if (lowPedalPress <= APPS_LOW_MIN) {
-        return MIN_TORQUE_REQUESTABLE;
+        return MIN_TORQUE_REQUESTABLE_x10;
     } else if (lowPedalPress >= APPS_LOW_MAX) {
-        return MAX_TORQUE_REQUESTABLE;
+        return MAX_TORQUE_REQUESTABLE_x10;
     }
-    double torque = ((double)(lowPedalPress - APPS_LOW_MIN) * (MAX_TORQUE_REQUESTABLE - MIN_TORQUE_REQUESTABLE)) / (APPS_LOW_MAX - APPS_LOW_MIN) + MIN_TORQUE_REQUESTABLE;
+    double torque = ((double)(lowPedalPress - APPS_LOW_MIN) * (MAX_TORQUE_REQUESTABLE_x10 - MIN_TORQUE_REQUESTABLE_x10)) / (APPS_LOW_MAX - APPS_LOW_MIN) + MIN_TORQUE_REQUESTABLE_x10;
 
     return (int16_t)(torque + 0.5);
 }
@@ -82,10 +83,16 @@ void InitializeApps(float gain, uint16_t low_zero, uint16_t low_min, uint16_t lo
 }
 
 bool twoFootRulePassedPerPedal(uint16_t appsVal, uint16_t twoFootPressVal, uint16_t twoFootReleaseVal, uint16_t* twoFootCount, bool* twoFootFlag) {
-    if ((*twoFootFlag) && brakePressed() || appsVal >= twoFootReleaseVal) {
-        *twoFootCount = 10;
-    } else if (appsVal < twoFootReleaseVal) {
-        (*twoFootCount)--;
+    if ((*twoFootFlag) == true) {
+        if (brakePressed()) {
+            *twoFootCount = 10;
+        } else {
+            if (appsVal < twoFootReleaseVal) {
+                (*twoFootCount)--;
+            } else {
+                *twoFootCount = 10;
+            }
+        }
     } else if (appsVal > twoFootPressVal && brakePressed()) {
         (*twoFootCount)++;
     }
@@ -100,8 +107,8 @@ bool twoFootRulePassedPerPedal(uint16_t appsVal, uint16_t twoFootPressVal, uint1
 }
 
 bool twoFootRulePassed(uint16_t high_val, uint16_t low_val) {
-    return twoFootRulePassedPerPedal(high_val, APPS_HIGH_PRESS_PEDAL_TRAVEL, APPS_HIGH_RELEASE_PEDAL_TRAVEL, &(apps.two_foot_high_count), &(apps.two_foot_high_flag)) &&
-           twoFootRulePassedPerPedal(low_val, APPS_LOW_PRESS_PEDAL_TRAVEL, APPS_LOW_RELEASE_PEDAL_TRAVEL, &(apps.two_foot_low_count), &(apps.two_foot_low_flag));
+    return (twoFootRulePassedPerPedal(high_val, APPS_HIGH_PRESS_PEDAL_TRAVEL, APPS_HIGH_RELEASE_PEDAL_TRAVEL, &apps.two_foot_high_count, &apps.two_foot_high_flag) &&
+           twoFootRulePassedPerPedal(low_val, APPS_LOW_PRESS_PEDAL_TRAVEL, APPS_LOW_RELEASE_PEDAL_TRAVEL, &apps.two_foot_low_count, &apps.two_foot_low_flag));
 }
 
 void readAccelPedals(uint16_t *apps_low, uint16_t *apps_high) {
@@ -120,8 +127,8 @@ bool checkPedalsImplausibility(uint16_t high_val, uint16_t low_val){
 
     if (BYPASS_RTD || get_car_state() == READY_TO_DRIVE) {
         if (BYPASS_SAFETY || read_saftey_loop()) {
-            if (BYPASS_APPS || rule_10percent_pedal_travel_apps_agreement(high_val, low_val, &apps)) {
-                if (BYPASS_BRAKE || twoFootRulePassed(high_val, low_val)) {
+            if (BYPASS_BRAKE || twoFootRulePassed(high_val, low_val)) {
+                if (BYPASS_APPS || rule_10percent_pedal_travel_apps_agreement(high_val, low_val, &apps)) {
                     res = false;
                 }
                 else {
@@ -137,7 +144,7 @@ bool checkPedalsImplausibility(uint16_t high_val, uint16_t low_val){
 }
 
 void sendTorqueWithFaultFixing(int16_t torque) {
-    if ((get_mc_heartbeat_state() != HEARTBEAT_PRESENT) ||  (get_car_state() != READY_TO_DRIVE) || brakePressed() || torque < 10) {
+    if ((get_mc_heartbeat_state() != HEARTBEAT_PRESENT) ||  (get_car_state() != READY_TO_DRIVE) || brakePressed() || torque < DEADZONE_TORQUE_x10) {
         DisableMC();
         sendTorque(0);
         fixFaults();
@@ -262,11 +269,11 @@ void StartAppsProcessTask(void *argument) {
 
         mc_apps_val = mapPedalPressToMotorTorque(apps_low);
 
-        if(!pedalValid(apps_high, apps_low, &apps) || checkPedalsImplausibility(apps_high, apps_low)){
+        if(checkPedalsImplausibility(apps_high, apps_low)){
             handleImplausibility();
         }
         else{
-            sendTorqueWithFaultFixing(mc_apps_val);
+             sendTorqueWithFaultFixing(mc_apps_val);
         }
 
         osDelay(pdMS_TO_TICKS(1000 / APPS_REQ_FREQ_HZ));

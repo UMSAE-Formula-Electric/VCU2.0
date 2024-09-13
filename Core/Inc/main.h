@@ -107,8 +107,6 @@ void Error_Handler(void);
 #define VCU_LED_RED_GPIO_Port GPIOE
 #define SHUTDOWN_CTL_Pin GPIO_PIN_12
 #define SHUTDOWN_CTL_GPIO_Port GPIOE
-#define BT_RESET_Pin GPIO_PIN_10
-#define BT_RESET_GPIO_Port GPIOD
 #define BT_SW_BTN_Pin GPIO_PIN_13
 #define BT_SW_BTN_GPIO_Port GPIOD
 #define BT_P2_4_Pin GPIO_PIN_14

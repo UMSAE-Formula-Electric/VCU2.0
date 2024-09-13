@@ -101,7 +101,7 @@ int main(void)
   MX_USART2_Init();
   MX_TIM12_Init();
   MX_ADC1_Init();
-  MX_USART3_UART_Init();
+  MX_USART3_Init();
   /* USER CODE BEGIN 2 */
     dash_set_all_leds();
 

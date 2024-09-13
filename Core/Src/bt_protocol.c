@@ -241,8 +241,9 @@ void btSendPacket() {
 		if(xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
 			updateSequence();
             //TODO Bluetooth
-			val = HAL_UART_Transmit(&huart3, (uint8_t *)&packet, sizeof(PACKET), 10000);
-			xSemaphoreGive(packetMutex);
+			//val = HAL_USART_Transmit(&husart3, (uint8_t *)&packet, sizeof(PACKET), 10000);
+            HAL_USART_Transmit(&husart3, (uint8_t *)"Hello David", sizeof("Hello David"), 10000);
+            xSemaphoreGive(packetMutex);
 		}
 	}
 }
@@ -425,6 +426,7 @@ void StartBluetoothDumpTask(void *argument) {
 
 	for(;;) {
         kickWatchdogBit(osThreadGetId());
+
 
 		//Dump, Wait
 		btSendPacket();

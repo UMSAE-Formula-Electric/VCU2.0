@@ -297,7 +297,7 @@ void StartBrakeProcessTask(void *argument) {
         kickWatchdogBit(osThreadGetId());
 
         brake1 = readDigitalBrakeState();
-        btLogSensor(brake1, BRAKE_1);
+        btLogIndicator(brake1, BREAK);
 
         osDelay(pdMS_TO_TICKS(1000 / BRAKE_REQ_FREQ_HZ));
     }

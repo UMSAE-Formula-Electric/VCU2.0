@@ -236,15 +236,29 @@ bool btTerminate() {
  */
 void btSendPacket() {
 	HAL_StatusTypeDef val;
+    uint16_t SPEED = 0;
 	if(BT_INITIALIZED && BT_ERROR_STATE == 0x00) {
 		//Try to take the semaphore to update the packet memory location
-		if(xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
-			updateSequence();
-            //TODO Bluetooth
-			//val = HAL_USART_Transmit(&husart3, (uint8_t *)&packet, sizeof(PACKET), 10000);
-            HAL_USART_Transmit(&husart3, (uint8_t *)"Hello David", sizeof("Hello David"), 10000);
-            xSemaphoreGive(packetMutex);
-		}
+
+        // Update the speed of the car converted from the motor RPM
+        // This is a workaround fix to get the speed of the car to bluetooth.
+        // Will need to be updated so that more info (i.e. speed, current, voltage, etc) can be sent to the bluetooth
+        // sepamores and mutexes are going to have to be used.
+        SPEED = (uint16_t)(mc_get_motor_RPM() * 117.97) / 5500;
+        char message[50];
+        sprintf(message,"Speed: %3d",SPEED);
+
+        HAL_USART_Transmit(&husart3, (uint8_t *)message,4, 500);
+
+
+
+
+//        if(xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
+//			updateSequence();
+////            TODO Bluetooth
+//			val = HAL_USART_Transmit(&husart3, (uint8_t *)&packet, sizeof(PACKET), 500);
+//            xSemaphoreGive(packetMutex);
+//		}
 	}
 }
 
@@ -273,7 +287,7 @@ bool btUpdateData(void *value, SENSOR name) {
 		} else if(packet_type == BT_DT_FLOAT) {
 			snprintf(value_buff, size, "%010li", (uint32_t)*((float *)value));
 		} else if(packet_type == BT_DT_DOUBLE) {
-			snprintf(value_buff, size, "%010f", *((double *)value));
+			//snprintf(value_buff, size, "%010f", *((double *)value));
 		} else if(packet_type == BT_DT_CHAR) {
 			value_buff[0] = *((char *)value);
 		} else if(packet_type == BT_DT_STRING) {

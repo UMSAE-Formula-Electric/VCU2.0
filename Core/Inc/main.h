@@ -58,6 +58,7 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define IWDG_RELOAD_PERIOD 4094
+#define BREAK_CHECK_TASK_ENABLE 1
 #define BT_DUMP_TASK_ENABLED 1
 #define APPS_PROC_TASK_ENABLED 1
 #define IWDG_EVENT_ALL_ALLOWED_BITS 0xFFFFFF

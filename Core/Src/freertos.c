@@ -132,6 +132,13 @@ const osThreadAttr_t acuCanCommsTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for breakCheckTask */
+osThreadId_t breakCheckTaskHandle;
+const osThreadAttr_t breakCheckTask_attributes = {
+  .name = "breakCheckTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 /* Definitions for canRxPacketQueue */
 osMessageQueueId_t canRxPacketQueueHandle;
 const osMessageQueueAttr_t canRxPacketQueue_attributes = {
@@ -180,6 +187,7 @@ extern void StartAcuHeartbeatTask(void *argument);
 extern void StartAppsProcessTask(void *argument);
 extern void StartMcCanCommsTask(void *argument);
 extern void StartAcuCanCommsTask(void *argument);
+extern void StartBrakeProcessTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -261,6 +269,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of acuCanCommsTask */
   acuCanCommsTaskHandle = osThreadNew(StartAcuCanCommsTask, (void*) ACU_CAN_COMMS_TASK_ENABLED, &acuCanCommsTask_attributes);
+
+  /* creation of breakCheckTask */
+  breakCheckTaskHandle = osThreadNew(StartBrakeProcessTask, (void*) BREAK_CHECK_TASK_ENABLE, &breakCheckTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

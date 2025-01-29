@@ -71,3 +71,14 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
         COMMENT "Building ${HEX_FILE}
 Building ${BIN_FILE}")
+
+
+# Ceedling support
+find_program(CEEDLING_EXECUTABLE ceedling REQUIRED)
+
+# Custom build type for running Ceedling tests
+add_custom_target(run_tests
+        COMMAND ${CEEDLING_EXECUTABLE} test:all
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Running Ceedling tests"
+)

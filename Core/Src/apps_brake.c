@@ -150,7 +150,6 @@ void sendTorqueWithFaultFixing(int16_t torque) {
         fixFaults();
     } else {
         EnableMC();
-        mc_send_command_msg(TORQUE_MODE);
         sendTorque(torque);
     }
 }

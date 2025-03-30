@@ -41,10 +41,12 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 void goTsaProcedure(uint8_t *vcuStateTaskNotification) {
     osStatus_t retRTOS = 0;
 
+    // sometimes we get a double ack. removing a double ack from the buffer (we don't care about the first ack)
     osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(2));
     if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
         if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin) && (brakePressed() || DISABLE_BRAKE_CHECK) && (checkHeartbeat() || DISABLE_HEARTBEAT_CHECK)) {
             goTSA();
+            // check the second ack now that the first one is out of the queue
             retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(FIRST_ACK_TIMEOUT_MS));
             if(retRTOS != osOK || (*vcuStateTaskNotification) != ACU_TSA_ACK){
             	go_idle();
@@ -82,6 +84,9 @@ void goRtdProcedure(uint8_t *vcuStateTaskNotification) {
                 dash_set_state(DASH_VCU_RTD_ACU_RTD);
                 EnableMC();
                 mc_set_inverter_enable(1);
+                // send a message to the motor controller to prime it the type of message it is about to receive
+                // we only send this once INSTEAD of each time we receive a torque request because this is the only time we need to change the MC mode
+                mc_send_command_msg(TORQUE_MODE);
                 logMessage("Went RTD!", false);
             }
         }
@@ -103,6 +108,7 @@ void goRtdProcedure(uint8_t *vcuStateTaskNotification) {
 void rtdStateProcedure(uint8_t *vcuStateTaskNotification) {
     osStatus_t retRTOS = 0;
 
+    // sets the motor controller global variable to then be sent to the MC via a CAN message
     EnableMC();
     if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin) || isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)){
         set_ACU_State(IDLE);

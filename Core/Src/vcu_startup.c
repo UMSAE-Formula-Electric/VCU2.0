@@ -33,6 +33,8 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 #define MC_STARTUP_DELAY_MS 1000	//[ms] delay used to wait for the motor controller
 #define STARTUP_TASK_DELAY_MS 25
 
+#define DISABLE_TSA_BUTTON_PRESS 0
+#define DISABLE_MC_HEARTBEAT_CHECK 0
 #define DISABLE_HEARTBEAT_CHECK 0
 #define DISABLE_SAFETY_LOOP_CHECK 0
 #define DISABLE_BRAKE_CHECK 0
@@ -44,7 +46,7 @@ void goTsaProcedure(uint8_t *vcuStateTaskNotification) {
     // sometimes we get a double ack. removing a double ack from the buffer (we don't care about the first ack)
     osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(2));
     if(read_saftey_loop() || DISABLE_SAFETY_LOOP_CHECK) {
-        if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin) && (brakePressed() || DISABLE_BRAKE_CHECK) && (checkHeartbeat() || DISABLE_HEARTBEAT_CHECK)) {
+        if((isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin) || DISABLE_TSA_BUTTON_PRESS) && (brakePressed() || DISABLE_BRAKE_CHECK) && (checkHeartbeat() || DISABLE_HEARTBEAT_CHECK)) {
             goTSA();
             // check the second ack now that the first one is out of the queue
             retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, pdMS_TO_TICKS(FIRST_ACK_TIMEOUT_MS));
@@ -143,7 +145,7 @@ void set_safety_loop_state(enum safetyLoopState state){
 
 int checkHeartbeat() {
 	if(get_acu_heartbeat_state() == HEARTBEAT_PRESENT){
-		if(get_mc_heartbeat_state() == HEARTBEAT_PRESENT) {
+		if((get_mc_heartbeat_state() == HEARTBEAT_PRESENT) || DISABLE_MC_HEARTBEAT_CHECK) {
 			return true;
 		}
 	}

@@ -58,7 +58,7 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define CAN_TX_TASK_ENABLED 1
-#define MC_HRTBEAT_TASK_ENABLED 1
+#define MC_HRTBEAT_TASK_ENABLED 0
 #define IWDG_RELOAD_PERIOD 4094
 #define BT_DUMP_TASK_ENABLED 0
 #define APPS_PROC_TASK_ENABLED 1
@@ -68,7 +68,7 @@ void Error_Handler(void);
 #define MC_CAN_COMMS_TASK_ENABLED 1
 #define DEFAULT_TASK_ENABLED 0
 #define CAN_RX_TASK_ENABLED 1
-#define WATCH_DOG_TASK_ENABLED 1
+#define WATCH_DOG_TASK_ENABLED 0
 #define ACU_CAN_COMMS_TASK_ENABLED 1
 #define IWDG_EVENT_ALL_ALLOWED_BITS 0xFFFFFF
 #define RTD_LED2_BLUE_Pin GPIO_PIN_2

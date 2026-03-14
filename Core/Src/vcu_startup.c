@@ -33,10 +33,10 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 #define MC_STARTUP_DELAY_MS 1000	//[ms] delay used to wait for the motor controller
 #define STARTUP_TASK_DELAY_MS 25
 
-#define DISABLE_HEARTBEAT_CHECK 1
-#define DISABLE_MC_HEARTBEAT 1
+#define DISABLE_HEARTBEAT_CHECK 0
+#define DISABLE_MC_HEARTBEAT 0
 #define DISABLE_SAFETY_LOOP_CHECK 0
-#define DISABLE_BRAKE_CHECK 1
+#define DISABLE_BRAKE_CHECK 0
 #define DISABLE_ACU_ACK 0
 
 void goTsaProcedure(uint8_t *vcuStateTaskNotification) {
@@ -228,7 +228,6 @@ static void fail_pulse(){
  * @Return: returns true if the button is pressed, otherwise returns false
  */
 bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin){
-	GPIO_PinState buttonValue = HAL_GPIO_ReadPin(port, pin);
     return (HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_RESET);
 }
 

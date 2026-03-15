@@ -34,6 +34,7 @@ bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
 #define STARTUP_TASK_DELAY_MS 25
 
 #define DISABLE_HEARTBEAT_CHECK 0
+#define DISABLE_MC_HEARTBEAT 0
 #define DISABLE_SAFETY_LOOP_CHECK 0
 #define DISABLE_BRAKE_CHECK 0
 #define DISABLE_ACU_ACK 0
@@ -143,7 +144,7 @@ void set_safety_loop_state(enum safetyLoopState state){
 
 int checkHeartbeat() {
 	if(get_acu_heartbeat_state() == HEARTBEAT_PRESENT){
-		if(get_mc_heartbeat_state() == HEARTBEAT_PRESENT) {
+		if((get_mc_heartbeat_state() == HEARTBEAT_PRESENT) || DISABLE_MC_HEARTBEAT) {
 			return true;
 		}
 	}

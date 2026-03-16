@@ -10,6 +10,7 @@
 #include "semphr.h"
 #include "main.h"
 #include "iwdg.h"
+#include "usart.h"
 
 //Variables for BT status/errors
 static bool BT_INITIALIZED = false;
@@ -190,6 +191,12 @@ int data_scalars_bt[NUM_OF_SENSORS+NUM_OF_INDICATORS] = {
 bool btInitialize() {
 	//Check if BT has already been initialized
 	if(!BT_INITIALIZED) {
+
+		// init BT Module
+		HAL_GPIO_WritePin(BT_SW_BTN_GPIO_Port, BT_SW_BTN_Pin, GPIO_PIN_SET);// Power on the BT module
+
+        btModeConfig(BT_APPLICATION); // Set the BT module to application mode
+
         initPacket();
         //Create the mutex
         packetMutex = xSemaphoreCreateMutex();
@@ -225,17 +232,33 @@ bool btTerminate() {
 /**
  * btSendPacket()
  *
- * 		Builds and sends the packet via USART
+ * 		Builds and sends the packet via UART
  */
 void btSendPacket() {
+	HAL_StatusTypeDef val;
+    uint16_t SPEED = 0;
 	if(BT_INITIALIZED && BT_ERROR_STATE == 0x00) {
 		//Try to take the semaphore to update the packet memory location
-		if(xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
-			updateSequence();
-            //TODO Bluetooth
-//			usartBTSend((char*)&packet);
-			xSemaphoreGive(packetMutex);
-		}
+
+        // Update the speed of the car converted from the motor RPM
+        // This is a workaround fix to get the speed of the car to bluetooth.
+        // Will need to be updated so that more info (i.e. speed, current, voltage, etc) can be sent to the bluetooth
+        // sepamores and mutexes are going to have to be used.
+        SPEED = (uint16_t)(mc_get_motor_RPM() * 117.97) / 5500;
+        char message[50];
+        sprintf(message,"Speed: %3d",SPEED);
+
+        HAL_USART_Transmit(&husart3, (uint8_t *)message,4, 500);
+
+
+
+
+//        if(xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
+//			updateSequence();
+////            TODO Bluetooth
+//			val = HAL_USART_Transmit(&husart3, (uint8_t *)&packet, sizeof(PACKET), 500);
+//            xSemaphoreGive(packetMutex);
+//		}
 	}
 }
 
@@ -247,7 +270,7 @@ void btSendPacket() {
 bool btUpdateData(void *value, SENSOR name) {
 	//Try to take the semaphore to update the packet memory location
 	if( 1){//xSemaphoreTake(packetMutex, BT_MUTEX_TIMEOUT) == pdPASS) {
-		int size = 51; //I thibk //used to be 11
+		int size = 51; //I think //used to be 11
 		//Convert packet type back to an integer
 		int packet_type = packet.data[name].type[0] - '0';
 		//Char array for storing final value
@@ -264,7 +287,7 @@ bool btUpdateData(void *value, SENSOR name) {
 		} else if(packet_type == BT_DT_FLOAT) {
 			snprintf(value_buff, size, "%010li", (uint32_t)*((float *)value));
 		} else if(packet_type == BT_DT_DOUBLE) {
-			snprintf(value_buff, size, "%010f", *((double *)value));
+			//snprintf(value_buff, size, "%010f", *((double *)value));
 		} else if(packet_type == BT_DT_CHAR) {
 			value_buff[0] = *((char *)value);
 		} else if(packet_type == BT_DT_STRING) {
@@ -418,6 +441,7 @@ void StartBluetoothDumpTask(void *argument) {
 	for(;;) {
         kickWatchdogBit(osThreadGetId());
 
+
 		//Dump, Wait
 		btSendPacket();
         btLogSensor((float) 0 - 1, MC_ACUAL_SPEED_REG_LOG);
@@ -476,4 +500,25 @@ void btLogSensor(float value, SENSOR sens) {
 	if(BT_INITIALIZED) {
         btUpdateData((void *)&value, sens);
 	}
+}
+
+/**
+ * btModeConfig()
+ *
+ * 		Configures the Bluetooth module to a specific mode
+ */
+void btModeConfig(BTMODE mode){
+    if(mode == BT_APPLICATION){
+        HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(BT_P2_4_GPIO_Port, BT_P2_4_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(BT_EAN_GPIO_Port, BT_EAN_Pin, GPIO_PIN_RESET);
+    } else if(mode == BT_TEST){
+        HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(BT_P2_4_GPIO_Port, BT_P2_4_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(BT_EAN_GPIO_Port, BT_EAN_Pin, GPIO_PIN_RESET);
+    } else if(mode == BT_WRITE){
+        HAL_GPIO_WritePin(BT_P2_0_GPIO_Port, BT_P2_0_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(BT_P2_4_GPIO_Port, BT_P2_4_Pin, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(BT_EAN_GPIO_Port, BT_EAN_Pin, GPIO_PIN_RESET);
+    }
 }

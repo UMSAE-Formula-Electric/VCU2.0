@@ -14,6 +14,13 @@
 #define BT_VALUE_TRUE 0x01
 #define BT_VALUE_FALSE 0x00
 
+//Configure the Bluetooth module
+typedef enum BLUETOOTHMODE{
+    BT_APPLICATION = 110,
+    BT_TEST = 010,
+    BT_WRITE = 001
+}BTMODE;
+
 typedef enum Datatype {
 	BT_DT_BYTE,		//0
 	BT_DT_SHORT,	//1
@@ -57,5 +64,6 @@ extern const osThreadAttr_t btDumpTask_attributes;
 void btLogIndicator(bool value, INDICATOR indc);
 void btLogErrorMessage(char *data, INDICATOR indc);
 void btLogSensor(float value, SENSOR sens);
+void btModeConfig(BTMODE mode);
 
 #endif

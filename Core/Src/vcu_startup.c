@@ -21,6 +21,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "freertos_task_handles.h"
+#include <stdbool.h>
 
 static void fail_pulse();
 bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);

@@ -7,6 +7,7 @@
 #include "freertos_task_handles.h"
 #include "iwdg.h"
 #include "bt_protocol.h"
+#include "semphr.h"
 
 #define HEARTBEAT_TASK_TIMEOUT_MS   100
 #define HEARTBEAT_TASK_DELAY_MS     25
@@ -17,8 +18,30 @@
 static HeartbeatState_t acu_connection_state = HEARTBEAT_NONE;
 static HeartbeatState_t mc_connection_state = HEARTBEAT_NONE;
 
+// One mutex per state variable so the ACU and MC heartbeat tasks never block each other
+static SemaphoreHandle_t acuHeartbeatMutex = NULL;
+static SemaphoreHandle_t mcHeartbeatMutex = NULL;
+
+/*
+ * heartbeat_init
+ *
+ * @Brief: Creates the mutexes guarding the heartbeat state variables.
+ *         Must be called before osKernelStart() (before any task runs).
+ * @Return: true if both mutexes were created successfully
+ */
+bool heartbeat_init(){
+    acuHeartbeatMutex = xSemaphoreCreateMutex();
+    mcHeartbeatMutex = xSemaphoreCreateMutex();
+    return (acuHeartbeatMutex != NULL) && (mcHeartbeatMutex != NULL);
+}
+
 void updateAcuStateLedsAndIndicators() {
-    if(acu_connection_state == HEARTBEAT_PRESENT){
+    // Snapshot the state under the lock, then act on the local copy
+    xSemaphoreTake(acuHeartbeatMutex, portMAX_DELAY);
+    HeartbeatState_t state = acu_connection_state;
+    xSemaphoreGive(acuHeartbeatMutex);
+
+    if(state == HEARTBEAT_PRESENT){
       //heartbeat all good
         btLogIndicator(false, NO_ACB);
     }
@@ -58,15 +81,26 @@ void StartAcuHeartbeatTask(void *argument){
 		if(retRTOS == pdTRUE && acuNotification == HEARTBEAT_RESPONSE_NOTIFY){
             // Received notification from ACU
             misses = 0; // Reset misses counter
-            logMessage(acu_connection_state == HEARTBEAT_LOST ? "Heartbeat: ACU re-connection\r\n" : "Heartbeat: Heartbeat received from the ACU\r\n", true);
+
+            HeartbeatState_t prev_state;
+            xSemaphoreTake(acuHeartbeatMutex, portMAX_DELAY);
+            prev_state = acu_connection_state;
             acu_connection_state = HEARTBEAT_PRESENT; // Set state
+            xSemaphoreGive(acuHeartbeatMutex);
+
+            logMessage(prev_state == HEARTBEAT_LOST ? "Heartbeat: ACU re-connection\r\n" : "Heartbeat: Heartbeat received from the ACU\r\n", true);
 		}
 		else{
             // Did not receive notification from ACU
             if(++misses > HEARTBEAT_MAX_MISSES){
                 // Lost ACU
-                logMessage(acu_connection_state == HEARTBEAT_PRESENT ? "Heartbeat: Lost Connection with ACU\r\n" : "Heartbeat: Could not connect with ACU\r\n", true);
+                HeartbeatState_t prev_state;
+                xSemaphoreTake(acuHeartbeatMutex, portMAX_DELAY);
+                prev_state = acu_connection_state;
                 acu_connection_state = HEARTBEAT_LOST;
+                xSemaphoreGive(acuHeartbeatMutex);
+
+                logMessage(prev_state == HEARTBEAT_PRESENT ? "Heartbeat: Lost Connection with ACU\r\n" : "Heartbeat: Could not connect with ACU\r\n", true);
             }
 		}
 
@@ -101,15 +135,26 @@ void StartMcHeartbeatTask(void *argument){
     if(retRTOS == pdPASS){
         // Received notification from MC
         misses = 0; // Reset misses counter
-        logMessage(mc_connection_state == HEARTBEAT_LOST ? "Heartbeat: MC re-connection\r\n" : "Heartbeat: Heartbeat received from the MC\r\n", true);
+
+        HeartbeatState_t prev_state;
+        xSemaphoreTake(mcHeartbeatMutex, portMAX_DELAY);
+        prev_state = mc_connection_state;
         mc_connection_state = HEARTBEAT_PRESENT; // Set state
+        xSemaphoreGive(mcHeartbeatMutex);
+
+        logMessage(prev_state == HEARTBEAT_LOST ? "Heartbeat: MC re-connection\r\n" : "Heartbeat: Heartbeat received from the MC\r\n", true);
     }
     else{
         // Did not receive notification from MC
         if(++misses > HEARTBEAT_MAX_MISSES){
             // Lost MC
-            logMessage(mc_connection_state == HEARTBEAT_PRESENT ? "Heartbeat: Lost Connection with MC\r\n" : "Heartbeat: Could not connect with MC\r\n", true);
+            HeartbeatState_t prev_state;
+            xSemaphoreTake(mcHeartbeatMutex, portMAX_DELAY);
+            prev_state = mc_connection_state;
             mc_connection_state = HEARTBEAT_LOST;
+            xSemaphoreGive(mcHeartbeatMutex);
+
+            logMessage(prev_state == HEARTBEAT_PRESENT ? "Heartbeat: Lost Connection with MC\r\n" : "Heartbeat: Could not connect with MC\r\n", true);
         }
     }
     osDelay(pdMS_TO_TICKS(HEARTBEAT_TASK_DELAY_MS));
@@ -122,7 +167,11 @@ void StartMcHeartbeatTask(void *argument){
  * @Brief: This method is used to get the current state of heartbeat
  */
 HeartbeatState_t get_acu_heartbeat_state(){
-	return acu_connection_state;
+	HeartbeatState_t state;
+	xSemaphoreTake(acuHeartbeatMutex, portMAX_DELAY);
+	state = acu_connection_state;
+	xSemaphoreGive(acuHeartbeatMutex);
+	return state;
 }
 
 /*
@@ -131,7 +180,11 @@ HeartbeatState_t get_acu_heartbeat_state(){
  * @Brief: This method is used to get the current state of heartbeat
  */
 HeartbeatState_t get_mc_heartbeat_state(){
-  return mc_connection_state;
+  HeartbeatState_t state;
+  xSemaphoreTake(mcHeartbeatMutex, portMAX_DELAY);
+  state = mc_connection_state;
+  xSemaphoreGive(mcHeartbeatMutex);
+  return state;
 }
 
 osThreadId_t get_acu_heartbeat_task_handle(){

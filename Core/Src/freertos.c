@@ -27,6 +27,8 @@
 /* USER CODE BEGIN Includes */
 #include "iwdg.h"
 #include "can_utils.h"
+#include "car_state.h"
+#include "heartbeat.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -190,7 +192,8 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-
+  car_state_init();
+  heartbeat_init();
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */

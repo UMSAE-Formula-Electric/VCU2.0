@@ -124,7 +124,6 @@ void readAccelPedals(uint16_t *apps_low, uint16_t *apps_high) {
 
 bool checkPedalsImplausibility(uint16_t high_val, uint16_t low_val){
 	bool res = true;
-	twoFootRulePassed(high_val, low_val);
     if (BYPASS_RTD || get_car_state() == READY_TO_DRIVE) {
         if (BYPASS_SAFETY || read_saftey_loop()) {
             if (BYPASS_BRAKE || twoFootRulePassed(high_val, low_val)) {

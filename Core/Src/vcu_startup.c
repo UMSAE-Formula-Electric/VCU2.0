@@ -21,6 +21,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "freertos_task_handles.h"
+#include <stdbool.h>
 
 static void fail_pulse();
 bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin);
@@ -142,7 +143,7 @@ void set_safety_loop_state(enum safetyLoopState state){
 	HAL_GPIO_WritePin(SAFETY_LOOP_CTL_GPIO_Port, SAFETY_LOOP_CTL_Pin , pinState);
 }
 
-int checkHeartbeat() {
+bool checkHeartbeat() {
 	if(get_acu_heartbeat_state() == HEARTBEAT_PRESENT){
 		if((get_mc_heartbeat_state() == HEARTBEAT_PRESENT) || DISABLE_MC_HEARTBEAT) {
 			return true;

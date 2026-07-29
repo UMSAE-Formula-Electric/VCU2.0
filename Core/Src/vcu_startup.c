@@ -95,9 +95,11 @@ void goRtdProcedure(uint8_t *vcuStateTaskNotification) {
         go_idle();
     }
 
+#ifdef GOIDLE
     if(isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)) {
         go_idle();
     }
+#endif
 
     retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, 0);
     if(retRTOS == osOK && (*vcuStateTaskNotification) == GO_IDLE_REQ_FROM_ACU){
@@ -111,11 +113,13 @@ void rtdStateProcedure(uint8_t *vcuStateTaskNotification) {
 
     // sets the motor controller global variable to then be sent to the MC via a CAN message
     EnableMC();
+#ifdef GOIDLE
     if(isButtonPressed(RTD_BTN_GPIO_Port, RTD_BTN_Pin) || isButtonPressed(TSA_BTN_GPIO_Port, TSA_BTN_Pin)){
         set_ACU_State(IDLE);
         go_idle();
         logMessage("RTD or VCU Button Pressed, going IDLE", false);
     }
+#endif
 
     retRTOS = osMessageQueueGet(ackCarStateQueueHandle, vcuStateTaskNotification, 0, 0);
     if(retRTOS == osOK && (*vcuStateTaskNotification) == GO_IDLE_REQ_FROM_ACU){

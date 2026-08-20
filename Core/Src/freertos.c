@@ -27,9 +27,11 @@
 /* USER CODE BEGIN Includes */
 #include "iwdg.h"
 #include "can_utils.h"
+#include "global_board_config.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
+typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -50,9 +52,14 @@
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
+uint32_t defaultTaskBuffer[ 512 ];
+osStaticThreadDef_t defaultTaskControlBlock;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .cb_mem = &defaultTaskControlBlock,
+  .cb_size = sizeof(defaultTaskControlBlock),
+  .stack_mem = &defaultTaskBuffer[0],
+  .stack_size = sizeof(defaultTaskBuffer),
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for dashLedTask */
@@ -165,7 +172,7 @@ const osEventFlagsAttr_t iwdgEventGroup_attributes = {
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
-
+extern void profile_report(void);
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
@@ -182,6 +189,23 @@ extern void StartMcCanCommsTask(void *argument);
 extern void StartAcuCanCommsTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+
+/* Hook prototypes */
+void configureTimerForRunTimeStats(void);
+unsigned long getRunTimeCounterValue(void);
+
+/* USER CODE BEGIN 1 */
+/* Functions needed when configGENERATE_RUN_TIME_STATS is on */
+__weak void configureTimerForRunTimeStats(void)
+{
+
+}
+
+__weak unsigned long getRunTimeCounterValue(void)
+{
+return 0;
+}
+/* USER CODE END 1 */
 
 /**
   * @brief  FreeRTOS initialization
@@ -291,11 +315,23 @@ void StartDefaultTask(void *argument)
         osThreadExit();
     }
 
+#ifdef PROFILER_ENABLE
+    uint32_t reportCounter = 0;
+#endif
+
   /* Infinite loop */
   for(;;)
   {
-      kickWatchdogBit(osThreadGetId());
-    osDelay(1);
+     kickWatchdogBit(osThreadGetId());
+#ifdef PROFILER_ENABLE
+        if (++reportCounter >= 5u) {     /* 5 x 1000ms = 5s */
+            reportCounter = 0;
+            profiler_report();
+        }
+#endif
+
+        osDelay(1000);
+
   }
   /* USER CODE END StartDefaultTask */
 }

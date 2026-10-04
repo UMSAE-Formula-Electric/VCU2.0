@@ -107,13 +107,13 @@ bool twoFootRulePassedPerPedal(uint16_t appsVal, uint16_t twoFootPressVal, uint1
 }
 
 bool twoFootRulePassed(uint16_t high_val, uint16_t low_val) {
-    return (twoFootRulePassedPerPedal(high_val, APPS_HIGH_PRESS_PEDAL_TRAVEL, APPS_HIGH_RELEASE_PEDAL_TRAVEL, &apps.two_foot_high_count, &apps.two_foot_high_flag) &&
-           twoFootRulePassedPerPedal(low_val, APPS_LOW_PRESS_PEDAL_TRAVEL, APPS_LOW_RELEASE_PEDAL_TRAVEL, &apps.two_foot_low_count, &apps.two_foot_low_flag));
+    return twoFootRulePassedPerPedal(high_val, APPS_HIGH_PRESS_PEDAL_TRAVEL, APPS_HIGH_RELEASE_PEDAL_TRAVEL, &apps.two_foot_high_count, &apps.two_foot_high_flag) &&
+    	   twoFootRulePassedPerPedal(low_val, APPS_LOW_PRESS_PEDAL_TRAVEL, APPS_LOW_RELEASE_PEDAL_TRAVEL, &apps.two_foot_low_count, &apps.two_foot_low_flag);
 }
 
 void readAccelPedals(uint16_t *apps_low, uint16_t *apps_high) {
-    uint16_t temp_apps_low = ADC_get_val(ADC_APPS_LOW);
-    uint16_t temp_apps_high = ADC_get_val(ADC_APPS_HIGH);
+    uint16_t temp_apps_low = ADC_get_val(ADC_APPS_HIGH);
+    uint16_t temp_apps_high = ADC_get_val(ADC_APPS_LOW);
     if (temp_apps_low != INVALID_ADC_READING) {
         (*apps_low) = (uint16_t) ((0.5 * temp_apps_low) + (0.5 * (*apps_low)));
     }
@@ -124,12 +124,11 @@ void readAccelPedals(uint16_t *apps_low, uint16_t *apps_high) {
 
 bool checkPedalsImplausibility(uint16_t high_val, uint16_t low_val){
 	bool res = true;
-
     if (BYPASS_RTD || get_car_state() == READY_TO_DRIVE) {
         if (BYPASS_SAFETY || read_saftey_loop()) {
             if (BYPASS_BRAKE || twoFootRulePassed(high_val, low_val)) {
                 if (BYPASS_APPS || rule_10percent_pedal_travel_apps_agreement(high_val, low_val, &apps)) {
-                    res = false;
+					res = false;
                 }
                 else {
                     btLogIndicator(false, THROTTLE_ERROR);

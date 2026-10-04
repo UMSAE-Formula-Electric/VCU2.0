@@ -228,7 +228,7 @@ static void fail_pulse(){
  * @Return: returns true if the button is pressed, otherwise returns false
  */
 bool isButtonPressed(GPIO_TypeDef* port, uint16_t pin){
-    return (HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_RESET);
+    return HAL_GPIO_ReadPin(port, pin) == GPIO_PIN_RESET;
 }
 
 /**
